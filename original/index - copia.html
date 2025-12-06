@@ -6,7 +6,7 @@
     <title>PaseoDog - Sistema Completo</title>
 
     <style>
-                /* VARIABLES CSS - TEMA OSCURO DORADO PREMIUM */
+                /* VARIABLES CSS */
         :root {
             --primary: #10b981;
             --primary-dark: #059669;
@@ -31,26 +31,23 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         [data-theme="dark"] {
-            --primary: #D4AF37;                /* Dorado clásico */
-            --primary-dark: #B8860B;           /* Dorado oscuro */
-            --primary-light: rgba(212, 175, 55, 0.15); /* Dorado suave translúcido */
+            --primary: #34d399;
+            --primary-dark: #059669;
+            --primary-light: #064e3b;
             --secondary: #60a5fa;
             --secondary-dark: #3b82f6;
             --danger: #f87171;
             --danger-light: #450a0a;
             --warning: #fbbf24;
             --warning-light: #451a03;
-            --text-primary: #f8f9fa;           /* Blanco suave */
-            --text-secondary: #b0b0b0;         /* Gris claro suave */
-            --bg-body: #0F0F1B;                /* Fondo oscuro profundo */
-            --bg-card: #1A1A2E;                /* Tarjetas ligeramente más claras */
-            --bg-input: #25253A;               /* Inputs/paneles oscuros */
-            --border: #33334D;                 /* Bordes sutiles */
-            --shadow: 0 4px 12px -1px rgba(0, 0, 0, 0.6);
-            --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.7);
-            --radius: 12px;
-            --radius-lg: 16px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --bg-body: #111827;
+            --bg-card: #1f2937;
+            --bg-input: #374151;
+            --border: #4b5563;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -256,60 +253,11 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        } 
-        /* GOLDEN PARTICLES FOR DARK MODE */
-        #particles-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-            display: none; /* oculto en modo claro */
-        }
-        [data-theme="dark"] #particles-container {
-            display: block;
-        }
-        .particle {
-            position: absolute;
-            background: rgba(212, 175, 55, 0.6); /* dorado translúcido */
-            border-radius: 50%;
-            animation: float 15s infinite ease-in-out;
-            box-shadow: 0 0 8px rgba(212, 175, 55, 0.7);
-        }
-        .particle:nth-child(2n) {
-            animation-duration: 18s;
-            animation-delay: 2s;
-        }
-        .particle:nth-child(3n) {
-            animation-duration: 22s;
-            animation-delay: 4s;
-        }
-        .particle:nth-child(5n) {
-            animation-duration: 25s;
-            animation-delay: 1s;
-        }
-        @keyframes float {
-            0%, 100% {
-                transform: translate(0, 0) scale(1);
-                opacity: 0.7;
-            }
-            25% {
-                transform: translate(10vw, -20vh) scale(1.1);
-            }
-            50% {
-                transform: translate(20vw, -40vh) scale(0.9);
-            }
-            75% {
-                transform: translate(-15vw, -30vh) scale(1.05);
-            }
         }
     </style>
 </head>
 <body>
-    <!-- GOLDEN PARTICLES BACKGROUND -->
-    <div id="particles-container"></div>
+
     <!-- LOADING OVERLAY -->
     <div id="loading-overlay">
         <div class="spinner"></div>
@@ -975,32 +923,7 @@
             document.getElementById('loading-overlay').style.display='none';
             showView('login-section'); 
             updateThemeIcon(); 
-            // Generar partículas doradas (solo si estamos en modo oscuro)
-            const particlesContainer = document.getElementById('particles-container');
-            if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                for (let i = 0; i < 25; i++) {
-                    const p = document.createElement('div');
-                    p.classList.add('particle');
-                    // Tamaño aleatorio entre 4px y 18px
-                    const size = 4 + Math.random() * 14;
-                    p.style.width = `${size}px`;
-                    p.style.height = `${size}px`;
-                    // Posición inicial aleatoria
-                    p.style.left = `${Math.random() * 100}vw`;
-                    p.style.top = `${Math.random() * 100}vh`;
-                    particlesContainer.appendChild(p);
-                }
-            }
-            // Asegurar que las partículas se actualicen al cambiar de tema
-            const observer = new MutationObserver(() => {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                particlesContainer.style.display = isDark ? 'block' : 'none';
-                if (isDark && particlesContainer.children.length === 0) {
-                    // Regenerar si no existen (opcional, ya están)
-                }
-            });
-            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });       
- };
+        };
     </script>
 </body>
 </html>
