@@ -1,0 +1,282 @@
+{
+  "dogs": [
+    {
+      "id": 1,
+      "nombre": "Fido",
+      "dueno_email": "cliente@paseos.com",
+      "perfil": {
+        "raza": "Pastor Alemán",
+        "edad": "3 años",
+        "sexo": "Macho (Esterilizado)",
+        "peso": "35 kg",
+        "alergias": "Ninguna conocida",
+        "dueno": "Juan Pérez",
+        "telefono": "5491155550000",
+        "energia": "Alta",
+        "social": "Muy amigable con otros perros",
+        "foto_id": "1589941013453-ec89f33b5e95"
+      },
+      "walks": [
+        {
+          "fecha": "2025-10-28",
+          "resumen_diario": "¡Fido tuvo un día fantástico! Exploramos el nuevo parque al sur y corrió por todas partes. El clima estuvo perfecto y se encontró con varios amigos perrunos.",
+          "duracion_minutos": 75,
+          "distancia_km": 4.8,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "",
+          "fotos": [
+            {"id": "1543466835-00a7907e9de1", "comentario": "Fido corriendo feliz en el parque"},
+            {"id": "1592194996308-7b43878e84a6", "comentario": "Momento de descanso bajo la sombra"},
+            {"id": "1587300003388-5920dcc28193", "comentario": "Jugando con su pelota favorita"},
+            {"id": "1518020382338-a7de69f01b71", "comentario": "¡Qué buena pose para la foto!"}
+          ]
+        },
+        {
+          "fecha": "2025-10-27",
+          "resumen_diario": "Paseo tranquilo por el barrio. Hubo mucha lluvia por la mañana, pero logramos salir un rato al atardecer. Fido estuvo un poco nervioso con los truenos.",
+          "duracion_minutos": 40,
+          "distancia_km": 1.5,
+          "comportamiento_problemas": true,
+          "incidentes_salud": "Tiró de la correa en dos ocasiones al ver otros perros pasando.",
+          "fotos": [
+            {"id": "1507146426996-ef05306b995a", "comentario": "Cansado pero contento al final del día"},
+            {"id": "1543466835-00a7907e9de1", "comentario": "Explorando después de la lluvia"}
+          ]
+        },
+        {
+          "fecha": "2025-10-25",
+          "resumen_diario": "Día de entrenamiento especial. Practicamos comandos básicos y Fido respondió excelente. Trabajamos 'sentado', 'quieto' y 'venir'. ¡Gran progreso!",
+          "duracion_minutos": 50,
+          "distancia_km": 2.2,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "",
+          "fotos": [
+            {"id": "1592194996308-7b43878e84a6", "comentario": "Concentrado en el entrenamiento"},
+            {"id": "1589941013453-ec89f33b5e95", "comentario": "Pose perfecta después de practicar"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "nombre": "Luna",
+      "dueno_email": "luna@paseos.com",
+      "perfil": {
+        "raza": "Bulldog Francés",
+        "edad": "1 año",
+        "sexo": "Hembra",
+        "peso": "12 kg",
+        "alergias": "Al pasto (leve)",
+        "dueno": "Sofía Gómez",
+        "telefono": "5491111112222",
+        "energia": "Media",
+        "social": "Tímida al inicio pero cariñosa",
+        "foto_id": "1583511655857-d19b40a7a54e"
+      },
+      "walks": [
+        {
+          "fecha": "2025-10-26",
+          "resumen_diario": "Paseo muy tranquilo por la plaza. Luna disfrutó mucho de los mimos y caminó a su ritmo. Se detuvo varias veces a oler flores.",
+          "duracion_minutos": 30,
+          "distancia_km": 0.8,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "Necesitó descansar a la sombra 3 veces por el calor. Todo controlado.",
+          "fotos": [
+            {"id": "1583511655857-d19b40a7a54e", "comentario": "Luna descansando en la sombra"},
+            {"id": "1587300003388-5920dcc28193", "comentario": "Olfateando las flores con curiosidad"}
+          ]
+        },
+        {
+          "fecha": "2025-10-24",
+          "resumen_diario": "Primera vez en el parque canino. Luna estuvo nerviosa al inicio pero terminó jugando con otros bulldogs. ¡Hizo amigos!",
+          "duracion_minutos": 35,
+          "distancia_km": 1.2,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "",
+          "fotos": [
+            {"id": "1518020382338-a7de69f01b71", "comentario": "Conociendo nuevos amigos perrunos"},
+            {"id": "1507146426996-ef05306b995a", "comentario": "Momento de juego con otros bulldogs"},
+            {"id": "1592194996308-7b43878e84a6", "comentario": "Feliz después de la experiencia social"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "nombre": "Max",
+      "dueno_email": "max@paseos.com",
+      "perfil": {
+        "raza": "Golden Retriever",
+        "edad": "5 años",
+        "sexo": "Macho",
+        "peso": "32 kg",
+        "alergias": "Ninguna",
+        "dueno": "Carlos Martínez",
+        "telefono": "5491122223333",
+        "energia": "Muy Alta",
+        "social": "Extrovertido y super juguetón",
+        "foto_id": "1633722715463-d30f4f325e24"
+      },
+      "walks": [
+        {
+          "fecha": "2025-10-28",
+          "resumen_diario": "Max estuvo increíble hoy. Corrió sin parar en la playa y nadó en el mar. ¡Le encanta el agua! Fue un día perfecto de playa.",
+          "duracion_minutos": 90,
+          "distancia_km": 5.5,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "",
+          "fotos": [
+            {"id": "1633722715463-d30f4f325e24", "comentario": "Max nadando feliz en el mar"},
+            {"id": "1543466835-00a7907e9de1", "comentario": "Corriendo por la arena mojada"},
+            {"id": "1587300003388-5920dcc28193", "comentario": "Sacudiéndose después del baño"},
+            {"id": "1592194996308-7b43878e84a6", "comentario": "Descansando bajo el sol playero"}
+          ]
+        },
+        {
+          "fecha": "2025-10-26",
+          "resumen_diario": "Caminata larga por el bosque cerca de casa. Max disfrutó explorando nuevos senderos y olores. Encontró un palo gigante y lo cargó todo el camino.",
+          "duracion_minutos": 85,
+          "distancia_km": 6.2,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "",
+          "fotos": [
+            {"id": "1518020382338-a7de69f01b71", "comentario": "Explorando el sendero del bosque"},
+            {"id": "1507146426996-ef05306b995a", "comentario": "Bebiendo agua fresca del arroyo"},
+            {"id": "1633722715463-d30f4f325e24", "comentario": "Pose majestuosa en el mirador"}
+          ]
+        },
+        {
+          "fecha": "2025-10-23",
+          "resumen_diario": "Día tranquilo de paseo urbano. Visitamos el centro comercial pet-friendly y Max se comportó impecable. Muchas personas lo saludaron.",
+          "duracion_minutos": 60,
+          "distancia_km": 3.0,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "",
+          "fotos": [
+            {"id": "1592194996308-7b43878e84a6", "comentario": "Max posando para los fans"},
+            {"id": "1587300003388-5920dcc28193", "comentario": "Descansando en la plaza"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "nombre": "Bella",
+      "dueno_email": "bella@paseos.com",
+      "perfil": {
+        "raza": "Beagle",
+        "edad": "2 años",
+        "sexo": "Hembra (Esterilizada)",
+        "peso": "15 kg",
+        "alergias": "Polen estacional",
+        "dueno": "María López",
+        "telefono": "5491133334444",
+        "energia": "Alta",
+        "social": "Muy sociable con todos",
+        "foto_id": "1537151608828-ea2b11777ee8"
+      },
+      "walks": [
+        {
+          "fecha": "2025-10-27",
+          "resumen_diario": "Bella estuvo muy activa hoy. Siguió muchos rastros con su nariz, típico de la raza Beagle. Descubrió un camino nuevo que le encantó.",
+          "duracion_minutos": 55,
+          "distancia_km": 3.8,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "",
+          "fotos": [
+            {"id": "1537151608828-ea2b11777ee8", "comentario": "Bella olfateando rastros interesantes"},
+            {"id": "1543466835-00a7907e9de1", "comentario": "Encontró algo fascinante en el pasto"},
+            {"id": "1518020382338-a7de69f01b71", "comentario": "Contenta al final del paseo"}
+          ]
+        },
+        {
+          "fecha": "2025-10-25",
+          "resumen_diario": "Paseo matutino por el barrio. Bella tiró un poco de la correa al principio porque estaba muy emocionada, pero después se calmó.",
+          "duracion_minutos": 45,
+          "distancia_km": 2.5,
+          "comportamiento_problemas": true,
+          "incidentes_salud": "Tiró fuerte de la correa al ver una ardilla. Necesitamos trabajar más el 'quieto'.",
+          "fotos": [
+            {"id": "1507146426996-ef05306b995a", "comentario": "Bella observando el parque con atención"},
+            {"id": "1592194996308-7b43878e84a6", "comentario": "Momento de calma y descanso"}
+          ]
+        },
+        {
+          "fecha": "2025-10-22",
+          "resumen_diario": "Sesión de socialización en el parque. Bella jugó con 4 perros diferentes y se divirtió muchísimo. Es una perra muy social.",
+          "duracion_minutos": 50,
+          "distancia_km": 2.0,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "",
+          "fotos": [
+            {"id": "1587300003388-5920dcc28193", "comentario": "Jugando con sus nuevos amigos"},
+            {"id": "1537151608828-ea2b11777ee8", "comentario": "Feliz después del juego"},
+            {"id": "1633722715463-d30f4f325e24", "comentario": "Descansando en el pasto"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "nombre": "Rocky",
+      "dueno_email": "rocky@paseos.com",
+      "perfil": {
+        "raza": "Rottweiler",
+        "edad": "4 años",
+        "sexo": "Macho (Esterilizado)",
+        "peso": "45 kg",
+        "alergias": "Ninguna",
+        "dueno": "Diego Fernández",
+        "telefono": "5491144445555",
+        "energia": "Media-Alta",
+        "social": "Selectivo pero leal con conocidos",
+        "foto_id": "1561037404-61cd46aa615b"
+      },
+      "walks": [
+        {
+          "fecha": "2025-10-28",
+          "resumen_diario": "Rocky estuvo tranquilo y obediente todo el día. Excelente comportamiento durante todo el paseo. Trabajamos comandos y respondió perfecto.",
+          "duracion_minutos": 60,
+          "distancia_km": 4.0,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "",
+          "fotos": [
+            {"id": "1561037404-61cd46aa615b", "comentario": "Rocky en su mejor pose de guardian"},
+            {"id": "1543466835-00a7907e9de1", "comentario": "Caminando con elegancia y porte"},
+            {"id": "1518020382338-a7de69f01b71", "comentario": "Momento de descanso merecido"}
+          ]
+        },
+        {
+          "fecha": "2025-10-25",
+          "resumen_diario": "Paseo largo por zona tranquila. Rocky disfrutó del ejercicio y mostró gran obediencia. Es un perro muy equilibrado cuando está bien ejercitado.",
+          "duracion_minutos": 70,
+          "distancia_km": 4.5,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "",
+          "fotos": [
+            {"id": "1507146426996-ef05306b995a", "comentario": "Rocky vigilante durante el paseo"},
+            {"id": "1592194996308-7b43878e84a6", "comentario": "Disfrutando del aire libre"}
+          ]
+        }
+      ]
+    }
+  ],
+  "admin": {
+    "email": "admin@paseos.com",
+    "password": "admin123"
+  },
+  "trainer_phone": "5491100000000",
+  "photo_references": {
+    "shepherd": "1589941013453-ec89f33b5e95",
+    "bulldog": "1583511655857-d19b40a7a54e",
+    "golden": "1633722715463-d30f4f325e24",
+    "beagle": "1537151608828-ea2b11777ee8",
+    "rottweiler": "1561037404-61cd46aa615b",
+    "random": [
+      "1592194996308-7b43878e84a6",
+      "1587300003388-5920dcc28193",
+      "1518020382338-a7de69f01b71",
+      "1507146426996-ef05306b995a"
+    ]
+  }
+}

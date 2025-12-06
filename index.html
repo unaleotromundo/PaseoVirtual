@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaseoDog - Sistema Completo</title>
+
+    <style>
+        /* VARIABLES CSS */
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #d1fae5;
+            --secondary: #3b82f6;
+            --secondary-dark: #2563eb;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-body: #f9fafb;
+            --bg-card: #ffffff;
+            --bg-input: #f9fafb;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --primary: #34d399;
+            --primary-dark: #059669;
+            --primary-light: #064e3b;
+            --secondary: #60a5fa;
+            --secondary-dark: #3b82f6;
+            --danger: #f87171;
+            --danger-light: #450a0a;
+            --warning: #fbbf24;
+            --warning-light: #451a03;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --bg-body: #111827;
+            --bg-card: #1f2937;
+            --bg-input: #374151;
+            --border: #4b5563;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        [data-theme="light"] body {
+            background: linear-gradient(135deg, #f9fafb 0%, #e0f2fe 100%);
+        }
+
+        header { text-align: center; margin-bottom: 40px; position: relative; animation: fadeInDown 0.6s ease-out; }
+        h1 { color: var(--primary); font-size: 2.5rem; font-weight: 800; margin-bottom: 8px; text-shadow: 2px 2px 4px rgba(16, 185, 129, 0.1); }
+        #saludo-usuario { color: var(--text-secondary); font-size: 1.1rem; font-weight: 500; }
+
+        #theme-toggle {
+            position: absolute; top: 0; right: 0;
+            background: var(--bg-card); border: 2px solid var(--border);
+            border-radius: 50%; width: 50px; height: 50px;
+            font-size: 1.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow); transition: var(--transition);
+        }
+        #theme-toggle:hover { transform: scale(1.1); border-color: var(--primary); }
+
+        #app-container {
+            max-width: 900px; margin: 0 auto;
+            background: var(--bg-card); padding: 40px;
+            border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        h2 { color: var(--text-primary); font-size: 1.75rem; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 3px solid var(--primary-light); }
+        h3 { color: var(--text-primary); font-size: 1.25rem; font-weight: 600; margin: 24px 0 12px 0; }
+        h4 { color: var(--text-secondary); font-size: 1rem; font-weight: 600; margin: 16px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        input, textarea, select {
+            width: 100%; padding: 14px 16px; margin-bottom: 16px;
+            border: 2px solid var(--border); border-radius: var(--radius);
+            font-size: 1rem; transition: var(--transition);
+            background: var(--bg-input); color: var(--text-primary);
+        }
+        input:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        label { display: block; color: var(--text-primary); font-weight: 600; margin-bottom: 6px; font-size: 0.95rem; }
+        
+        .password-wrapper { position: relative; margin-bottom: 16px; }
+        .password-wrapper input { margin-bottom: 0; padding-right: 50px; }
+        .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.5rem; color: var(--text-secondary); }
+
+        .checkbox-group { display: flex; align-items: center; margin: 16px 0; padding: 12px; background: var(--bg-input); border-radius: var(--radius); border: 1px solid var(--border); }
+        .checkbox-group input { width: 20px; height: 20px; margin: 0 12px 0 0; cursor: pointer; accent-color: var(--primary); }
+        .checkbox-group label { margin: 0; cursor: pointer; font-weight: 500; }
+
+        button {
+            font-family: inherit; font-size: 1rem; font-weight: 600; padding: 14px 24px;
+            border: none; border-radius: var(--radius); cursor: pointer; transition: var(--transition);
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        button[type="submit"], .btn-primary, .add-dog-btn { background: var(--primary); color: white; width: 100%; margin-top: 8px; }
+        button:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+        
+        .nav-button { background: var(--secondary); color: white; width: 100%; margin: 10px 0; }
+        .admin-action-button { background: var(--danger); color: white; width: 100%; margin: 16px 0; }
+        .edit-btn { background: var(--warning); color: white; width: auto; padding: 8px 16px; font-size: 0.9rem; margin-top: 10px; }
+        .save-btn { background: var(--primary); color: white; width: 100%; margin-top: 20px; }
+
+        .dog-card {
+            background: var(--bg-input);
+            border: 2px solid var(--border); border-radius: var(--radius); padding: 20px;
+            margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;
+            transition: var(--transition);
+        }
+        .dog-card:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateX(4px); }
+        .dog-card span { font-size: 1.1rem; color: var(--text-primary); }
+        .dog-card button { background: var(--primary); color: white; padding: 10px 20px; width: auto; margin: 0; }
+
+        #carousel-wrapper { 
+            position: relative; width: 100%; height: 350px; background: #000;
+            border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 30px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow);
+        }
+        #carousel-img { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.5s ease; }
+        .carousel-controls {
+            position: absolute; bottom: 0; left: 0; width: 100%; 
+            background: rgba(0,0,0,0.6);
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;
+        }
+        .carousel-btn { 
+            background: rgba(255,255,255,0.2); color: white; font-size: 1.5rem; 
+            border: none; cursor: pointer; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .carousel-btn:hover { background: var(--primary); color: white; transform: none; }
+        #carousel-counter { color: white; font-size: 0.9rem; font-weight: bold; }
+
+        .walk-session { 
+            background: var(--bg-card); border: 2px solid var(--border); 
+            border-radius: var(--radius-lg); margin-bottom: 32px; overflow: hidden; 
+            box-shadow: var(--shadow-sm); 
+        }
+        .walk-session h3 { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; padding: 20px 24px; margin: 0; font-size: 1.3rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        
+        .admin-walk-controls { display: flex; gap: 8px; }
+        .admin-walk-btn { background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.5); padding: 5px 12px; font-size: 0.85rem; width: auto; color: white; }
+        .admin-walk-btn:hover { background: white; color: var(--primary); }
+
+        .walk-details { padding: 24px; border-left: 4px solid var(--primary-light); background: var(--bg-input); }
+        .walk-metrics { display: flex; gap: 24px; flex-wrap: wrap; margin: 16px 0; }
+        .walk-metrics span { 
+            background: var(--bg-card); padding: 10px 16px; border-radius: var(--radius);
+            font-weight: 600; color: var(--secondary); box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+        }
+        .incident-alert { background: var(--danger-light); color: #991b1b; padding: 16px; margin: 12px 0; border-radius: var(--radius); border-left: 5px solid var(--danger); font-weight: 500; }
+        .success-notice { background: var(--primary-light); color: #065f46; padding: 12px 16px; margin: 12px 0; border-radius: var(--radius); font-weight: 500; }
+
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; padding: 24px; background: var(--bg-card); }
+        .photo-card { position: relative; border-radius: var(--radius); overflow: hidden; cursor: pointer; aspect-ratio: 1; box-shadow: var(--shadow-sm); transition: transform 0.2s; }
+        .photo-card:hover { transform: scale(1.05); }
+        .photo-card img { width: 100%; height: 100%; object-fit: cover; }
+
+        #profile-content { display: grid; grid-template-columns: 1fr 2fr; gap: 32px; margin-top: 24px; }
+        #profile-photo-container { text-align: center; }
+        #profile-photo { 
+            width: 100%; max-width: 250px; height: 250px; object-fit: cover; 
+            border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); 
+            border: 4px solid var(--primary-light); 
+        }
+        .detail-row { 
+            padding: 12px 16px; margin: 8px 0; background: var(--bg-input); 
+            border-radius: var(--radius); border-left: 4px solid var(--primary); 
+            display: flex; align-items: center; 
+        }
+        .detail-label { font-weight: 700; color: var(--text-secondary); min-width: 140px; }
+        .detail-value { color: var(--text-primary); }
+
+        .whatsapp-float {
+            position: fixed; bottom: 30px; right: 30px;
+            background-color: #25d366; color: white;
+            width: 60px; height: 60px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 35px; box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+            z-index: 5000; transition: all 0.3s ease; text-decoration: none;
+        }
+        .whatsapp-float:hover { transform: scale(1.1); box-shadow: 2px 2px 15px rgba(0,0,0,0.4); }
+
+        .error { color: var(--danger); background: var(--danger-light); padding: 12px; border-radius: var(--radius); text-align: center; margin-top: 10px; }
+        .info-text { background: #dbeafe; color: #1e40af; padding: 12px 16px; border-radius: var(--radius); margin: 12px 0; border-left: 4px solid var(--secondary); }
+        
+        #photo-preview img, #edit-photo-preview img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin: 5px; }
+        .delete-photo-btn { position: absolute; top: 2px; right: 2px; background: red; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-size: 12px; }
+
+        #edit-walk-modal, #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-content { background: var(--bg-card); padding: 30px; border-radius: var(--radius-lg); width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; }
+        #lightbox-img { max-width: 90%; max-height: 85vh; border-radius: var(--radius); }
+        .lightbox-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 3rem; cursor: pointer; }
+        
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        #multi-dog-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .dog-select-item { display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--bg-input); border-radius: 8px; border: 1px solid var(--border); }
+
+        @media (max-width: 768px) {
+            #profile-content { grid-template-columns: 1fr; }
+            .detail-row { flex-direction: column; align-items: flex-start; }
+            #carousel-wrapper { height: 250px; }
+        }
+
+        #loading-overlay {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .spinner {
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p style="color: white; font-size: 1.2rem;">Cargando base de datos...</p>
+    </div>
+
+    <!-- WHATSAPP BUTTON -->
+    <a href="#" id="whatsapp-btn" class="whatsapp-float" target="_blank" style="display:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.017-1.04 2.481 0 1.461 1.063 2.875 1.211 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+    </a>
+
+    <header>
+        <button id="theme-toggle" title="Cambiar Tema">🐕‍🦺</button>
+        <h1>🐾 PaseoDog</h1>
+        <p id="saludo-usuario">Gestión Profesional de Paseos</p>
+    </header>
+
+    <main id="app-container">
+        
+        <!-- LOGIN -->
+        <section id="login-section">
+            <h2>🔐 Acceso al Sistema</h2>
+            <form id="login-form">
+                <label>Correo Electrónico</label>
+                <input type="email" id="email" placeholder="ejemplo@paseos.com" required>
+                
+                <label>Contraseña</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="••••••••" required>
+                    <button type="button" class="password-toggle" id="toggle-password">👁️</button>
+                </div>
+                
+                <button type="submit">Iniciar Sesión</button>
+                <p id="error-message" class="error" style="display:none;"></p>
+                
+                <div class="info-text" style="margin-top: 20px;">
+                    <strong>🔑 Credenciales de prueba:</strong><br><br>
+                    👨‍💼 <strong>Admin:</strong> <code>admin@paseos.com</code> / <code>admin123</code><br><br>
+                    👤 <strong>Clientes (pass: 123456):</strong><br>
+                    • <code>cliente@paseos.com</code> (Fido)<br>
+                    • <code>luna@paseos.com</code> (Luna)<br>
+                    • <code>max@paseos.com</code> (Max)
+                </div>
+                
+                <button type="button" id="toggle-demo-btn" style="background: var(--warning); margin-top: 16px;">
+                    🎭 Resetear Base de Datos
+                </button>
+                <p id="demo-status" style="text-align: center; margin-top: 12px; color: var(--text-secondary); font-size: 0.9rem;">
+                    Estado: <strong id="demo-status-text" style="color: var(--primary);">Base de datos cargada</strong>
+                </p>
+            </form>
+        </section>
+
+        <!-- ADMIN DASHBOARD -->
+        <section id="admin-dashboard-section" style="display:none;">
+            <h2>👨‍💼 Panel de Administrador</h2>
+            <button class="add-dog-btn" onclick="showView('create-dog-section')" style="margin-bottom:20px; font-size:1.1rem; padding:15px;">➕ Registrar Nuevo Mimoso</button>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">Lista de perros registrados:</p>
+            <div id="dog-list-container"></div>
+        </section>
+
+        <!-- CREATE DOG -->
+        <section id="create-dog-section" style="display:none;">
+            <h2>🐶 Registrar Nuevo Mimoso</h2>
+            <form id="create-dog-form">
+                <h3>Datos del Perro</h3>
+                <label>Nombre</label><input type="text" id="new-dog-name" required>
+                <label>Raza</label><input type="text" id="new-dog-breed" required>
+                <label>Sexo</label><select id="new-dog-sex"><option>Macho</option><option>Hembra</option></select>
+                
+                <h3>Datos del Dueño</h3>
+                <label>Nombre Dueño</label><input type="text" id="new-dog-owner" required>
+                <label>Email (Usuario)</label><input type="email" id="new-dog-email" required>
+                <label>Teléfono (WhatsApp)</label><input type="tel" id="new-dog-phone" required>
+                
+                <button type="submit" class="save-btn">💾 Guardar en Base de Datos</button>
+            </form>
+            <button class="nav-button" onclick="goBack()" style="background:var(--text-secondary);">Cancelar</button>
+        </section>
+
+        <!-- DOG DASHBOARD -->
+        <section id="dog-selection-dashboard" style="display:none;">
+            <h2>🐕 Dashboard de <span class="dog-name-placeholder"></span></h2>
+            
+            <div id="carousel-wrapper" style="display:none;">
+                <div id="carousel-container">
+                    <img id="carousel-img" src="" alt="Diapositiva">
+                    <div class="carousel-controls">
+                        <button class="carousel-btn" onclick="prevSlide()">◀</button>
+                        <div>
+                            <button class="carousel-btn" id="play-pause-btn" onclick="togglePlay()">▶️</button>
+                            <button class="carousel-btn" onclick="toggleFullscreen()">⛶</button>
+                        </div>
+                        <span id="carousel-counter" style="color:white; font-weight:bold;">0 / 0</span>
+                        <button class="carousel-btn" onclick="nextSlide()">▶</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 24px;">
+                <button id="admin-create-walk-btn" class="admin-action-button" style="display:none;" onclick="showView('create-walk-section')">
+                    ➕ Crear Nuevo Paseo
+                </button>
+                <button class="nav-button" onclick="showView('walks-history-section')">
+                    📜 Historial de Paseos
+                </button>
+                <button class="nav-button" onclick="showView('profile-section')">
+                    📋 Ver/Editar Perfil
+                </button>
+            </div>
+            
+            <button class="nav-button" onclick="goBack()" style="background: var(--text-secondary); margin-top: 16px;">
+                ⬅️ Volver
+            </button>
+        </section>
+
+        <!-- CREATE WALK -->
+        <section id="create-walk-section" style="display:none;">
+            <h2>➕ Crear Nuevo Paseo</h2>
+            <form id="walk-form">
+                <div style="background: var(--bg-input); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px;">
+                    <label style="color: var(--secondary);">🐶 ¿Quién más vino al paseo?</label>
+                    <div id="multi-dog-container"></div>
+                </div>
+
+                <label>📅 Fecha</label><input type="date" id="walk-date" required>
+                <label>⏱️ Duración (min)</label><input type="number" id="walk-duration" value="60" required>
+                <label>📏 Distancia (km)</label><input type="number" id="walk-distance" step="0.1" value="3.5">
+                <label>📝 Resumen</label><textarea id="walk-summary" required></textarea>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="comportamiento-problemas">
+                    <label>⚠️ Problemas de comportamiento</label>
+                </div>
+                
+                <label>🩺 Notas de Salud</label><textarea id="incidentes-salud"></textarea>
+                
+                <h3>📸 Fotos del Paseo</h3>
+                <div id="photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
+                <button type="button" id="simulate-photos-btn" class="nav-button" style="background: var(--secondary);">📷 Simular Fotos</button>
+                <button type="submit">💾 Guardar Paseo</button>
+            </form>
+            <button class="nav-button" onclick="goBack()" style="background: var(--text-secondary);">Cancelar</button>
+        </section>
+
+        <!-- PROFILE -->
+        <section id="profile-section" style="display:none;">
+            <h2>📋 Perfil Completo</h2>
+            <div id="profile-content">
+                <div id="profile-photo-container">
+                    <img id="profile-photo" src="" alt="Foto del Perro">
+                    <p id="profile-dog-name-display" class="dog-name-placeholder" style="font-size:1.5rem; font-weight:bold; color:var(--primary); margin-top:10px;"></p>
+                    <button id="edit-photo-btn" class="edit-btn" style="display:none; margin: 10px auto;" onclick="randomizeProfilePhoto()">🎲 Cambiar Foto</button>
+                    <button id="toggle-edit-btn" class="edit-btn" style="background: var(--secondary); margin-top: 16px;" onclick="toggleEditMode()">✏️ Editar Perfil</button>
+                </div>
+
+                <div id="profile-details-view"></div>
+                <form id="profile-details-edit" style="display:none;"></form>
+            </div>
+            <button class="nav-button" onclick="goBack()" style="background: var(--text-secondary); margin-top: 24px;">⬅️ Volver</button>
+        </section>
+
+        <!-- HISTORY -->
+        <section id="walks-history-section" style="display:none;">
+            <h2>📜 Historial de Paseos</h2>
+            <div id="walks-history"></div>
+            <button class="nav-button" onclick="goBack()" style="background: var(--text-secondary); margin-top: 16px;">⬅️ Volver</button>
+        </section>
+
+    </main>
+    
+    <!-- LIGHTBOX -->
+    <div id="lightbox">
+        <span class="lightbox-close" id="close-lightbox">&times;</span>
+        <img id="lightbox-img" src="">
+    </div>
+
+    <!-- MODAL EDIT WALK -->
+    <div id="edit-walk-modal">
+        <div class="modal-content">
+            <h2>✏️ Editar Paseo</h2>
+            <form id="edit-walk-form">
+                <label>Fecha</label><input type="date" id="edit-walk-date">
+                <label>Duración</label><input type="number" id="edit-walk-duration">
+                <label>Distancia</label><input type="number" id="edit-walk-distance" step="0.1">
+                <label>Resumen</label><textarea id="edit-walk-summary"></textarea>
+                <div class="checkbox-group"><input type="checkbox" id="edit-walk-behavior"><label>Problemas</label></div>
+                <label>Salud</label><textarea id="edit-walk-health"></textarea>
+                
+                <h3>Gestionar Fotos</h3>
+                <div id="edit-photo-preview" style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;"></div>
+                <button type="button" onclick="addPhotoEdit()" class="edit-btn" style="background:var(--secondary); width:100%; margin-bottom:15px;">➕ Agregar Foto</button>
+                
+                <div style="display:flex; gap:10px;">
+                    <button type="submit" class="save-btn">Guardar</button>
+                    <button type="button" onclick="document.getElementById('edit-walk-modal').style.display='none'" style="background:var(--text-secondary); width:auto;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // === CONFIGURACIÓN ===
+        const DB_KEY = 'paseoDogDB_EXTERNAL';
+        const DB_URL = 'paseoDogDB.json'; // Archivo JSON externo
+        let DATABASE = null;
+        let TRAINER_PHONE = "5491100000000";
+        let ADMIN_USER = { email: 'admin@paseos.com', password: 'admin123' };
+
+        // === ESTADO GLOBAL ===
+        let MOCK_DOGS = [];
+        let currentUser = null, currentDog = null, currentView = 'login-section';
+        let simulatedPhotos = [], isEditing = false, tempPhotoId = null, backStack = [];
+        let editWalkIdx = null, editWalkPhotos = [];
+        let allDogPhotos = [], slideIndex = 0, slideInterval = null, isPlaying = false;
+
+        // === FUNCIONES DE BASE DE DATOS ===
+        async function loadExternalDB() {
+            try {
+                const response = await fetch(DB_URL);
+                if (!response.ok) throw new Error('No se pudo cargar la base de datos');
+                DATABASE = await response.json();
+                MOCK_DOGS = DATABASE.dogs;
+                TRAINER_PHONE = DATABASE.trainer_phone;
+                ADMIN_USER = DATABASE.admin;
+                return true;
+            } catch (error) {
+                console.error('Error cargando DB:', error);
+                alert('⚠️ Error al cargar la base de datos. Usando datos locales si existen.');
+                return false;
+            }
+        }
+
+        function getPhotoUrl(id, w=400, h=400) {
+            return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
+        }
+
+        function loadDB() {
+            const data = localStorage.getItem(DB_KEY);
+            return data ? JSON.parse(data) : MOCK_DOGS;
+        }
+
+        function saveDB(data) {
+            localStorage.setItem(DB_KEY, JSON.stringify(data));
+            MOCK_DOGS = data;
+        }
+
+        // === TEMA ===
+        const themeToggle = document.getElementById('theme-toggle');
+        function updateThemeIcon() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            themeToggle.textContent = isDark ? '🐩' : '🐕‍🦺';
+        }
+        themeToggle.onclick = () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+            updateThemeIcon();
+        };
+
+        // === WHATSAPP ===
+        function updateWhatsApp() {
+            const btn = document.getElementById('whatsapp-btn');
+            if(currentView.includes('login') || currentView.includes('admin-dashboard')){ 
+                btn.style.display='none'; 
+                return; 
+            }
+            btn.style.display='flex';
+            let num = TRAINER_PHONE;
+            if(currentUser && currentUser.isAdmin && currentDog) {
+                num = currentDog.perfil.telefono.replace(/[^0-9]/g, '');
+            }
+            btn.href = `https://wa.me/${num}`;
+        }
+
+        // === NAVEGACIÓN ===
+        function showView(id, dogId=null) {
+            MOCK_DOGS = loadDB();
+            if(id!==currentView) backStack.push(currentView);
+            currentView = id;
+            document.querySelectorAll('main > section').forEach(s => s.style.display='none');
+            document.getElementById(id).style.display='block';
+
+            if(dogId) currentDog = MOCK_DOGS.find(d=>d.id===dogId);
+            
+            if(currentDog) {
+                currentDog = MOCK_DOGS.find(d=>d.id===currentDog.id);
+                document.querySelectorAll('.dog-name-placeholder').forEach(e=>e.textContent=currentDog.nombre);
+                
+                if(id==='dog-selection-dashboard') {
+                    document.getElementById('admin-create-walk-btn').style.display = currentUser.isAdmin ? 'block' : 'none';
+                    initCarousel();
+                }
+                if(id==='profile-section') { isEditing=false; loadProfile(currentDog); }
+                if(id==='walks-history-section') loadHistory(currentDog);
+                if(id==='create-walk-section') {
+                    document.getElementById('walk-form').reset();
+                    document.getElementById('walk-date').valueAsDate = new Date();
+                    simulatedPhotos=[]; document.getElementById('photo-preview').innerHTML='';
+                    loadMultiDog();
+                }
+            }
+            if(id==='admin-dashboard-section') loadAdminDashboard();
+            updateWhatsApp();
+            window.scrollTo(0,0);
+        }
+
+        function goBack(){ 
+            if(backStack.length) showView(backStack.pop()); 
+            else showView('login-section'); 
+        }
+
+        // === LOGIN ===
+        document.getElementById('toggle-password').onclick=()=>{ 
+            const p=document.getElementById('password'); 
+            p.type=p.type==='password'?'text':'password'; 
+        };
+
+        document.getElementById('login-form').onsubmit=(e)=>{
+            e.preventDefault();
+            const em=document.getElementById('email').value.toLowerCase();
+            const pw=document.getElementById('password').value;
+            MOCK_DOGS = loadDB();
+            
+            if(em===ADMIN_USER.email && pw===ADMIN_USER.password){ 
+                currentUser={email:em, isAdmin:true}; 
+                showView('admin-dashboard-section'); 
+            } else { 
+                const d=MOCK_DOGS.find(x=>x.dueno_email===em); 
+                if(d && pw==='123456'){ 
+                    currentUser={email:em, isAdmin:false}; 
+                    currentDog=d; 
+                    showView('dog-selection-dashboard'); 
+                } else {
+                    document.getElementById('error-message').style.display='block';
+                    document.getElementById('error-message').textContent='❌ Credenciales incorrectas';
+                }
+            }
+        };
+
+        // === ADMIN ===
+        function loadAdminDashboard() {
+            const c = document.getElementById('dog-list-container'); 
+            c.innerHTML='';
+            document.getElementById('demo-status-text').textContent = `${MOCK_DOGS.length} perros en BD`;
+            
+            if(!MOCK_DOGS.length) return c.innerHTML='<p class="info-text">Sin perros.</p>';
+            
+            MOCK_DOGS.forEach(d => {
+                c.innerHTML += `
+                <div class="dog-card">
+                    <span>🐶 <strong>${d.nombre}</strong> <small style="color:var(--text-secondary)">(${d.perfil.raza})</small></span>
+                    <button onclick="showView('dog-selection-dashboard',${d.id})">Gestionar</button>
+                </div>`;
+            });
+        }
+
+        // === CREATE DOG ===
+        document.getElementById('create-dog-form').onsubmit=(e)=>{
+            e.preventDefault();
+            const newId = MOCK_DOGS.length ? Math.max(...MOCK_DOGS.map(d=>d.id))+1 : 1;
+            const nd = {
+                id: newId, 
+                nombre: document.getElementById('new-dog-name').value, 
+                dueno_email: document.getElementById('new-dog-email').value,
+                perfil: { 
+                    raza: document.getElementById('new-dog-breed').value, 
+                    sexo: document.getElementById('new-dog-sex').value, 
+                    dueno: document.getElementById('new-dog-owner').value, 
+                    telefono: document.getElementById('new-dog-phone').value, 
+                    foto_id: DATABASE.photo_references.random[0], 
+                    edad:'?', peso:'?', alergias:'Ninguna', energia:'Media', social:'?' 
+                }, 
+                walks:[]
+            };
+            MOCK_DOGS.push(nd); 
+            saveDB(MOCK_DOGS); 
+            alert('✅ Perro registrado'); 
+            showView('admin-dashboard-section');
+        };
+
+        // === PROFILE ===
+        function loadProfile(d) {
+            const p = d.perfil;
+            document.getElementById('profile-photo').src = getPhotoUrl(tempPhotoId || p.foto_id, 300, 300);
+            document.getElementById('profile-dog-name-display').textContent = d.nombre;
+            document.getElementById('edit-photo-btn').style.display = isEditing ? 'block' : 'none';
+            document.getElementById('toggle-edit-btn').textContent = isEditing ? '❌ Cancelar' : '✏️ Editar Perfil';
+            
+            const v = document.getElementById('profile-details-view');
+            const e = document.getElementById('profile-details-edit');
+
+            v.innerHTML = `
+                <h3>🐕 Datos Básicos</h3>
+                <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${p.raza}</span></div>
+                <div class="detail-row"><span class="detail-label">Edad:</span> <span class="detail-value">${p.edad}</span></div>
+                <div class="detail-row"><span class="detail-label">Sexo:</span> <span class="detail-value">${p.sexo}</span></div>
+                <h3>💊 Salud y Contacto</h3>
+                <div class="detail-row"><span class="detail-label">Peso:</span> <span class="detail-value">${p.peso}</span></div>
+                <div class="detail-row"><span class="detail-label">Alergias:</span> <span class="detail-value">${p.alergias}</span></div>
+                <div class="detail-row"><span class="detail-label">Dueño:</span> <span class="detail-value">${p.dueno}</span></div>
+                <div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${p.telefono}</span></div>
+                <h3>🎾 Comportamiento</h3>
+                <div class="detail-row"><span class="detail-label">Energía:</span> <span class="detail-value">${p.energia}</span></div>
+                <div class="detail-row"><span class="detail-label">Social:</span> <span class="detail-value">${p.social}</span></div>
+            `;
+
+            e.innerHTML = '';
+            const fields = ['raza','edad','sexo','peso','alergias','dueno','telefono','energia','social'];
+            fields.forEach(k => {
+                e.innerHTML += `<label>${k.charAt(0).toUpperCase() + k.slice(1)}</label><input type="text" name="${k}" value="${p[k]}">`;
+            });
+            e.innerHTML += '<button type="submit" class="save-btn">Guardar Cambios</button>';
+
+            v.style.display = isEditing ? 'none' : 'block';
+            e.style.display = isEditing ? 'block' : 'none';
+        }
+
+        function toggleEditMode(){ 
+            isEditing = !isEditing; 
+            tempPhotoId=null; 
+            loadProfile(currentDog); 
+        }
+
+        function randomizeProfilePhoto(){ 
+            tempPhotoId = DATABASE.photo_references.random[Math.floor(Math.random()*DATABASE.photo_references.random.length)]; 
+            document.getElementById('profile-photo').src = getPhotoUrl(tempPhotoId,300,300); 
+        }
+
+        document.getElementById('profile-details-edit').onsubmit=(evt)=>{
+            evt.preventDefault(); 
+            const fd = new FormData(evt.target);
+            const idx = MOCK_DOGS.findIndex(d=>d.id===currentDog.id);
+            for(let [k,v] of fd.entries()) MOCK_DOGS[idx].perfil[k] = v;
+            if(tempPhotoId) MOCK_DOGS[idx].perfil.foto_id = tempPhotoId;
+            saveDB(MOCK_DOGS); 
+            isEditing=false; 
+            loadProfile(MOCK_DOGS[idx]);
+        };
+
+        // === CREATE WALK ===
+        function loadMultiDog(){
+            const c = document.getElementById('multi-dog-container'); 
+            c.innerHTML='';
+            MOCK_DOGS.filter(d=>d.id!==currentDog.id).forEach(d => {
+                c.innerHTML+=`<div class="dog-select-item"><input type="checkbox" value="${d.id}" id="md${d.id}"><label for="md${d.id}" style="margin:0">${d.nombre}</label></div>`;
+            });
+        }
+
+        document.getElementById('simulate-photos-btn').onclick=()=>{
+            simulatedPhotos=[]; 
+            const c=document.getElementById('photo-preview'); 
+            c.innerHTML='';
+            for(let i=0;i<3;i++){
+                const id=DATABASE.photo_references.random[i]; 
+                simulatedPhotos.push({id, comentario: `Foto ${i+1} del paseo`});
+                c.innerHTML+=`<img src="${getPhotoUrl(id,100,100)}">`;
+            }
+        };
+
+        document.getElementById('walk-form').onsubmit=(e)=>{
+            e.preventDefault();
+            const w = {
+                fecha: document.getElementById('walk-date').value,
+                duracion_minutos: parseInt(document.getElementById('walk-duration').value),
+                distancia_km: parseFloat(document.getElementById('walk-distance').value),
+                resumen_diario: document.getElementById('walk-summary').value,
+                comportamiento_problemas: document.getElementById('comportamiento-problemas').checked,
+                incidentes_salud: document.getElementById('incidentes-salud').value,
+                fotos: simulatedPhotos
+            };
+            
+            const idx = MOCK_DOGS.findIndex(d=>d.id===currentDog.id);
+            MOCK_DOGS[idx].walks.unshift(JSON.parse(JSON.stringify(w)));
+            
+            document.querySelectorAll('#multi-dog-container input:checked').forEach(cb=>{
+                const pIdx = MOCK_DOGS.findIndex(d=>d.id==cb.value);
+                if(pIdx>-1) MOCK_DOGS[pIdx].walks.unshift(JSON.parse(JSON.stringify(w)));
+            });
+            
+            saveDB(MOCK_DOGS); 
+            alert('✅ Paseo guardado!'); 
+            showView('dog-selection-dashboard');
+        };
+
+        // === HISTORY & EDIT ===
+        function loadHistory(d){
+            const c = document.getElementById('walks-history'); 
+            c.innerHTML='';
+            
+            if(!d.walks.length) return c.innerHTML='<p class="info-text">Sin historial.</p>';
+            
+            d.walks.forEach((w,i)=>{
+                const imgs = w.fotos.map(f=>`<div class="photo-card" onclick="openLightbox('${f.id}')"><img src="${getPhotoUrl(f.id,200,200)}"></div>`).join('');
+                const adminBtns = (currentUser && currentUser.isAdmin) ? 
+                    `<div class="admin-walk-controls">
+                        <button class="admin-walk-btn" onclick="openEditWalk(${i})">✏️ Editar</button>
+                        <button class="admin-walk-btn" style="border-color:var(--danger-light); color:#fca5a5;" onclick="delWalk(${i})">🗑️ Borrar</button>
+                    </div>` : '';
+                
+                c.innerHTML+=`
+                <div class="walk-session">
+                    <h3><span>📅 ${w.fecha}</span> ${adminBtns}</h3>
+                    <div class="walk-details">
+                        <div class="walk-metrics">
+                            <span>⏱️ ${w.duracion_minutos} min</span>
+                            <span>📏 ${w.distancia_km} km</span>
+                            <span>📸 ${w.fotos.length} fotos</span>
+                        </div>
+                        <p><strong>Resumen:</strong> ${w.resumen_diario}</p>
+                        ${w.comportamiento_problemas ? '<div class="incident-alert">⚠️ Hubo problemas de comportamiento</div>' : '<div class="success-notice">✅ Paseo tranquilo</div>'}
+                        ${w.incidentes_salud ? `<div class="incident-alert">🩺 <strong>Salud:</strong> ${w.incidentes_salud}</div>` : ''}
+                        <div class="gallery">${imgs}</div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function openEditWalk(i){
+            editWalkIdx=i; 
+            editWalkPhotos=[...currentDog.walks[i].fotos];
+            const w=currentDog.walks[i];
+            document.getElementById('edit-walk-date').value=w.fecha;
+            document.getElementById('edit-walk-duration').value=w.duracion_minutos;
+            document.getElementById('edit-walk-distance').value=w.distancia_km;
+            document.getElementById('edit-walk-summary').value=w.resumen_diario;
+            document.getElementById('edit-walk-behavior').checked=w.comportamiento_problemas;
+            document.getElementById('edit-walk-health').value=w.incidentes_salud;
+            renderEditPhotos();
+            document.getElementById('edit-walk-modal').style.display='flex';
+        }
+
+        function renderEditPhotos(){ 
+            const c=document.getElementById('edit-photo-preview'); 
+            c.innerHTML=''; 
+            editWalkPhotos.forEach((p,i)=>
+                c.innerHTML+=`<div style="position:relative">
+                    <img src="${getPhotoUrl(p.id,100,100)}">
+                    <button type="button" class="delete-photo-btn" onclick="delEditPhoto(${i})">x</button>
+                </div>`
+            ); 
+        }
+
+        function delEditPhoto(i){ 
+            editWalkPhotos.splice(i,1); 
+            renderEditPhotos(); 
+        }
+
+        function addPhotoEdit(){ 
+            editWalkPhotos.push({
+                id:DATABASE.photo_references.random[0], 
+                comentario: 'Nueva foto'
+            }); 
+            renderEditPhotos(); 
+        }
+
+        document.getElementById('edit-walk-form').onsubmit=(e)=>{
+            e.preventDefault();
+            const idx = MOCK_DOGS.findIndex(d=>d.id===currentDog.id);
+            MOCK_DOGS[idx].walks[editWalkIdx] = {
+                fecha: document.getElementById('edit-walk-date').value,
+                duracion_minutos: parseInt(document.getElementById('edit-walk-duration').value),
+                distancia_km: parseFloat(document.getElementById('edit-walk-distance').value),
+                resumen_diario: document.getElementById('edit-walk-summary').value,
+                comportamiento_problemas: document.getElementById('edit-walk-behavior').checked,
+                incidentes_salud: document.getElementById('edit-walk-health').value,
+                fotos: editWalkPhotos
+            };
+            saveDB(MOCK_DOGS); 
+            document.getElementById('edit-walk-modal').style.display='none'; 
+            loadHistory(MOCK_DOGS[idx]);
+        };
+
+        function delWalk(i){ 
+            if(confirm('¿Borrar este paseo?')){ 
+                const idx=MOCK_DOGS.findIndex(d=>d.id===currentDog.id); 
+                MOCK_DOGS[idx].walks.splice(i,1); 
+                saveDB(MOCK_DOGS); 
+                loadHistory(MOCK_DOGS[idx]); 
+            } 
+        }
+
+        // === LIGHTBOX ===
+        function openLightbox(id){ 
+            document.getElementById('lightbox-img').src=getPhotoUrl(id,800,800); 
+            document.getElementById('lightbox').style.display='flex'; 
+        }
+        document.getElementById('close-lightbox').onclick=()=>
+            document.getElementById('lightbox').style.display='none';
+
+        // === CAROUSEL ===
+        function initCarousel(){ 
+            const w=document.getElementById('carousel-wrapper'); 
+            const slides=[];
+            if(currentDog.walks) currentDog.walks.forEach(wa=>wa.fotos && wa.fotos.forEach(f=>slides.push(f.id)));
+            if(!slides.length){ w.style.display='none'; return; } 
+            w.style.display='flex';
+            
+            let idx=0; 
+            const img=document.getElementById('carousel-img'); 
+            const cnt=document.getElementById('carousel-counter');
+            
+            const show=()=>{ 
+                img.style.opacity=0; 
+                setTimeout(()=>{
+                    img.src=getPhotoUrl(slides[idx],800,500); 
+                    img.onload=()=>{img.style.opacity=1}; 
+                    cnt.textContent=`${idx+1}/${slides.length}`;
+                },200); 
+            }; 
+            show();
+            
+            window.nextSlide=()=>{ idx=(idx+1)%slides.length; show(); }; 
+            window.prevSlide=()=>{ idx=(idx-1+slides.length)%slides.length; show(); };
+            window.togglePlay=()=>{ 
+                const b=document.getElementById('play-pause-btn'); 
+                if(isPlaying){
+                    clearInterval(slideInterval);
+                    b.textContent='▶️';
+                    isPlaying=false;
+                }else{
+                    nextSlide();
+                    slideInterval=setInterval(nextSlide,3000);
+                    b.textContent='⏸️';
+                    isPlaying=true;
+                } 
+            };
+            window.toggleFullscreen=()=>{ 
+                const el=document.getElementById('carousel-container'); 
+                !document.fullscreenElement ? el.requestFullscreen() : document.exitFullscreen(); 
+            };
+        }
+
+        // === RESET DB ===
+        document.getElementById('toggle-demo-btn').onclick=async()=>{ 
+            if(confirm('¿Resetear base de datos con datos originales?')) {
+                document.getElementById('loading-overlay').style.display='flex';
+                await loadExternalDB();
+                localStorage.removeItem(DB_KEY);
+                MOCK_DOGS = DATABASE.dogs;
+                saveDB(MOCK_DOGS);
+                document.getElementById('loading-overlay').style.display='none';
+                alert('✅ Base de datos reseteada');
+                location.reload();
+            }
+        };
+
+        // === INIT ===
+        window.onload=async()=>{ 
+            document.getElementById('loading-overlay').style.display='flex';
+            const loaded = await loadExternalDB();
+            
+            if(loaded) {
+                // Si hay datos en localStorage, úsalos. Si no, usa los de la DB externa
+                const localData = localStorage.getItem(DB_KEY);
+                if(localData) {
+                    MOCK_DOGS = JSON.parse(localData);
+                } else {
+                    MOCK_DOGS = DATABASE.dogs;
+                    saveDB(MOCK_DOGS);
+                }
+            }
+            
+            document.getElementById('loading-overlay').style.display='none';
+            showView('login-section'); 
+            updateThemeIcon(); 
+        };
+    </script>
+</body>
+</html>
