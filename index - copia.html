@@ -32,19 +32,19 @@
         [data-theme="dark"] {
             --primary: #D4AF37;                /* Dorado clásico */
             --primary-dark: #B8860B;           /* Dorado oscuro */
-            --primary-light: rgba(212, 175, 55, 0.15);
+            --primary-light: rgba(212, 175, 55, 0.15); /* Dorado suave translúcido */
             --secondary: #60a5fa;
             --secondary-dark: #3b82f6;
             --danger: #f87171;
             --danger-light: #450a0a;
             --warning: #fbbf24;
             --warning-light: #451a03;
-            --text-primary: #f8f9fa;
-            --text-secondary: #b0b0b0;
-            --bg-body: #0F0F1B;
-            --bg-card: #1A1A2E;
-            --bg-input: #25253A;
-            --border: #33334D;
+            --text-primary: #f8f9fa;           /* Blanco suave */
+            --text-secondary: #b0b0b0;         /* Gris claro suave */
+            --bg-body: #0F0F1B;                /* Fondo oscuro profundo */
+            --bg-card: #1A1A2E;                /* Tarjetas ligeramente más claras */
+            --bg-input: #25253A;               /* Inputs/paneles oscuros */
+            --border: #33334D;                 /* Bordes sutiles */
             --shadow: 0 4px 12px -1px rgba(0, 0, 0, 0.6);
             --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.7);
             --radius: 12px;
@@ -75,8 +75,7 @@
             font-size: 2.5rem;
             font-weight: 800;
             margin-bottom: 8px;
-            text-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
-            animation: heartbeatGlow 4s ease-in-out 1.5s infinite;
+            text-shadow: 2px 2px 4px rgba(212, 175, 55, 0.2);
         }
         #saludo-usuario {
             color: var(--text-secondary);
@@ -298,14 +297,14 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0, 0, 0, 0.6);
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px 20px;
         }
         .carousel-btn {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             font-size: 1.5rem;
             border: none;
@@ -353,8 +352,8 @@
             gap: 8px;
         }
         .admin-walk-btn {
-            background: rgba(255,255,255,0.25);
-            border: 1px solid rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.5);
             padding: 5px 12px;
             font-size: 0.85rem;
             width: auto;
@@ -473,45 +472,14 @@
             align-items: center;
             justify-content: center;
             font-size: 35px;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
             z-index: 5000;
             transition: all 0.3s ease;
             text-decoration: none;
         }
         .whatsapp-float:hover {
             transform: scale(1.1);
-            box-shadow: 2px 2px 15px rgba(0,0,0,0.4);
-        }
-        .audio-float {
-            position: fixed;
-            bottom: 30px;
-            right: 100px;
-            background: rgba(30, 30, 40, 0.85);
-            color: #d4af37;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            z-index: 5000;
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            backdrop-filter: blur(4px);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .audio-float:hover {
-            transform: scale(1.1);
-            color: white;
-            background: rgba(212, 175, 55, 0.3);
-        }
-        [data-theme="light"] .audio-float {
-            background: rgba(255, 255, 255, 0.85);
-            color: #4b5563;
-        }
-        [data-theme="light"] .audio-float:hover {
-            color: #10b981;
+            box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.4);
         }
         .error {
             color: var(--danger);
@@ -561,7 +529,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 2000;
             align-items: center;
             justify-content: center;
@@ -590,14 +558,30 @@
             cursor: pointer;
         }
 
-        /* === ANIMACIONES ENRIQUECIDAS === */
+        /* === ANIMACIONES ENRIQUECIDAS (MEJORA 3) === */
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-24px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from {
+                opacity: 0;
+                transform: translateY(-24px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(24px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from {
+                opacity: 0;
+                transform: translateY(24px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         @keyframes popIn {
             0% { transform: scale(0.9); opacity: 0; }
@@ -609,12 +593,8 @@
             70% { box-shadow: 0 0 20px 4px rgba(212, 175, 55, 0.4); }
             100% { box-shadow: 0 0 12px 2px rgba(212, 175, 55, 0.3); }
         }
-        @keyframes heartbeatGlow {
-            0%, 100% { text-shadow: 0 0 12px rgba(212, 175, 55, 0.4); }
-            50% { text-shadow: 0 0 24px rgba(212, 175, 55, 0.8), 0 0 36px rgba(212, 175, 55, 0.6); }
-        }
 
-        /* GOLDEN PARTICLES */
+        /* GOLDEN PARTICLES FOR DARK MODE */
         #particles-container {
             position: fixed;
             top: 0;
@@ -635,14 +615,32 @@
             animation: float 15s infinite ease-in-out;
             box-shadow: 0 0 8px rgba(212, 175, 55, 0.7);
         }
-        .particle:nth-child(2n) { animation-duration: 18s; animation-delay: 2s; }
-        .particle:nth-child(3n) { animation-duration: 22s; animation-delay: 4s; }
-        .particle:nth-child(5n) { animation-duration: 25s; animation-delay: 1s; }
+        .particle:nth-child(2n) {
+            animation-duration: 18s;
+            animation-delay: 2s;
+        }
+        .particle:nth-child(3n) {
+            animation-duration: 22s;
+            animation-delay: 4s;
+        }
+        .particle:nth-child(5n) {
+            animation-duration: 25s;
+            animation-delay: 1s;
+        }
         @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
-            25% { transform: translate(10vw, -20vh) scale(1.1); }
-            50% { transform: translate(20vw, -40vh) scale(0.9); }
-            75% { transform: translate(-15vw, -30vh) scale(1.05); }
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.7;
+            }
+            25% {
+                transform: translate(10vw, -20vh) scale(1.1);
+            }
+            50% {
+                transform: translate(20vw, -40vh) scale(0.9);
+            }
+            75% {
+                transform: translate(-15vw, -30vh) scale(1.05);
+            }
         }
 
         #multi-dog-container {
@@ -661,11 +659,16 @@
             border: 1px solid var(--border);
         }
         @media (max-width: 768px) {
-            #profile-content { grid-template-columns: 1fr; }
-            .detail-row { flex-direction: column; align-items: flex-start; }
-            #carousel-wrapper { height: 250px; }
-            .whatsapp-float { right: 20px; }
-            .audio-float { right: 80px; }
+            #profile-content {
+                grid-template-columns: 1fr;
+            }
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            #carousel-wrapper {
+                height: 250px;
+            }
         }
         #loading-overlay {
             display: flex;
@@ -674,7 +677,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.8);
             z-index: 10000;
             align-items: center;
             justify-content: center;
@@ -682,7 +685,7 @@
             gap: 20px;
         }
         .spinner {
-            border: 5px solid rgba(255,255,255,0.3);
+            border: 5px solid rgba(255, 255, 255, 0.3);
             border-top: 5px solid var(--primary);
             border-radius: 50%;
             width: 60px;
@@ -696,22 +699,21 @@
     </style>
 </head>
 <body>
-    <!-- FONDO DE PARTÍCULAS -->
+    <!-- GOLDEN PARTICLES BACKGROUND -->
     <div id="particles-container"></div>
 
-    <!-- LOADING -->
+    <!-- LOADING OVERLAY -->
     <div id="loading-overlay">
         <div class="spinner"></div>
         <p style="color: white; font-size: 1.2rem;">Cargando base de datos...</p>
     </div>
 
-    <!-- WHATSAPP + AUDIO -->
+    <!-- WHATSAPP BUTTON -->
     <a href="#" id="whatsapp-btn" class="whatsapp-float" target="_blank" style="display:none;">
         <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="currentColor">
             <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.017-1.04 2.481 0 1.461 1.063 2.875 1.211 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
         </svg>
     </a>
-    <button id="audio-toggle" class="audio-float" title="Silenciar sonido">🔊</button>
 
     <header>
         <button id="theme-toggle" title="Cambiar Tema">🐩</button>
@@ -892,60 +894,24 @@
         let DATABASE = null;
         let TRAINER_PHONE = "5491100000000";
         let ADMIN_USER = { email: 'admin@paseos.com', password: 'admin123' };
+
+        // === ESTADO GLOBAL ===
         let MOCK_DOGS = [];
-        let currentUser = null, currentDog = null, currentView = 'login-section';
-        let simulatedPhotos = [], isEditing = false, tempPhotoId = null, backStack = [];
-        let editWalkIdx = null, editWalkPhotos = [];
-        let slideIndex = 0, slideInterval = null, isPlaying = false;
+        let currentUser = null,
+            currentDog = null,
+            currentView = 'login-section';
+        let simulatedPhotos = [],
+            isEditing = false,
+            tempPhotoId = null,
+            backStack = [];
+        let editWalkIdx = null,
+            editWalkPhotos = [];
+        let allDogPhotos = [],
+            slideIndex = 0,
+            slideInterval = null,
+            isPlaying = false;
 
-        // === SONIDO DE BIENVENIDA ===
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let isAudioEnabled = true;
-        let hasPlayedWelcome = false;
-        let userHasInteracted = false;
-
-        // Mini beep de bienvenida en base64 (suave y corto)
-        const BEEP_WAV = "UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=="; // placeholder
-
-        function playWelcomeSound() {
-            if (!isAudioEnabled || hasPlayedWelcome || !userHasInteracted) return;
-            hasPlayedWelcome = true;
-            // Generar beep sintético (no necesita archivo)
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            oscillator.frequency.value = 660; // Nota E5
-            oscillator.type = 'sine';
-            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.6);
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.6);
-        }
-
-        // === AUDIO CONTROL ===
-        const audioToggle = document.getElementById('audio-toggle');
-        const savedAudio = localStorage.getItem('paseoDogAudio');
-        if (savedAudio === 'off') {
-            isAudioEnabled = false;
-            audioToggle.textContent = '🔇';
-        }
-
-        audioToggle.onclick = (e) => {
-            e.stopPropagation();
-            isAudioEnabled = !isAudioEnabled;
-            audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
-            localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
-        };
-
-        document.addEventListener('click', () => {
-            if (!userHasInteracted) {
-                userHasInteracted = true;
-                if (currentUser) playWelcomeSound();
-            }
-        }, { once: true });
-
-        // === FUNCIONES PRINCIPALES (igual que antes) ===
+        // === FUNCIONES DE BASE DE DATOS ===
         async function loadExternalDB() {
             try {
                 const response = await fetch(DB_URL);
@@ -973,6 +939,7 @@
             MOCK_DOGS = data;
         }
 
+        // === TEMA ===
         const themeToggle = document.getElementById('theme-toggle');
         function updateThemeIcon() {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -984,37 +951,42 @@
             updateThemeIcon();
         };
 
+        // === WHATSAPP ===
         function updateWhatsApp() {
             const btn = document.getElementById('whatsapp-btn');
-            if(currentView.includes('login') || currentView.includes('admin-dashboard')){
-                btn.style.display='none';
+            if (currentView.includes('login') || currentView.includes('admin-dashboard')) {
+                btn.style.display = 'none';
                 return;
             }
-            btn.style.display='flex';
+            btn.style.display = 'flex';
             let num = TRAINER_PHONE;
-            if(currentUser && currentUser.isAdmin && currentDog) {
+            if (currentUser && currentUser.isAdmin && currentDog) {
                 num = currentDog.perfil.telefono.replace(/[^0-9]/g, '');
             }
             btn.href = `https://wa.me/${num}`;
         }
 
+        // === NAVEGACIÓN ===
         function showView(id, dogId = null) {
             MOCK_DOGS = loadDB();
-            if(id !== currentView) backStack.push(currentView);
+            if (id !== currentView) backStack.push(currentView);
             currentView = id;
             document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
             document.getElementById(id).style.display = 'block';
-            if(dogId) currentDog = MOCK_DOGS.find(d => d.id === dogId);
-            if(currentDog) {
+            if (dogId) currentDog = MOCK_DOGS.find(d => d.id === dogId);
+            if (currentDog) {
                 currentDog = MOCK_DOGS.find(d => d.id === currentDog.id);
                 document.querySelectorAll('.dog-name-placeholder').forEach(e => e.textContent = currentDog.nombre);
-                if(id === 'dog-selection-dashboard') {
+                if (id === 'dog-selection-dashboard') {
                     document.getElementById('admin-create-walk-btn').style.display = currentUser.isAdmin ? 'block' : 'none';
                     initCarousel();
                 }
-                if(id === 'profile-section') { isEditing = false; loadProfile(currentDog); }
-                if(id === 'walks-history-section') loadHistory(currentDog);
-                if(id === 'create-walk-section') {
+                if (id === 'profile-section') {
+                    isEditing = false;
+                    loadProfile(currentDog);
+                }
+                if (id === 'walks-history-section') loadHistory(currentDog);
+                if (id === 'create-walk-section') {
                     document.getElementById('walk-form').reset();
                     document.getElementById('walk-date').valueAsDate = new Date();
                     simulatedPhotos = [];
@@ -1022,35 +994,31 @@
                     loadMultiDog();
                 }
             }
-            if(id === 'admin-dashboard-section') loadAdminDashboard();
-            if((id === 'dog-selection-dashboard' || id === 'admin-dashboard-section') && userHasInteracted) {
-                setTimeout(playWelcomeSound, 500);
-            }
+            if (id === 'admin-dashboard-section') loadAdminDashboard();
             updateWhatsApp();
-            window.scrollTo(0,0);
+            window.scrollTo(0, 0);
         }
-
-        function goBack(){
-            if(backStack.length) showView(backStack.pop());
+        function goBack() {
+            if (backStack.length) showView(backStack.pop());
             else showView('login-section');
         }
 
+        // === LOGIN ===
         document.getElementById('toggle-password').onclick = () => {
             const p = document.getElementById('password');
             p.type = p.type === 'password' ? 'text' : 'password';
         };
-
         document.getElementById('login-form').onsubmit = (e) => {
             e.preventDefault();
             const em = document.getElementById('email').value.toLowerCase();
             const pw = document.getElementById('password').value;
             MOCK_DOGS = loadDB();
-            if(em === ADMIN_USER.email && pw === ADMIN_USER.password){
+            if (em === ADMIN_USER.email && pw === ADMIN_USER.password) {
                 currentUser = { email: em, isAdmin: true };
                 showView('admin-dashboard-section');
             } else {
                 const d = MOCK_DOGS.find(x => x.dueno_email === em);
-                if(d && pw === '123456'){
+                if (d && pw === '123456') {
                     currentUser = { email: em, isAdmin: false };
                     currentDog = d;
                     showView('dog-selection-dashboard');
@@ -1061,11 +1029,12 @@
             }
         };
 
+        // === ADMIN ===
         function loadAdminDashboard() {
             const c = document.getElementById('dog-list-container');
             c.innerHTML = '';
             document.getElementById('demo-status-text').textContent = `${MOCK_DOGS.length} perros en BD`;
-            if(!MOCK_DOGS.length) return c.innerHTML = '<p class="info-text">Sin perros.</p>';
+            if (!MOCK_DOGS.length) return c.innerHTML = '<p class="info-text">Sin perros.</p>';
             MOCK_DOGS.forEach((d, i) => {
                 const card = document.createElement('div');
                 card.className = 'dog-card';
@@ -1078,6 +1047,7 @@
             });
         }
 
+        // === CREATE DOG ===
         document.getElementById('create-dog-form').onsubmit = (e) => {
             e.preventDefault();
             const newId = MOCK_DOGS.length ? Math.max(...MOCK_DOGS.map(d => d.id)) + 1 : 1;
@@ -1105,6 +1075,7 @@
             showView('admin-dashboard-section');
         };
 
+        // === PROFILE ===
         function loadProfile(d) {
             const p = d.perfil;
             document.getElementById('profile-photo').src = getPhotoUrl(tempPhotoId || p.foto_id, 300, 300);
@@ -1128,7 +1099,7 @@
                 <div class="detail-row"><span class="detail-label">Social:</span> <span class="detail-value">${p.social}</span></div>
             `;
             e.innerHTML = '';
-            const fields = ['raza','edad','sexo','peso','alergias','dueno','telefono','energia','social'];
+            const fields = ['raza', 'edad', 'sexo', 'peso', 'alergias', 'dueno', 'telefono', 'energia', 'social'];
             fields.forEach(k => {
                 e.innerHTML += `<label>${k.charAt(0).toUpperCase() + k.slice(1)}</label><input type="text" name="${k}" value="${p[k]}">`;
             });
@@ -1136,27 +1107,28 @@
             v.style.display = isEditing ? 'none' : 'block';
             e.style.display = isEditing ? 'block' : 'none';
         }
-        function toggleEditMode(){
+        function toggleEditMode() {
             isEditing = !isEditing;
             tempPhotoId = null;
             loadProfile(currentDog);
         }
-        function randomizeProfilePhoto(){
+        function randomizeProfilePhoto() {
             tempPhotoId = DATABASE.photo_references.random[Math.floor(Math.random() * DATABASE.photo_references.random.length)];
-            document.getElementById('profile-photo').src = getPhotoUrl(tempPhotoId,300,300);
+            document.getElementById('profile-photo').src = getPhotoUrl(tempPhotoId, 300, 300);
         }
         document.getElementById('profile-details-edit').onsubmit = (evt) => {
             evt.preventDefault();
             const fd = new FormData(evt.target);
             const idx = MOCK_DOGS.findIndex(d => d.id === currentDog.id);
-            for(let [k,v] of fd.entries()) MOCK_DOGS[idx].perfil[k] = v;
-            if(tempPhotoId) MOCK_DOGS[idx].perfil.foto_id = tempPhotoId;
+            for (let [k, v] of fd.entries()) MOCK_DOGS[idx].perfil[k] = v;
+            if (tempPhotoId) MOCK_DOGS[idx].perfil.foto_id = tempPhotoId;
             saveDB(MOCK_DOGS);
             isEditing = false;
             loadProfile(MOCK_DOGS[idx]);
         };
 
-        function loadMultiDog(){
+        // === CREATE WALK ===
+        function loadMultiDog() {
             const c = document.getElementById('multi-dog-container');
             c.innerHTML = '';
             MOCK_DOGS.filter(d => d.id !== currentDog.id).forEach(d => {
@@ -1167,9 +1139,9 @@
             simulatedPhotos = [];
             const c = document.getElementById('photo-preview');
             c.innerHTML = '';
-            for(let i = 0; i < 3; i++){
+            for (let i = 0; i < 3; i++) {
                 const id = DATABASE.photo_references.random[i];
-                simulatedPhotos.push({id, comentario: `Foto ${i+1} del paseo`});
+                simulatedPhotos.push({ id, comentario: `Foto ${i + 1} del paseo` });
                 c.innerHTML += `<img src="${getPhotoUrl(id,100,100)}">`;
             }
         };
@@ -1188,18 +1160,19 @@
             MOCK_DOGS[idx].walks.unshift(JSON.parse(JSON.stringify(w)));
             document.querySelectorAll('#multi-dog-container input:checked').forEach(cb => {
                 const pIdx = MOCK_DOGS.findIndex(d => d.id == cb.value);
-                if(pIdx > -1) MOCK_DOGS[pIdx].walks.unshift(JSON.parse(JSON.stringify(w)));
+                if (pIdx > -1) MOCK_DOGS[pIdx].walks.unshift(JSON.parse(JSON.stringify(w)));
             });
             saveDB(MOCK_DOGS);
             alert('✅ Paseo guardado!');
             showView('dog-selection-dashboard');
         };
 
-        function loadHistory(d){
+        // === HISTORY & EDIT ===
+        function loadHistory(d) {
             const c = document.getElementById('walks-history');
             c.innerHTML = '';
-            if(!d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
-            d.walks.forEach((w,i) => {
+            if (!d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
+            d.walks.forEach((w, i) => {
                 const imgs = w.fotos.map(f => `<div class="photo-card" onclick="openLightbox('${f.id}')"><img src="${getPhotoUrl(f.id,200,200)}"></div>`).join('');
                 const adminBtns = (currentUser && currentUser.isAdmin) ?
                     `<div class="admin-walk-controls">
@@ -1226,8 +1199,7 @@
                 c.appendChild(session);
             });
         }
-
-        function openEditWalk(i){
+        function openEditWalk(i) {
             editWalkIdx = i;
             editWalkPhotos = [...currentDog.walks[i].fotos];
             const w = currentDog.walks[i];
@@ -1240,21 +1212,21 @@
             renderEditPhotos();
             document.getElementById('edit-walk-modal').style.display = 'flex';
         }
-        function renderEditPhotos(){
+        function renderEditPhotos() {
             const c = document.getElementById('edit-photo-preview');
             c.innerHTML = '';
-            editWalkPhotos.forEach((p,i) =>
+            editWalkPhotos.forEach((p, i) =>
                 c.innerHTML += `<div style="position:relative">
                     <img src="${getPhotoUrl(p.id,100,100)}">
                     <button type="button" class="delete-photo-btn" onclick="delEditPhoto(${i})">x</button>
                 </div>`
             );
         }
-        function delEditPhoto(i){
-            editWalkPhotos.splice(i,1);
+        function delEditPhoto(i) {
+            editWalkPhotos.splice(i, 1);
             renderEditPhotos();
         }
-        function addPhotoEdit(){
+        function addPhotoEdit() {
             editWalkPhotos.push({
                 id: DATABASE.photo_references.random[0],
                 comentario: 'Nueva foto'
@@ -1277,27 +1249,32 @@
             document.getElementById('edit-walk-modal').style.display = 'none';
             loadHistory(MOCK_DOGS[idx]);
         };
-        function delWalk(i){
-            if(confirm('¿Borrar este paseo?')){
+        function delWalk(i) {
+            if (confirm('¿Borrar este paseo?')) {
                 const idx = MOCK_DOGS.findIndex(d => d.id === currentDog.id);
-                MOCK_DOGS[idx].walks.splice(i,1);
+                MOCK_DOGS[idx].walks.splice(i, 1);
                 saveDB(MOCK_DOGS);
                 loadHistory(MOCK_DOGS[idx]);
             }
         }
 
-        function openLightbox(id){
-            document.getElementById('lightbox-img').src = getPhotoUrl(id,800,800);
+        // === LIGHTBOX ===
+        function openLightbox(id) {
+            document.getElementById('lightbox-img').src = getPhotoUrl(id, 800, 800);
             document.getElementById('lightbox').style.display = 'flex';
         }
         document.getElementById('close-lightbox').onclick = () =>
             document.getElementById('lightbox').style.display = 'none';
 
-        function initCarousel(){
+        // === CAROUSEL ===
+        function initCarousel() {
             const w = document.getElementById('carousel-wrapper');
             const slides = [];
-            if(currentDog.walks) currentDog.walks.forEach(wa => wa.fotos && wa.fotos.forEach(f => slides.push(f.id)));
-            if(!slides.length){ w.style.display = 'none'; return; }
+            if (currentDog.walks) currentDog.walks.forEach(wa => wa.fotos && wa.fotos.forEach(f => slides.push(f.id)));
+            if (!slides.length) {
+                w.style.display = 'none';
+                return;
+            }
             w.style.display = 'flex';
             let idx = 0;
             const img = document.getElementById('carousel-img');
@@ -1305,17 +1282,17 @@
             const show = () => {
                 img.style.opacity = 0;
                 setTimeout(() => {
-                    img.src = getPhotoUrl(slides[idx],800,500);
+                    img.src = getPhotoUrl(slides[idx], 800, 500);
                     img.onload = () => { img.style.opacity = 1; };
-                    cnt.textContent = `${idx+1}/${slides.length}`;
+                    cnt.textContent = `${idx + 1}/${slides.length}`;
                 }, 200);
             };
             show();
-            window.nextSlide = () => { idx = (idx+1) % slides.length; show(); };
-            window.prevSlide = () => { idx = (idx-1+slides.length) % slides.length; show(); };
+            window.nextSlide = () => { idx = (idx + 1) % slides.length; show(); };
+            window.prevSlide = () => { idx = (idx - 1 + slides.length) % slides.length; show(); };
             window.togglePlay = () => {
                 const b = document.getElementById('play-pause-btn');
-                if(isPlaying){
+                if (isPlaying) {
                     clearInterval(slideInterval);
                     b.textContent = '▶️';
                     isPlaying = false;
@@ -1332,8 +1309,9 @@
             };
         }
 
+        // === RESET DB ===
         document.getElementById('toggle-demo-btn').onclick = async () => {
-            if(confirm('¿Resetear base de datos con datos originales?')) {
+            if (confirm('¿Resetear base de datos con datos originales?')) {
                 document.getElementById('loading-overlay').style.display = 'flex';
                 await loadExternalDB();
                 localStorage.removeItem(DB_KEY);
@@ -1345,12 +1323,13 @@
             }
         };
 
+        // === INIT ===
         window.onload = async () => {
             document.getElementById('loading-overlay').style.display = 'flex';
             const loaded = await loadExternalDB();
-            if(loaded) {
+            if (loaded) {
                 const localData = localStorage.getItem(DB_KEY);
-                if(localData) {
+                if (localData) {
                     MOCK_DOGS = JSON.parse(localData);
                 } else {
                     MOCK_DOGS = DATABASE.dogs;
@@ -1361,6 +1340,7 @@
             showView('login-section');
             updateThemeIcon();
 
+            // Generar partículas doradas
             const particlesContainer = document.getElementById('particles-container');
             if (document.documentElement.getAttribute('data-theme') === 'dark') {
                 for (let i = 0; i < 25; i++) {
