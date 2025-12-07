@@ -886,143 +886,192 @@
             to { opacity: 0; transform: translateX(120%); }
         }
         /* === CARRUSEL MODERNO (ESTILO YOUTUBE) === */
-        #carousel-wrapper {
-            position: relative;
-            width: 100%;
-            height: 350px;
-            background: #000;
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-        }
-        #carousel-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            transition: opacity 0.5s ease;
-        }
-        .carousel-play-large {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: none;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.9;
-            transition: opacity 0.3s;
-            z-index: 100;
-            padding: 0;
-            margin: 0;
-            cursor: pointer;
-            user-select: none;
-            pointer-events: auto;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .carousel-play-large:hover {
-            opacity: 1;
-            background: rgba(0, 0, 0, 0.8);
-            transform: translate(-50%, -50%);
-        }
-        .carousel-nav {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            pointer-events: none;
-        }
-        .carousel-nav-btn {
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.3s, transform 0.3s;
-            pointer-events: auto;
-            cursor: pointer;
-            z-index: 100;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .carousel-nav-btn:hover {
-            background: rgba(212, 175, 55, 0.8);
-            transform: translateY(0);
-        }
-        .carousel-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 8px 16px;
-            border-radius: 20px;
-            opacity: 0;
-            transform: translateX(-50%) translateY(20px);
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        .carousel-controls.visible {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-        #carousel-counter {
-            color: white;
-            font-size: 0.9rem;
-            font-weight: bold;
-            min-width: 40px;
-            text-align: center;
-        }
-        .carousel-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .carousel-action-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
-            z-index: 100;
-            pointer-events: auto;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .carousel-action-btn:hover {
-            background: var(--primary);
-        }
+#carousel-wrapper {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    background: #000;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+}
+
+#carousel-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: opacity 0.3s ease;
+}
+
+/* Botón PLAY grande en el centro */
+.carousel-play-large {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.3s, background 0.3s;
+    padding-left: 6px; /* Para centrar el triángulo de play */
+}
+
+#carousel-wrapper:hover .carousel-play-large {
+    opacity: 1;
+}
+
+.carousel-play-large:hover {
+    background: rgba(212, 175, 55, 0.9);
+}
+
+.carousel-play-large.playing {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+/* Botones de navegación (izquierda/derecha) */
+.carousel-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    pointer-events: none;
+    z-index: 150;
+}
+
+.carousel-nav-btn {
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity 0.3s, background 0.3s;
+}
+
+#carousel-wrapper:hover .carousel-nav-btn {
+    opacity: 1;
+}
+
+.carousel-nav-btn:hover {
+    background: rgba(212, 175, 55, 0.8);
+}
+
+.carousel-nav-btn.playing {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+/* Controles inferiores (contador + botones) */
+.carousel-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 16px;
+    border-radius: 20px;
+    z-index: 150;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+#carousel-wrapper:hover .carousel-controls {
+    opacity: 1;
+}
+
+.carousel-controls.playing {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+#carousel-counter {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: bold;
+    min-width: 50px;
+    text-align: center;
+}
+
+.carousel-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.carousel-action-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    pointer-events: auto;
+}
+
+.carousel-action-btn:hover {
+    background: var(--primary);
+}
+
+/* MÓVIL */
+@media (max-width: 768px) {
+    #carousel-wrapper { height: 280px; }
+    .carousel-play-large {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
+    }
+    .carousel-nav-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.5rem;
+    }
+    .carousel-controls {
+        padding: 6px 12px;
+        gap: 12px;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -1358,22 +1407,28 @@
         function initCarousel() {
     const wrapper = document.getElementById('carousel-wrapper');
     const container = document.getElementById('carousel-container');
+    const playLargeBtn = document.getElementById('carousel-play-large');
     const slides = [];
+    
     if (currentDog && currentDog.walks) {
         currentDog.walks.forEach(wa => {
             if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
         });
     }
+    
     if (!slides.length) {
         wrapper.style.display = 'none';
         return;
     }
+    
     wrapper.style.display = 'flex';
     let idx = 0;
     isPlaying = false;
 
     const img = document.getElementById('carousel-img');
     const counter = document.getElementById('carousel-counter');
+    const controls = document.querySelector('.carousel-controls');
+    const navBtns = document.querySelectorAll('.carousel-nav-btn');
 
     const showSlide = () => {
         img.style.opacity = 0;
@@ -1384,17 +1439,31 @@
         }, 200);
     };
 
-    // ===== AGREGA ESTAS FUNCIONES AQUÍ =====
+    const updatePlayState = () => {
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        playPauseBtn.textContent = isPlaying ? '⏸' : '▶';
+        playLargeBtn.textContent = isPlaying ? '⏸' : '▶';
+        
+        // Ocultar controles cuando está reproduciendo
+        if (isPlaying) {
+            playLargeBtn.classList.add('playing');
+            controls.classList.add('playing');
+            navBtns.forEach(btn => btn.classList.add('playing'));
+        } else {
+            playLargeBtn.classList.remove('playing');
+            controls.classList.remove('playing');
+            navBtns.forEach(btn => btn.classList.remove('playing'));
+        }
+    };
+
     window.nextSlide = () => {
         idx = (idx + 1) % slides.length;
         showSlide();
-        showControls();
     };
 
     window.prevSlide = () => {
         idx = (idx - 1 + slides.length) % slides.length;
         showSlide();
-        showControls();
     };
 
     window.togglePlay = () => {
@@ -1408,23 +1477,8 @@
             }
             isPlaying = false;
         }
-        updatePlayButton();
-        showControls();
+        updatePlayState();
     };
-    // ===== FIN DE LAS FUNCIONES =====
-
-    // Comportamiento unificado: mostrar controles al pasar mouse o tocar
-    container.addEventListener('mouseenter', showControls);
-    container.addEventListener('mousemove', showControls);
-    container.addEventListener('touchstart', (e) => {
-        showControls();
-    }, { passive: true });
-    
-    container.addEventListener('click', (e) => {
-        if (!e.target.closest('button')) {
-            showControls();
-        }
-    });
 
     window.toggleFullscreen = () => {
         if (!document.fullscreenElement) {
@@ -1435,9 +1489,10 @@
     };
 
     showSlide();
-    showControls();
+    updatePlayState();
     
     // Avance automático cada 3 segundos
+    if (slideInterval) clearInterval(slideInterval);
     slideInterval = setInterval(() => {
         if (!isPlaying) {
             window.nextSlide();
