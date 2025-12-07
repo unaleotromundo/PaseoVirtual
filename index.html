@@ -1490,37 +1490,62 @@
         };
 
         // === HISTORY & EDIT ===
-        function loadHistory(d){
-            const c = document.getElementById('walks-history');
-            c.innerHTML = '';
-            if(!d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
-            d.walks.forEach((w,i) => {
-                const imgs = w.fotos.map(f => `<div class="photo-card" onclick="openLightbox('${f.id}')"><img src="${getPhotoUrl(f.id,200,200)}"></div>`).join('');
-                const adminBtns = (currentUser && currentUser.isAdmin) ?
-                    `<div class="admin-walk-controls">
-                        <button class="admin-walk-btn ripple" onclick="openEditWalk(${i})">✏️ Editar</button>
-                        <button class="admin-walk-btn ripple" style="border-color:var(--danger-light); color:#fca5a5;" onclick="delWalk(${i})">🗑️ Borrar</button>
-                    </div>` : '';
-                const session = document.createElement('div');
-                session.className = 'walk-session';
-                session.style.setProperty('--i', i);
-                session.innerHTML = `
-                    <h3><span>📅 ${w.fecha}</span> ${adminBtns}</h3>
-                    <div class="walk-details">
-                        <div class="walk-metrics">
-                            <span>⏱️ ${w.duracion_minutos} min</span>
-                            <span>📏 ${w.distancia_km} km</span>
-                            <span>📸 ${w.fotos.length} fotos</span>
-                        </div>
-                        <p><strong>Resumen:</strong> ${w.resumen_diario}</p>
-                        ${w.comportamiento_problemas ? '<div class="incident-alert">⚠️ Hubo problemas de comportamiento</div>' : '<div class="success-notice">✅ Paseo tranquilo</div>'}
-                        ${w.incidentes_salud ? `<div class="incident-alert">🩺 <strong>Salud:</strong> ${w.incidentes_salud}</div>` : ''}
-                        <div class="gallery">${imgs}</div>
-                    </div>
-                `;
-                c.appendChild(session);
-            });
-        }
+        function loadHistory(d) {
+    const c = document.getElementById('walks-history');
+    c.innerHTML = '';
+    if (!d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
+    
+    d.walks.forEach((w, i) => {
+        const imgs = w.fotos.map(f => 
+            `<div class="photo-card" onclick="openLightbox('${f.id}')">
+                <img src="${getPhotoUrl(f.id,200,200)}">
+            </div>`
+        ).join('');
+
+        const session = document.createElement('div');
+        session.className = 'walk-session';
+        session.style.setProperty('--i', i);
+        session.innerHTML = `
+            <h3><span>📅 ${w.fecha}</span>
+                <div class="admin-walk-controls" data-index="${i}">
+                    ${currentUser && currentUser.isAdmin ? 
+                        `<button class="admin-walk-btn edit-btn" data-action="edit">✏️ Editar</button>
+                         <button class="admin-walk-btn delete-btn" data-action="delete" style="border-color:var(--danger-light); color:#fca5a5;">🗑️ Borrar</button>` 
+                        : ''}
+                </div>
+            </h3>
+            <div class="walk-details">
+                <div class="walk-metrics">
+                    <span>⏱️ ${w.duracion_minutos} min</span>
+                    <span>📏 ${w.distancia_km} km</span>
+                    <span>📸 ${w.fotos.length} fotos</span>
+                </div>
+                <p><strong>Resumen:</strong> ${w.resumen_diario}</p>
+                ${w.comportamiento_problemas ? 
+                    '<div class="incident-alert">⚠️ Hubo problemas de comportamiento</div>' : 
+                    '<div class="success-notice">✅ Paseo tranquilo</div>'}
+                ${w.incidentes_salud ? 
+                    `<div class="incident-alert">🩺 <strong>Salud:</strong> ${w.incidentes_salud}</div>` : ''}
+                <div class="gallery">${imgs}</div>
+            </div>
+        `;
+        c.appendChild(session);
+    });
+
+    // === DELEGACIÓN DE EVENTOS ===
+    c.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
+            openEditWalk(parseInt(walkIndex));
+        };
+    });
+    c.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
+            delWalk(parseInt(walkIndex));
+        };
+    });
+}
 
         // === LIGHTBOX ===
         function openLightbox(id){
