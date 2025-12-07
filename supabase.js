@@ -69,6 +69,7 @@ export async function loadWalks(dogId) {
 
 /**
  * 🐕 Crear o actualizar perro (upsert)
+ * Incluye los nuevos campos de perfil (edad, peso, etc.)
  */
 export async function createDog(dogData) {
     console.log('💾 [CREATE DOG] Guardando perro en Supabase...');
@@ -84,7 +85,13 @@ export async function createDog(dogData) {
             dueno: dogData.perfil.dueno,
             telefono: dogData.perfil.telefono,
             dueno_email: dogData.dueno_email,
-            foto_url: dogData.perfil.foto_url || ''
+            foto_url: dogData.perfil.foto_url || '',
+            // 💡 NUEVOS CAMPOS AGREGADOS
+            edad: dogData.perfil.edad,
+            peso: dogData.perfil.peso,
+            alergias: dogData.perfil.alergias,
+            energia: dogData.perfil.energia,
+            social: dogData.perfil.social
         }], {
             onConflict: 'dueno_email'
         })
@@ -101,7 +108,38 @@ export async function createDog(dogData) {
 }
 
 /**
- * 📸 Crear paseo con fotos
+ * 💾 Actualizar perfil del perro (incluye los nuevos campos)
+ */
+export async function updateDogProfile(dogData) {
+    console.log('💾 [UPDATE PROFILE] Actualizando perfil de perro ID:', dogData.id);
+
+    const { error } = await supabase
+        .from('dogs')
+        .update({
+            nombre: dogData.nombre,
+            raza: dogData.raza,
+            sexo: dogData.sexo,
+            dueno: dogData.dueno,
+            telefono: dogData.telefono,
+            // 💡 NUEVOS CAMPOS AGREGADOS
+            edad: dogData.edad,
+            peso: dogData.peso,
+            alergias: dogData.alergias,
+            energia: dogData.energia,
+            social: dogData.social,
+            // foto_url no se actualiza aquí, sino en updateDogProfilePhoto
+        })
+        .eq('id', dogData.id);
+
+    if (error) {
+        console.error('❌ [UPDATE PROFILE] ERROR al actualizar perfil:', error.message);
+        throw new Error('Error al actualizar perfil: ' + error.message);
+    }
+    console.log('✅ [UPDATE PROFILE] Perfil actualizado con éxito.');
+}
+
+/**
+ * 📸 Crear paseo
  */
 export async function createWalk(walkData, dogId) {
     console.log('💾 [CREATE WALK] Guardando paseo para perro ID:', dogId);
@@ -133,9 +171,51 @@ export async function createWalk(walkData, dogId) {
 }
 
 /**
- * 📤 Subir foto de paseo al bucket 'photos'
+ * 💾 Actualizar paseo
  */
-export async function uploadPhoto(file, dogId) {
+export async function updateWalk(walkData) {
+    console.log('💾 [UPDATE WALK] Actualizando paseo ID:', walkData.id);
+    const { error } = await supabase
+        .from('walks')
+        .update({
+            duracion_minutos: walkData.duracion_minutos,
+            distancia_km: walkData.distancia_km,
+            resumen_diario: walkData.resumen_diario,
+            comportamiento_problemas: walkData.comportamiento_problemas,
+            incidentes_salud: walkData.incidentes_salud,
+            fotos_urls: walkData.fotos_urls
+        })
+        .eq('id', walkData.id);
+
+    if (error) {
+        console.error('❌ [UPDATE WALK] ERROR al actualizar paseo:', error.message);
+        throw new Error('Error al actualizar paseo: ' + error.message);
+    }
+    console.log('✅ [UPDATE WALK] Paseo actualizado con éxito.');
+}
+
+/**
+ * 🗑️ Eliminar paseo
+ */
+export async function deleteWalk(walkId) {
+    console.log('🗑️ [DELETE WALK] Eliminando paseo ID:', walkId);
+    const { error } = await supabase
+        .from('walks')
+        .delete()
+        .eq('id', walkId);
+
+    if (error) {
+        console.error('❌ [DELETE WALK] ERROR al eliminar paseo:', error.message);
+        throw new Error('Error al eliminar paseo: ' + error.message);
+    }
+    console.log('✅ [DELETE WALK] Paseo eliminado con éxito.');
+}
+
+/**
+ * 📤 Subir foto de paseo al bucket 'photos'
+ * 💡 FUNCIÓN RENOMBRADA DE 'uploadPhoto' A 'uploadWalkPhoto'
+ */
+export async function uploadWalkPhoto(file, dogId) {
     const timestamp = Date.now();
     const fileName = `${dogId}/${timestamp}-${file.name}`;
     console.log('📤 [UPLOAD PHOTO] Subiendo archivo a Storage...');
@@ -159,7 +239,6 @@ export async function uploadPhoto(file, dogId) {
 
     console.log('✅ [UPLOAD PHOTO] Archivo subido con éxito');
 
-    // ✅ CORREGIDO: destructuring válido
     const { data, error: urlError } = await supabase
         .storage
         .from('photos')
@@ -178,7 +257,7 @@ export async function uploadPhoto(file, dogId) {
 /**
  * 📤 Subir foto de perfil al bucket 'photos'
  */
-export async function uploadProfilePhoto(file, dogId) {
+export async function uploadProfilePhoto(dogId, file) {
     const fileName = `profile/${dogId}/avatar-${Date.now()}-${file.name}`;
     console.log('📤 [PERFIL] Subiendo foto de perfil:', fileName);
     
@@ -192,7 +271,6 @@ export async function uploadProfilePhoto(file, dogId) {
         throw new Error('Error al subir foto de perfil: ' + uploadError.message);
     }
 
-    // ✅ CORREGIDO: destructuring válido
     const { data, error: urlError } = await supabase
         .storage
         .from('photos')
