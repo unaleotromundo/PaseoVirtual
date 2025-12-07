@@ -1373,35 +1373,7 @@
             });
         }
 
-        function updatePlayButton() {
-            const btn = document.getElementById('play-pause-btn');
-            const largeBtn = document.getElementById('carousel-play-large');
-            if (btn) btn.textContent = isPlaying ? '⏸' : '▶';
-            if (largeBtn) largeBtn.textContent = isPlaying ? '⏸' : '▶';
-        }
-
-        function hideControls() {
-            if (!isPlaying) {
-                document.getElementById('carousel-play-large').style.display = 'none';
-                document.querySelector('.carousel-controls').classList.remove('visible');
-                document.querySelectorAll('.carousel-nav-btn').forEach(btn => {
-                    btn.style.opacity = '0';
-                    btn.style.transform = 'translateY(20px)';
-                });
-            }
-        }
-
-        function showControls() {
-            document.getElementById('carousel-play-large').style.display = 'flex';
-            document.querySelector('.carousel-controls').classList.add('visible');
-            document.querySelectorAll('.carousel-nav-btn').forEach(btn => {
-                btn.style.opacity = '1';
-                btn.style.transform = 'translateY(0)';
-            });
-            if (timeoutId) clearTimeout(timeoutId);
-            timeoutId = setTimeout(hideControls, 3000);
-        }
-
+        
         // === CAROUSEL MODERNO CON AUDIO ===
         let timeoutId = null;
         function initCarousel() {
