@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PaseoDog - Sistema Mejorado</title>
-    <!-- FAVICON: huella de perro dorada -->
-    <link rel="icon" type="image/x-icon"  ícono de Apple Touch o el manifest.json
+    <!-- FAVICON: círculo negro con huella blanca -->
+    <link rel="icon" type="image/x-icon" href="image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjI1NiIgZmlsbD0iIzAwMDAwMCIvPjxwYXRoIGZpbGw9IiNmZmZmZmYiIGQ9Ik0zMjAgMTYwaC02NGEyIDIgMCAwIDAtMiAydjMyYTU2IDU2IDAgMCAwIDU2IDU2aDhhNTYgNTYgMCAwIDAgNTYtNTZ2LTMyYT2IDIgMCAwIDAtMi0yaC02NHptLTI4OCAwaC02NGEyIDIgMCAwIDAtMiAydjMyYTU2IDU2IDAgMCAwIDU2IDU2aDdhNTYgNTYgMCAwIDAgNTctNTZ2LTMyYT2IDIgMCAwIDAtMi0yaC02NHptMzIgMTI4aC02NGEyIDIgMCAwIDAtMiAydjQ4YTU2IDU2IDAgMCAwIDU2IDU2aDhhNTYgNTYgMCAwIDAgNTYtNTZ2LTQ4YT2IDIgMCAwIDAtMi0yaC02NHptLTI4OCAwaC02NGEyIDIgMCAwIDAtMiAydjQ4YTU2IDU2IDAgMCAwIDU2IDU2aDdhNTYgNTYgMCAwIDAgNTctNTZ2LTQ4YT2IDIgMCAwIDAtMi0yaC02NHptMTQ0IDE5MmgtNjRhMiAyIDAgMCAwLTIgMnYzMmE1NiA1NiAwIDAgMCA1NiA1Nmg4YTU2IDU2IDAgMCAwIDU2LTU2di0zMmEyIDIgMCAwIDAtMi0yaC02NHoiLz48L3N2Zz4=">
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="PaseoDog">
     <link rel="apple-touch-icon" href="image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjI1NiIgZmlsbD0iIzAwMDAwMCIvPjxwYXRoIGZpbGw9IiNmZmZmZmYiIGQ9Ik0zMjAgMTYwaC02NGEyIDIgMCAwIDAtMiAydjMyYTU2IDU2IDAgMCAwIDU2IDU2aDhhNTYgNTYgMCAwIDAgNTYtNTZ2LTMyYT2IDIgMCAwIDAtMi0yaC02NHptLTI4OCAwaC02NGEyIDIgMCAwIDAtMiAydjMyYTU2IDU2IDAgMCAwIDU2IDU2aDdhNTYgNTYgMCAwIDAgNTctNTZ2LTMyYT2IDIgMCAwIDAtMi0yaC02NHptMzIgMTI4aC02NGEyIDIgMCAwIDAtMiAydjQ4YTU2IDU2IDAgMCAwIDU2IDU2aDhhNTYgNTYgMCAwIDAgNTYtNTZ2LTQ4YT2IDIgMCAwIDAtMi0yaC02NHptLTI4OCAwaC02NGEyIDIgMCAwIDAtMiAydjQ4YTU2IDU2IDAgMCAwIDU2IDU2aDdhNTYgNTYgMCAwIDAgNTctNTZ2LTQ4YT2IDIgMCAwIDAtMi0yaC02NHptMTQ0IDE5MmgtNjRhMiAyIDAgMCAwLTIgMnYzMmE1NiA1NiAwIDAgMCA1NiA1Nmg4YTU2IDU2IDAgMCAwIDU2LTU2di0zMmEyIDIgMCAwIDAtMi0yaC02NHoiLz48L3N2Zz4=">
     <style>
-        /* === VARIABLES CSS - TEMA OSCURO DORADO PREMIUM === */
+        /* VARIABLES CSS - TEMA OSCURO DORADO PREMIUM */
         :root {
             --primary: #10b981;
             --primary-dark: #059669;
@@ -55,8 +56,6 @@
             --shadow: 0 4px 12px -1px rgba(0, 0, 0, 0.6);
             --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.7);
         }
-
-        /* === ESTILOS GENERALES === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -690,7 +689,6 @@
         @keyframes fadeOut {
             to { opacity: 0; transform: translateX(120%); }
         }
-
         /* === CARRUSEL MODERNO (ESTILO YOUTUBE) === */
         #carousel-wrapper {
             position: relative;
@@ -738,7 +736,7 @@
         .carousel-play-large:hover {
             opacity: 1;
             background: rgba(0, 0, 0, 0.8);
-            transform: translate(-50%, -50%); /* Fijar posición en hover */
+            transform: translate(-50%, -50%);
         }
         .carousel-nav {
             position: absolute;
@@ -838,13 +836,11 @@
         </svg>
     </a>
     <button id="audio-toggle" class="audio-float" title="Silenciar sonido">🔊</button>
-
     <header>
         <button id="theme-toggle" title="Cambiar Tema">🐩</button>
         <h1>🐾 PaseoDog</h1>
         <p id="saludo-usuario">Gestión Profesional de Paseos</p>
     </header>
-
     <main id="app-container">
         <!-- LOGIN -->
         <section id="login-section">
@@ -875,7 +871,6 @@
                 </p>
             </form>
         </section>
-
         <!-- ADMIN DASHBOARD -->
         <section id="admin-dashboard-section" style="display:none;">
             <h2>👨‍💼 Panel de Administrador</h2>
@@ -883,7 +878,6 @@
             <p style="color: var(--text-secondary); margin-bottom: 24px;">Lista de perros registrados:</p>
             <div id="dog-list-container"></div>
         </section>
-
         <!-- CREATE DOG -->
         <section id="create-dog-section" style="display:none;">
             <h2>🐶 Registrar Nuevo Mimoso</h2>
@@ -900,7 +894,6 @@
             </form>
             <button class="nav-button ripple" onclick="goBack()" style="background:var(--text-secondary);">Cancelar</button>
         </section>
-
         <!-- DOG DASHBOARD -->
         <section id="dog-selection-dashboard" style="display:none;">
             <h2>🐕 Dashboard de <span class="dog-name-placeholder"></span></h2>
@@ -936,7 +929,6 @@
                 ⬅️ Volver
             </button>
         </section>
-
         <!-- CREATE WALK -->
         <section id="create-walk-section" style="display:none;">
             <h2>➕ Crear Nuevo Paseo</h2>
@@ -961,7 +953,6 @@
             </form>
             <button class="nav-button ripple" onclick="goBack()" style="background: var(--text-secondary);">Cancelar</button>
         </section>
-
         <!-- PROFILE -->
         <section id="profile-section" style="display:none;">
             <h2>📋 Perfil Completo</h2>
@@ -977,7 +968,6 @@
             </div>
             <button class="nav-button ripple" onclick="goBack()" style="background: var(--text-secondary); margin-top: 24px;">⬅️ Volver</button>
         </section>
-
         <!-- HISTORY -->
         <section id="walks-history-section" style="display:none;">
             <h2>📜 Historial de Paseos</h2>
@@ -985,13 +975,11 @@
             <button class="nav-button ripple" onclick="goBack()" style="background: var(--text-secondary); margin-top: 16px;">⬅️ Volver</button>
         </section>
     </main>
-
     <!-- LIGHTBOX -->
     <div id="lightbox">
         <span class="lightbox-close" id="close-lightbox">&times;</span>
         <img id="lightbox-img" src="">
     </div>
-
     <!-- MODAL EDIT WALK -->
     <div id="edit-walk-modal">
         <div class="modal-content">
@@ -1013,7 +1001,6 @@
             </form>
         </div>
     </div>
-
     <script>
         // === UTILIDADES ===
         function showToast(message, type = 'info') {
