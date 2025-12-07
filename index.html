@@ -12,9 +12,7 @@
     <meta name="apple-mobile-web-app-title" content="PaseoDog">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjRDRBRjM3IiBkPSJNNDQ4IDI1NmEyNDIuNjcgMjQyLjY3IDAgMCAxLTI0MCAyNDIuNjdBMjQzLjIgMjQzLjIgMCAwIDEgOS4zMyAyNDhhMjQyLjY3IDI0Mi42NyAwIDAgMSAyNDAtMjQyLjY3QTI0My4yIDI0My4yIDAgMCAxIDQ0OCAyNTZ6bS0zMiA4YTMyIDIwNi42NyAwIDEgMC0zMiAwaDI1NnoiLz48cGF0aCBmaWxsPSIjRjBGMEYwIiBkPSJNMzUyIDMyYTIyNCAyMjQgMCAwIDAtNDE2IDE5MmEzMiAzMiAwIDEgMCA2NCAwbDgtMTI4aDEybDE2IDMyaDI0bDE2LTMyaDEybDgtMTI4YTMyIDMyIDAgMSAwLTY0IDBaIi8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTM4NCAxNjBhMzIgMzIgMCAxIDAgNjQgMGwtMTI4LTI4YTMyIDMyIDAgMSAwIDAtNjRsMjg4IDEyYTMyIDMyIDAgMSAwIDAtNjRsLTE2IDMyaC0yNGwxNi0zMnptLTEyOCA4YTMyIDMyIDAgMSAwIDY0IDBsLTgtMTI4YTMyIDMyIDAgMSAwLTY0IDBaIi8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTI1NiAzMmExMjggMTI4IDAgMCAwLTEyOCAxMjhhMzIgMzIgMCAxIDAgNjQgMGwxMDQtODBhMzIgMzIgMCAxIDAgMC02NGwtMjg4IDEyYTMyIDMyIDAgMSAwIDY0IDZsMTYtMzJoMjRsMTYgMzJoMTJ6Ii8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTE5MiAyMjRhMzIgMzIgMCAxIDAgNjQgMGwxMjgtMTZhMzIgMzIgMCAxIDAgMC02NGwtMTI4LTE2YTMyIDMyIDAgMSAwLTY0IDB6Ii8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTMyMCAzMjBhMzIgMzIgMCAxIDAgNjQgMGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgxMmwyODggMTJhMzIgMzIgMCAxIDAgMC02NGwtMTYtMzJoLTI0bC0xNiAzMiIvPjwvc3ZnPg==">
     <style>
-        /* === TODOS TUS ESTILOS EXISTENTES === */
-        /* (El bloque de CSS es idéntico al de tu versión mejorada, incluyendo el carrusel moderno) */
-        /* VARIABLES CSS - TEMA OSCURO DORADO PREMIUM */
+        /* === VARIABLES CSS - TEMA OSCURO DORADO PREMIUM === */
         :root {
             --primary: #10b981;
             --primary-dark: #059669;
@@ -57,6 +55,8 @@
             --shadow: 0 4px 12px -1px rgba(0, 0, 0, 0.6);
             --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.7);
         }
+
+        /* === ESTILOS GENERALES === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -434,7 +434,8 @@
         .detail-value {
             color: var(--text-primary);
         }
-        .whatsapp-float, .audio-float {
+        .whatsapp-float,
+        .audio-float {
             position: fixed;
             bottom: 30px;
             border-radius: 50%;
@@ -497,7 +498,8 @@
             margin: 12px 0;
             border-left: 4px solid var(--secondary);
         }
-        #photo-preview img, #edit-photo-preview img {
+        #photo-preview img,
+        #edit-photo-preview img {
             width: 100px;
             height: 100px;
             object-fit: cover;
@@ -520,7 +522,8 @@
             border: none;
             font-size: 12px;
         }
-        #edit-walk-modal, #lightbox {
+        #edit-walk-modal,
+        #lightbox {
             display: none;
             position: fixed;
             top: 0;
@@ -687,6 +690,7 @@
         @keyframes fadeOut {
             to { opacity: 0; transform: translateX(120%); }
         }
+
         /* === CARRUSEL MODERNO (ESTILO YOUTUBE) === */
         #carousel-wrapper {
             position: relative;
@@ -709,33 +713,33 @@
             transition: opacity 0.5s ease;
         }
         .carousel-play-large {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    border: none;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    font-size: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.9;
-    transition: opacity 0.3s;
-    z-index: 10;
-    padding: 0;
-    margin: 0;
-    cursor: pointer;
-    user-select: none;
-}
-.carousel-play-large:hover {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.8);
-    transform: translate(-50%, -50%); /* Asegurar que no se mueva */
-}
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.9;
+            transition: opacity 0.3s;
+            z-index: 10;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+        .carousel-play-large:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.8);
+            transform: translate(-50%, -50%); /* Fijar posición en hover */
+        }
         .carousel-nav {
             position: absolute;
             top: 0;
@@ -1230,8 +1234,7 @@
             showControls();
         }
 
-        // === RESTO DE FUNCIONES (TEMAS, LOGIN, ADMIN, ETC.) ===
-        // --- (igual que en tu versión mejorada, sin cambios)
+        // === TEMA ===
         const themeToggle = document.getElementById('theme-toggle');
         function updateThemeIcon() {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -1490,62 +1493,55 @@
         };
 
         // === HISTORY & EDIT ===
-        function loadHistory(d) {
-    const c = document.getElementById('walks-history');
-    c.innerHTML = '';
-    if (!d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
-    
-    d.walks.forEach((w, i) => {
-        const imgs = w.fotos.map(f => 
-            `<div class="photo-card" onclick="openLightbox('${f.id}')">
-                <img src="${getPhotoUrl(f.id,200,200)}">
-            </div>`
-        ).join('');
+        function loadHistory(d){
+            const c = document.getElementById('walks-history');
+            c.innerHTML = '';
+            if(!d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
+            d.walks.forEach((w,i) => {
+                const imgs = w.fotos.map(f => 
+                    `<div class="photo-card" onclick="openLightbox('${f.id}')">
+                        <img src="${getPhotoUrl(f.id,200,200)}">
+                    </div>`
+                ).join('');
+                const adminBtns = (currentUser && currentUser.isAdmin) ?
+                    `<div class="admin-walk-controls" data-index="${i}">
+                        <button class="admin-walk-btn edit-btn">✏️ Editar</button>
+                        <button class="admin-walk-btn delete-btn" style="border-color:var(--danger-light); color:#fca5a5;">🗑️ Borrar</button>
+                    </div>` : '';
+                const session = document.createElement('div');
+                session.className = 'walk-session';
+                session.style.setProperty('--i', i);
+                session.innerHTML = `
+                    <h3><span>📅 ${w.fecha}</span> ${adminBtns}</h3>
+                    <div class="walk-details">
+                        <div class="walk-metrics">
+                            <span>⏱️ ${w.duracion_minutos} min</span>
+                            <span>📏 ${w.distancia_km} km</span>
+                            <span>📸 ${w.fotos.length} fotos</span>
+                        </div>
+                        <p><strong>Resumen:</strong> ${w.resumen_diario}</p>
+                        ${w.comportamiento_problemas ? '<div class="incident-alert">⚠️ Hubo problemas de comportamiento</div>' : '<div class="success-notice">✅ Paseo tranquilo</div>'}
+                        ${w.incidentes_salud ? `<div class="incident-alert">🩺 <strong>Salud:</strong> ${w.incidentes_salud}</div>` : ''}
+                        <div class="gallery">${imgs}</div>
+                    </div>
+                `;
+                c.appendChild(session);
+            });
 
-        const session = document.createElement('div');
-        session.className = 'walk-session';
-        session.style.setProperty('--i', i);
-        session.innerHTML = `
-            <h3><span>📅 ${w.fecha}</span>
-                <div class="admin-walk-controls" data-index="${i}">
-                    ${currentUser && currentUser.isAdmin ? 
-                        `<button class="admin-walk-btn edit-btn" data-action="edit">✏️ Editar</button>
-                         <button class="admin-walk-btn delete-btn" data-action="delete" style="border-color:var(--danger-light); color:#fca5a5;">🗑️ Borrar</button>` 
-                        : ''}
-                </div>
-            </h3>
-            <div class="walk-details">
-                <div class="walk-metrics">
-                    <span>⏱️ ${w.duracion_minutos} min</span>
-                    <span>📏 ${w.distancia_km} km</span>
-                    <span>📸 ${w.fotos.length} fotos</span>
-                </div>
-                <p><strong>Resumen:</strong> ${w.resumen_diario}</p>
-                ${w.comportamiento_problemas ? 
-                    '<div class="incident-alert">⚠️ Hubo problemas de comportamiento</div>' : 
-                    '<div class="success-notice">✅ Paseo tranquilo</div>'}
-                ${w.incidentes_salud ? 
-                    `<div class="incident-alert">🩺 <strong>Salud:</strong> ${w.incidentes_salud}</div>` : ''}
-                <div class="gallery">${imgs}</div>
-            </div>
-        `;
-        c.appendChild(session);
-    });
-
-    // === DELEGACIÓN DE EVENTOS ===
-    c.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
-            openEditWalk(parseInt(walkIndex));
-        };
-    });
-    c.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
-            delWalk(parseInt(walkIndex));
-        };
-    });
-}
+            // === VINCULAR EVENTOS DE EDICIÓN ===
+            c.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
+                    openEditWalk(parseInt(walkIndex));
+                };
+            });
+            c.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
+                    delWalk(parseInt(walkIndex));
+                };
+            });
+        }
 
         // === LIGHTBOX ===
         function openLightbox(id){
@@ -1554,6 +1550,66 @@
         }
         document.getElementById('close-lightbox').onclick = () =>
             document.getElementById('lightbox').style.display = 'none';
+
+        // === FUNCIONES DE EDICIÓN ===
+        function openEditWalk(i){
+            editWalkIdx=i; 
+            editWalkPhotos=[...currentDog.walks[i].fotos];
+            const w=currentDog.walks[i];
+            document.getElementById('edit-walk-date').value=w.fecha;
+            document.getElementById('edit-walk-duration').value=w.duracion_minutos;
+            document.getElementById('edit-walk-distance').value=w.distancia_km;
+            document.getElementById('edit-walk-summary').value=w.resumen_diario;
+            document.getElementById('edit-walk-behavior').checked=w.comportamiento_problemas;
+            document.getElementById('edit-walk-health').value=w.incidentes_salud;
+            renderEditPhotos();
+            document.getElementById('edit-walk-modal').style.display='flex';
+        }
+        function renderEditPhotos(){ 
+            const c=document.getElementById('edit-photo-preview'); 
+            c.innerHTML=''; 
+            editWalkPhotos.forEach((p,i)=>
+                c.innerHTML+=`<div style="position:relative">
+                    <img src="${getPhotoUrl(p.id,100,100)}">
+                    <button type="button" class="delete-photo-btn" onclick="delEditPhoto(${i})">x</button>
+                </div>`
+            ); 
+        }
+        function delEditPhoto(i){ 
+            editWalkPhotos.splice(i,1); 
+            renderEditPhotos(); 
+        }
+        function addPhotoEdit(){ 
+            editWalkPhotos.push({
+                id:DATABASE.photo_references.random[0], 
+                comentario: 'Nueva foto'
+            }); 
+            renderEditPhotos(); 
+        }
+        document.getElementById('edit-walk-form').onsubmit=(e)=>{
+            e.preventDefault();
+            const idx = MOCK_DOGS.findIndex(d=>d.id===currentDog.id);
+            MOCK_DOGS[idx].walks[editWalkIdx] = {
+                fecha: document.getElementById('edit-walk-date').value,
+                duracion_minutos: parseInt(document.getElementById('edit-walk-duration').value),
+                distancia_km: parseFloat(document.getElementById('edit-walk-distance').value),
+                resumen_diario: document.getElementById('edit-walk-summary').value,
+                comportamiento_problemas: document.getElementById('edit-walk-behavior').checked,
+                incidentes_salud: document.getElementById('edit-walk-health').value,
+                fotos: editWalkPhotos
+            };
+            saveDB(MOCK_DOGS); 
+            document.getElementById('edit-walk-modal').style.display='none'; 
+            loadHistory(MOCK_DOGS[idx]);
+        };
+        function delWalk(i){ 
+            if(confirm('¿Borrar este paseo?')){ 
+                const idx=MOCK_DOGS.findIndex(d=>d.id===currentDog.id); 
+                MOCK_DOGS[idx].walks.splice(i,1); 
+                saveDB(MOCK_DOGS); 
+                loadHistory(MOCK_DOGS[idx]); 
+            } 
+        }
 
         // === RESET DB ===
         document.getElementById('toggle-demo-btn').onclick = async () => {
@@ -1586,7 +1642,6 @@
             showView('login-section');
             updateThemeIcon();
 
-            // Partículas
             const particlesContainer = document.getElementById('particles-container');
             if (document.documentElement.getAttribute('data-theme') === 'dark') {
                 for (let i = 0; i < 25; i++) {
@@ -1606,12 +1661,11 @@
             });
             observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-            // Eventos ripple
             document.querySelectorAll('.ripple').forEach(btn => {
                 btn.addEventListener('click', createRipple);
             });
 
-            // Audio toggle
+            // === CONFIGURAR CONTROL DE AUDIO GLOBAL ===
             const audioToggle = document.getElementById('audio-toggle');
             const savedAudio = localStorage.getItem('paseoDogAudio');
             if (savedAudio === 'off') {
@@ -1623,6 +1677,14 @@
                 isAudioEnabled = !isAudioEnabled;
                 audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
                 localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
+                // Si se silencia, detener cualquier audio del carrusel
+                if (!isAudioEnabled && carouselAudio) {
+                    carouselAudio.pause();
+                    carouselAudio = null;
+                    isPlaying = false;
+                    updatePlayButton();
+                    hideControls();
+                }
             };
             document.addEventListener('click', () => {
                 if (!userHasInteracted) {
