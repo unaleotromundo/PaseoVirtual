@@ -40,7 +40,7 @@ export async function createDog(dogData) {
             dueno_email: dogData.dueno_email,
             foto_url: dogData.perfil.foto_url || ''
         }], {
-            onConflict: 'dueno_email' // Campo que causa el conflicto
+            onConflict: 'dueno_email'
         })
         .select()
         .single();
@@ -68,24 +68,30 @@ export async function createWalk(walkData, dogId) {
     return data;
 }
 
-// 🔺 NUEVA FUNCIÓN: Subir foto real a Storage
+// 🔺 Subir foto real a Storage
 export async function uploadPhoto(file, dogId) {
     const timestamp = Date.now();
     const fileName = `${dogId}/${timestamp}-${file.name}`;
-    const { data, error } = await supabase
+    
+    // Subir archivo
+    const { error: uploadError } = await supabase
         .storage
         .from('photos')
         .upload(fileName, file, {
             contentType: file.type,
             upsert: false
         });
-    if (error) throw new Error('Error al subir foto: ' + error.message);
+    
+    if (uploadError) throw new Error('Error al subir foto: ' + uploadError.message);
 
     // Obtener URL pública
-    const { data: { publicUrl } } = supabase
+    const { data: { publicUrl }, error: urlError } = await supabase
         .storage
         .from('photos')
         .getPublicUrl(fileName);
+    
+    if (urlError) throw new Error('Error al obtener URL pública: ' + urlError.message);
+    
     return publicUrl;
 }
 
