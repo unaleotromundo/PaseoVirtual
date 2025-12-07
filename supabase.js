@@ -29,6 +29,22 @@ export async function loadWalks(dogId) {
 }
 
 export async function createDog(dogData) {
+    // Primero verificar si ya existe un perro con ese email
+    const { data: existing, error: checkError } = await supabase
+        .from('dogs')
+        .select('id')
+        .eq('dueno_email', dogData.dueno_email)
+        .maybeSingle();
+    
+    if (checkError && checkError.code !== 'PGRST116') {
+        throw new Error('Error al verificar email: ' + checkError.message);
+    }
+    
+    if (existing) {
+        throw new Error('Ya existe un perro registrado con este email');
+    }
+    
+    // Si no existe, crear el perro
     const { data, error } = await supabase
         .from('dogs')
         .insert([{
@@ -38,10 +54,11 @@ export async function createDog(dogData) {
             dueno: dogData.perfil.dueno,
             telefono: dogData.perfil.telefono,
             dueno_email: dogData.dueno_email,
-            foto_url: dogData.foto_url || ''
+            foto_url: dogData.perfil.foto_url || ''
         }])
         .select()
         .single();
+    
     if (error) throw new Error('Error al crear perro: ' + error.message);
     return data;
 }
