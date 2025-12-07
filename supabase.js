@@ -1,34 +1,80 @@
 // supabase.js
 
+// 🔑 CONFIGURACIÓN
 const SUPABASE_URL = 'https://asejbhohkbcoixiwdhcq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZWpiaG9oa2Jjb2l4aXdkaGNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjk0NzMsImV4cCI6MjA4MDYwNTQ3M30.kbRKO5PEljZ29_kn6GYKoyGfB_t8xalxtMiq1ovPo4w';
 
+console.log('🌐 [SUPABASE] Inicializando cliente...');
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+console.log('✅ [SUPABASE] Cliente creado con éxito');
 
 // === FUNCIONES ===
 
+/**
+ * 🐶 Cargar perros desde Supabase
+ */
 export async function loadDogs(email = null, isAdmin = false) {
+    console.log('📥 [LOAD DOGS] Iniciando carga de perros...');
+    console.log('   👤 Usuario:', email || 'todos');
+    console.log('   👨‍💼 Es admin:', isAdmin);
+
     let query = supabase.from('dogs').select('*');
-    if (!isAdmin && email) query = query.eq('dueno_email', email);
+    if (!isAdmin && email) {
+        console.log('   🔍 Filtrando por email:', email);
+        query = query.eq('dueno_email', email);
+    }
+
     const { data, error } = await query;
-    if (error) throw new Error('Error al cargar perros: ' + error.message);
+
+    if (error) {
+        console.error('❌ [LOAD DOGS] ERROR al cargar perros:', error.message);
+        throw new Error('Error al cargar perros: ' + error.message);
+    }
+
+    console.log('✅ [LOAD DOGS] Perros cargados:', data.length);
+    console.table(data);
     return data;
 }
 
+/**
+ * 🚶 Cargar paseos de un perro
+ */
 export async function loadWalks(dogId) {
+    console.log('📥 [LOAD WALKS] Cargando paseos para perro ID:', dogId);
+
     const { data, error } = await supabase
         .from('walks')
         .select('*')
         .eq('dog_id', dogId)
         .order('created_at', { ascending: false });
-    if (error) throw new Error('Error al cargar paseos: ' + error.message);
+
+    if (error) {
+        console.error('❌ [LOAD WALKS] ERROR al cargar paseos:', error.message);
+        throw new Error('Error al cargar paseos: ' + error.message);
+    }
+
+    console.log('✅ [LOAD WALKS] Paseos cargados:', data.length);
+    if (data.length > 0) {
+        console.group('📸 URLs de fotos en paseos:');
+        data.forEach((w, i) => {
+            console.log(`   Paseo ${i+1} (${w.fecha}):`, w.fotos_urls || []);
+        });
+        console.groupEnd();
+    }
     return data.map(w => ({
         ...w,
         fotos: (w.fotos_urls || []).map(url => ({ id: url }))
     }));
 }
 
+/**
+ * 🐕 Crear o actualizar perro (upsert)
+ */
 export async function createDog(dogData) {
+    console.log('💾 [CREATE DOG] Guardando perro en Supabase...');
+    console.log('   Nombre:', dogData.nombre);
+    console.log('   Email:', dogData.dueno_email);
+
     const { data, error } = await supabase
         .from('dogs')
         .upsert([{
@@ -44,12 +90,24 @@ export async function createDog(dogData) {
         })
         .select()
         .single();
-    
-    if (error) throw new Error('Error al crear/actualizar perro: ' + error.message);
+
+    if (error) {
+        console.error('❌ [CREATE DOG] ERROR al guardar perro:', error.message);
+        throw new Error('Error al crear/actualizar perro: ' + error.message);
+    }
+
+    console.log('✅ [CREATE DOG] Perro guardado con ID:', data.id);
     return data;
 }
 
+/**
+ * 📸 Crear paseo con fotos
+ */
 export async function createWalk(walkData, dogId) {
+    console.log('💾 [CREATE WALK] Guardando paseo para perro ID:', dogId);
+    console.log('   Fecha:', walkData.fecha);
+    console.log('   Fotos a guardar:', walkData.fotos_urls?.length || 0);
+
     const { data, error } = await supabase
         .from('walks')
         .insert([{
@@ -64,16 +122,28 @@ export async function createWalk(walkData, dogId) {
         }])
         .select()
         .single();
-    if (error) throw new Error('Error al crear paseo: ' + error.message);
+
+    if (error) {
+        console.error('❌ [CREATE WALK] ERROR al guardar paseo:', error.message);
+        throw new Error('Error al crear paseo: ' + error.message);
+    }
+
+    console.log('✅ [CREATE WALK] Paseo guardado con ID:', data.id);
     return data;
 }
 
-// 🔺 Subir foto real a Storage
+/**
+ * 📤 Subir foto de paseo al bucket 'photos'
+ */
 export async function uploadPhoto(file, dogId) {
     const timestamp = Date.now();
     const fileName = `${dogId}/${timestamp}-${file.name}`;
-    
-    // Subir archivo
+    console.log('📤 [UPLOAD PHOTO] Subiendo archivo a Storage...');
+    console.log('   Nombre original:', file.name);
+    console.log('   Tipo:', file.type);
+    console.log('   Tamaño:', file.size, 'bytes');
+    console.log('   Ruta en bucket:', fileName);
+
     const { error: uploadError } = await supabase
         .storage
         .from('photos')
@@ -81,19 +151,30 @@ export async function uploadPhoto(file, dogId) {
             contentType: file.type,
             upsert: false
         });
-    
-    if (uploadError) throw new Error('Error al subir foto: ' + uploadError.message);
 
-    // Obtener URL pública
-    const { data: { publicUrl }, error: urlError } = await supabase
+    if (uploadError) {
+        console.error('❌ [UPLOAD PHOTO] ERROR al subir archivo:', uploadError.message);
+        throw new Error('Error al subir foto: ' + uploadError.message);
+    }
+
+    console.log('✅ [UPLOAD PHOTO] Archivo subido con éxito');
+
+    // ✅ CORREGIDO: destructuring válido
+    const { data, error: urlError } = await supabase
         .storage
         .from('photos')
         .getPublicUrl(fileName);
-    
-    if (urlError) throw new Error('Error al obtener URL pública: ' + urlError.message);
-    
+
+    if (urlError) {
+        console.error('❌ [UPLOAD PHOTO] ERROR al obtener URL pública:', urlError.message);
+        throw new Error('Error al obtener URL pública: ' + urlError.message);
+    }
+
+    const publicUrl = data.publicUrl;
+    console.log('🔗 [UPLOAD PHOTO] URL pública generada:', publicUrl);
     return publicUrl;
 }
+
 /**
  * 📤 Subir foto de perfil al bucket 'photos'
  */
@@ -111,7 +192,8 @@ export async function uploadProfilePhoto(file, dogId) {
         throw new Error('Error al subir foto de perfil: ' + uploadError.message);
     }
 
-    const {  { publicUrl }, error: urlError } = await supabase
+    // ✅ CORREGIDO: destructuring válido
+    const { data, error: urlError } = await supabase
         .storage
         .from('photos')
         .getPublicUrl(fileName);
@@ -121,6 +203,7 @@ export async function uploadProfilePhoto(file, dogId) {
         throw new Error('Error al obtener URL de perfil: ' + urlError.message);
     }
 
+    const publicUrl = data.publicUrl;
     console.log('✅ [PERFIL] Foto de perfil subida:', publicUrl);
     return publicUrl;
 }
