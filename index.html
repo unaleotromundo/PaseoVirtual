@@ -1427,11 +1427,11 @@
     wrapper.style.display = 'flex';
     let idx = 0;
     isPlaying = false;
-
     const img = document.getElementById('carousel-img');
     const counter = document.getElementById('carousel-counter');
     const controls = document.querySelector('.carousel-controls');
     const navBtns = document.querySelectorAll('.carousel-nav-btn');
+    let hideTimer = null;
 
     const showSlide = () => {
         img.style.opacity = 0;
@@ -1446,8 +1446,6 @@
         const playPauseBtn = document.getElementById('play-pause-btn');
         playPauseBtn.textContent = isPlaying ? '⏸' : '▶';
         playLargeBtn.textContent = isPlaying ? '⏸' : '▶';
-        
-        // Ocultar controles cuando está reproduciendo
         if (isPlaying) {
             playLargeBtn.classList.add('playing');
             controls.classList.add('playing');
@@ -1459,16 +1457,40 @@
         }
     };
 
+    const showControls = () => {
+        wrapper.classList.add('active');
+        resetHideTimer();
+    };
+
+    const hideControls = () => {
+        wrapper.classList.remove('active');
+    };
+
+    const resetHideTimer = () => {
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(hideControls, 3000);
+    };
+
+    // Eventos de interacción
+    wrapper.addEventListener('mouseenter', showControls);
+    wrapper.addEventListener('mouseleave', resetHideTimer);
+    wrapper.addEventListener('touchstart', showControls, { passive: true });
+    document.addEventListener('click', () => {
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+            showControls();
+        }
+    });
+
     window.nextSlide = () => {
         idx = (idx + 1) % slides.length;
         showSlide();
+        showControls();
     };
-
     window.prevSlide = () => {
         idx = (idx - 1 + slides.length) % slides.length;
         showSlide();
+        showControls();
     };
-
     window.togglePlay = () => {
         if (!isPlaying) {
             playRandomCarouselTrack();
@@ -1481,41 +1503,29 @@
             isPlaying = false;
         }
         updatePlayState();
+        showControls();
     };
-
     window.toggleFullscreen = () => {
-    const elem = document.getElementById('carousel-container');
-    
-    if (!document.fullscreenElement && !document.webkitFullscreenElement && 
-        !document.mozFullScreenElement && !document.msFullscreenElement) {
-        // Entrar a fullscreen
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen();
-        } else if (elem.mozRequestFullScreen) {
-            elem.mozRequestFullScreen();
-        } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen();
+        const elem = document.getElementById('carousel-container');
+        if (!document.fullscreenElement && !document.webkitFullscreenElement &&
+            !document.mozFullScreenElement && !document.msFullscreenElement) {
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+            else if (document.msExitFullscreen) document.msExitFullscreen();
         }
-    } else {
-        // Salir de fullscreen
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        }
-    }
-};
+        showControls();
+    };
 
     showSlide();
     updatePlayState();
-    
-    // Avance automático cada 3 segundos
+    hideControls(); // ocultar al inicio
+
     if (slideInterval) clearInterval(slideInterval);
     slideInterval = setInterval(() => {
         if (!isPlaying) {
