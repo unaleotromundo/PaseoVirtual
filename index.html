@@ -1467,33 +1467,35 @@
 
         // === CREATE DOG ===
         document.getElementById('create-dog-form')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = e.submitter;
-            const orig = btn.innerHTML;
-            btn.innerHTML = '🔄 Guardando...';
-            btn.disabled = true;
-            try {
-                const dogData = {
-                    nombre: document.getElementById('new-dog-name').value,
-                    dueno_email: document.getElementById('new-dog-email').value,
-                    perfil: {
-                        raza: document.getElementById('new-dog-breed').value,
-                        sexo: document.getElementById('new-dog-sex').value,
-                        dueno: document.getElementById('new-dog-owner').value,
-                        telefono: document.getElementById('new-dog-phone').value,
-                        foto_url: ''
-                    }
-                };
-                await createDog(dogData);
-                showToast('✅ Perro registrado', 'success');
-                window.showView('admin-dashboard-section');
-            } catch (err) {
-                showToast('Error al guardar', 'error');
-            } finally {
-                btn.innerHTML = orig;
-                btn.disabled = false;
+    e.preventDefault();
+    const btn = e.submitter;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '🔄 Guardando...';
+    btn.disabled = true;
+    try {
+        const dogData = {
+            nombre: document.getElementById('new-dog-name').value,
+            dueno_email: document.getElementById('new-dog-email').value,
+            perfil: {
+                raza: document.getElementById('new-dog-breed').value,
+                sexo: document.getElementById('new-dog-sex').value,
+                dueno: document.getElementById('new-dog-owner').value,
+                telefono: document.getElementById('new-dog-phone').value,
+                foto_url: ''
             }
-        });
+        };
+        await createDog(dogData);
+        showToast('✅ Perro registrado', 'success');
+        e.target.reset(); // Limpiar formulario
+        window.showView('admin-dashboard-section');
+    } catch (err) {
+        console.error('Error completo:', err);
+        showToast(err.message || 'Error al guardar', 'error');
+    } finally {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+    }
+});
 
         // === CREATE WALK ===
         function initCreateWalk() {
