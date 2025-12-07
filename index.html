@@ -1613,21 +1613,55 @@
         };
 
         // === INIT ===
-        window.onload = async () => {
-            document.getElementById('loading-overlay').style.display = 'flex';
-            const loaded = await loadExternalDB();
-            if(loaded) {
-                const localData = localStorage.getItem(DB_KEY);
-                if(localData) {
-                    MOCK_DOGS = JSON.parse(localData);
-                } else {
-                    MOCK_DOGS = DATABASE.dogs;
-                    saveDB(MOCK_DOGS);
+window.onload=async()=>{ 
+    document.getElementById('loading-overlay').style.display='flex';
+    
+    // Intentar cargar desde localStorage primero
+    const localData = localStorage.getItem(DB_KEY);
+    
+    if(localData) {
+        // Si hay datos locales, usarlos
+        MOCK_DOGS = JSON.parse(localData);
+        document.getElementById('loading-overlay').style.display='none';
+        showView('login-section'); 
+        updateThemeIcon();
+    } else {
+        // Si no hay datos locales, intentar cargar desde archivo externo
+        const loaded = await loadExternalDB();
+        
+        if(loaded) {
+            MOCK_DOGS = DATABASE.dogs;
+            saveDB(MOCK_DOGS);
+        } else {
+            // Si falla la carga externa, usar datos de ejemplo mínimos
+            MOCK_DOGS = [
+                {
+                    id: 1,
+                    nombre: "Fido",
+                    dueno_email: "cliente@paseos.com",
+                    perfil: {
+                        raza: "Labrador",
+                        sexo: "Macho",
+                        dueno: "Juan Pérez",
+                        telefono: "+54911223344",
+                        foto_id: "1587300003294-7e3b7a3b7b7b",
+                        edad: "3 años",
+                        peso: "25 kg",
+                        alergias: "Ninguna",
+                        energia: "Alta",
+                        social: "Muy amigable"
+                    },
+                    walks: []
                 }
-            }
-            document.getElementById('loading-overlay').style.display = 'none';
-            showView('login-section');
-            updateThemeIcon();
+            ];
+            saveDB(MOCK_DOGS);
+        }
+        
+        document.getElementById('loading-overlay').style.display='none';
+        showView('login-section'); 
+        updateThemeIcon();
+    }
+};
 
             const particlesContainer = document.getElementById('particles-container');
             if (document.documentElement.getAttribute('data-theme') === 'dark') {
