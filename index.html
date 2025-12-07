@@ -1230,6 +1230,13 @@
 
             showSlide();
             showControls();
+            
+            // Avance automático cada 3 segundos
+            slideInterval = setInterval(() => {
+                if (!isPlaying) {
+                    window.nextSlide();
+                }
+            }, 3000);
         }
 
         // === TEMA ===
@@ -1262,8 +1269,21 @@
             MOCK_DOGS = loadDB();
             if(id !== currentView) backStack.push(currentView);
             currentView = id;
+            
+            // Detener carrusel si salimos del dashboard
+            if (currentView !== 'dog-selection-dashboard' && slideInterval) {
+                clearInterval(slideInterval);
+                slideInterval = null;
+                if (carouselAudio) {
+                    carouselAudio.pause();
+                    carouselAudio = null;
+                }
+                isPlaying = false;
+            }
+            
             document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
             document.getElementById(id).style.display = 'block';
+
             if(dogId) currentDog = MOCK_DOGS.find(d => d.id === dogId);
             if(currentDog) {
                 currentDog = MOCK_DOGS.find(d => d.id === currentDog.id);
