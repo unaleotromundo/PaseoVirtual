@@ -1212,10 +1212,19 @@
                 if (isPlaying) {
                     showControls();
                     playRandomCarouselTrack();
+                    // Iniciar avance automático de imágenes cada 5 segundos
+                    slideInterval = setInterval(() => {
+                        window.nextSlide();
+                    }, 5000);
                 } else {
                     if (carouselAudio) {
                         carouselAudio.pause();
                         carouselAudio = null;
+                    }
+                    // Detener avance automático
+                    if (slideInterval) {
+                        clearInterval(slideInterval);
+                        slideInterval = null;
                     }
                     hideControls();
                 }
