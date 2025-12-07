@@ -1071,6 +1071,85 @@
         gap: 12px;
     }
 }
+/* FULLSCREEN */
+#carousel-container:fullscreen {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#carousel-container:fullscreen #carousel-img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+}
+
+#carousel-container:-webkit-full-screen {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#carousel-container:-webkit-full-screen #carousel-img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+}
+
+#carousel-container:-moz-full-screen {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#carousel-container:-moz-full-screen #carousel-img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+}
+
+#carousel-container:-ms-fullscreen {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#carousel-container:-ms-fullscreen #carousel-img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+}
+
+/* Controles en fullscreen */
+#carousel-container:fullscreen .carousel-controls,
+#carousel-container:-webkit-full-screen .carousel-controls,
+#carousel-container:-moz-full-screen .carousel-controls {
+    position: fixed;
+    bottom: 30px;
+}
+
+#carousel-container:fullscreen .carousel-nav,
+#carousel-container:-webkit-full-screen .carousel-nav,
+#carousel-container:-moz-full-screen .carousel-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+#carousel-container:fullscreen .carousel-play-large,
+#carousel-container:-webkit-full-screen .carousel-play-large,
+#carousel-container:-moz-full-screen .carousel-play-large {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
 
     </style>
 </head>
