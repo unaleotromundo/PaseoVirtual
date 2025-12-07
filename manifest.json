@@ -1,0 +1,19 @@
+{
+  "name": "PaseoDog",
+  "short_name": "PaseoDog",
+  "description": "Gestión profesional de paseos para perros",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0F0F1B",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjRDRBRjM3IiBkPSJNNDQ4IDI1NmEyNDIuNjcgMjQyLjY3IDAgMCAxLTI0MCAyNDIuNjdBMjQzLjIgMjQzLjIgMCAwIDEgOS4zMyAyNDhhMjQyLjY3IDI0Mi42NyAwIDAgMSAyNDAtMjQyLjY3QTI0My4yIDI0My4yIDAgMCAxIDQ0OCAyNTZ6bS0zMiA4YTMyIDIwNi42NyAwIDEgMC0zMiAwaDI1NnoiLz48cGF0aCBmaWxsPSIjRjBGMEYwIiBkPSJNMzUyIDMyYTIyNCAyMjQgMCAwIDAtNDE2IDE5MmEzMiAzMiAwIDEgMCA2NCAwbDgtMTI4aDEybDE2IDMyaDI0bDE2LTMyaDEybDgtMTI4YTMyIDMyIDAgMSAwLTY0IDBaIi8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTM4NCAxNjBhMzIgMzIgMCAxIDAgNjQgMGwtMTI4LTI4YTMyIDMyIDAgMSAwIDAtNjRsMjg4IDEyYTMyIDMyIDAgMSAwIDAtNjRsLTE2IDMyaC0yNGwxNi0zMnptLTEyOCA4YTMyIDMyIDAgMSAwIDY0IDBsLTgtMTI4YTMyIDMyIDAgMSAwLTY0IDBaIi8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTI1NiAzMmExMjggMTI4IDAgMCAwLTEyOCAxMjhhMzIgMzIgMCAxIDAgNjQgMGwxMDQtODBhMzIgMzIgMCAxIDAgMC02NGwtMjg4IDEyYTMyIDMyIDAgMSAwIDY0IDZsMTYtMzJoMjRsMTYgMzJoMTJ6Ii8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTE5MiAyMjRhMzIgMzIgMCAxIDAgNjQgMGwxMjgtMTZhMzIgMzIgMCAxIDAgMC02NGwtMTI4LTE2YTMyIDMyIDAgMSAwLTY0IDB6Ii8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTMyMCAzMjBhMzIgMzIgMCAxIDAgNjQgMGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgxMmwyODggMTJhMzIgMzIgMCAxIDAgMC02NGwtMTYtMzJoLTI0bC0xNiAzMiIvPjwvc3ZnPg==",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "orientation": "portrait-primary",
+  "lang": "es"
+}
