@@ -94,5 +94,52 @@ export async function uploadPhoto(file, dogId) {
     
     return publicUrl;
 }
+/**
+ * 📤 Subir foto de perfil al bucket 'photos'
+ */
+export async function uploadProfilePhoto(file, dogId) {
+    const fileName = `profile/${dogId}/avatar-${Date.now()}-${file.name}`;
+    console.log('📤 [PERFIL] Subiendo foto de perfil:', fileName);
+    
+    const { error: uploadError } = await supabase
+        .storage
+        .from('photos')
+        .upload(fileName, file, { contentType: file.type, upsert: true });
+
+    if (uploadError) {
+        console.error('❌ [PERFIL] Error al subir:', uploadError.message);
+        throw new Error('Error al subir foto de perfil: ' + uploadError.message);
+    }
+
+    const {  { publicUrl }, error: urlError } = await supabase
+        .storage
+        .from('photos')
+        .getPublicUrl(fileName);
+
+    if (urlError) {
+        console.error('❌ [PERFIL] Error URL pública:', urlError.message);
+        throw new Error('Error al obtener URL de perfil: ' + urlError.message);
+    }
+
+    console.log('✅ [PERFIL] Foto de perfil subida:', publicUrl);
+    return publicUrl;
+}
+
+/**
+ * 💾 Actualizar foto de perfil en la tabla 'dogs'
+ */
+export async function updateDogProfilePhoto(dogId, fotoUrl) {
+    console.log('💾 [PERFIL] Actualizando foto de perro ID:', dogId);
+    const { error } = await supabase
+        .from('dogs')
+        .update({ foto_url: fotoUrl })
+        .eq('id', dogId);
+
+    if (error) {
+        console.error('❌ [PERFIL] Error al actualizar:', error.message);
+        throw new Error('Error al guardar foto de perfil: ' + error.message);
+    }
+    console.log('✅ [PERFIL] Foto de perfil guardada en DB');
+}
 
 export { supabase };
