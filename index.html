@@ -728,11 +728,14 @@
             justify-content: center;
             opacity: 0.9;
             transition: opacity 0.3s;
-            z-index: 10;
+            z-index: 100;
             padding: 0;
             margin: 0;
             cursor: pointer;
             user-select: none;
+            pointer-events: auto;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         .carousel-play-large:hover {
             opacity: 1;
@@ -817,6 +820,10 @@
             justify-content: center;
             cursor: pointer;
             transition: background 0.2s;
+            z-index: 100;
+            pointer-events: auto;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         .carousel-action-btn:hover {
             background: var(--primary);
