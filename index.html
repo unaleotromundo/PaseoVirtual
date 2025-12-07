@@ -1616,7 +1616,7 @@ function loadProfile(dog) {
         if (!file) return;
 
         console.log('📤 [PERFIL] Archivo seleccionado:', file.name);
-        const btn = document.querySelector('.nav-button'); // Guardar referencia al botón de "Volver"
+        const btn = document.querySelector('.nav-button'); // Botón "Volver"
         const originalText = btn.innerHTML;
         btn.innerHTML = '🔄 Subiendo foto...';
         btn.disabled = true;
