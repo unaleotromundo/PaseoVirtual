@@ -1390,105 +1390,155 @@
         document.getElementById('close-lightbox').onclick = () =>
             document.getElementById('lightbox').style.display = 'none';
 
-        // === CAROUSEL MODERNO ===
-        function initCarousel() {
-            const wrapper = document.getElementById('carousel-wrapper');
-            const container = document.getElementById('carousel-container');
-            const playLargeBtn = document.getElementById('carousel-play-large');
-            const controls = document.querySelector('.carousel-controls');
-            const navBtns = document.querySelectorAll('.carousel-nav-btn');
-            const slides = [];
-            if (currentDog && currentDog.walks) {
-                currentDog.walks.forEach(wa => {
-                    if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
-                });
-            }
-            if (!slides.length) {
-                wrapper.style.display = 'none';
-                return;
-            }
-            wrapper.style.display = 'flex';
-            let idx = 0;
-            let timeoutId = null;
-            isPlaying = false;
-            slideInterval = null;
-            const img = document.getElementById('carousel-img');
-            const counter = document.getElementById('carousel-counter');
-            const playPauseBtn = document.getElementById('play-pause-btn');
+        // === AUDIO DEL CARRUSEL ===
+let carouselAudio = null;
+const CARRUSEL_TRACKS = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3', 'musica4.mp3'];
 
-            const showSlide = () => {
-                img.style.opacity = 0;
-                setTimeout(() => {
-                    img.src = getPhotoUrl(slides[idx], 800, 500);
-                    img.onload = () => { img.style.opacity = 1; };
-                    counter.textContent = `${idx + 1} / ${slides.length}`;
-                }, 200);
-            };
+function playRandomCarouselTrack() {
+    if (!isAudioEnabled) return; // respeta el mute global
 
-            const showControls = () => {
-                playLargeBtn.style.display = 'flex';
-                controls.classList.add('visible');
-                navBtns.forEach(btn => {
-                    btn.style.opacity = '1';
-                    btn.style.transform = 'translateY(0)';
-                });
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(hideControls, 3000);
-            };
+    // Si ya hay un audio, detenerlo
+    if (carouselAudio) {
+        carouselAudio.pause();
+        carouselAudio = null;
+    }
 
-            const hideControls = () => {
-                if (!isPlaying) {
-                    playLargeBtn.style.display = 'none';
-                    controls.classList.remove('visible');
-                    navBtns.forEach(btn => {
-                        btn.style.opacity = '0';
-                        btn.style.transform = 'translateY(20px)';
-                    });
-                }
-            };
+    // Elegir canción aleatoria
+    const randomTrack = CARRUSEL_TRACKS[Math.floor(Math.random() * CARRUSEL_TRACKS.length)];
+    carouselAudio = new Audio(randomTrack);
 
-            container.addEventListener('mouseenter', showControls);
-            container.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                showControls();
-            }, { passive: false });
-            container.addEventListener('click', showControls);
+    // Configurar eventos
+    carouselAudio.onended = () => {
+        carouselAudio = null;
+        isPlaying = false;
+        updatePlayButton();
+        hideControls();
+    };
 
-            window.prevSlide = () => {
-                idx = (idx - 1 + slides.length) % slides.length;
-                showSlide();
-                showControls();
-            };
-            window.nextSlide = () => {
-                idx = (idx + 1) % slides.length;
-                showSlide();
-                showControls();
-            };
-            window.togglePlay = () => {
-                isPlaying = !isPlaying;
-                playPauseBtn.textContent = isPlaying ? '⏸' : '▶';
-                playLargeBtn.textContent = isPlaying ? '⏸' : '▶';
-                if (isPlaying) {
-                    showControls();
-                    slideInterval = setInterval(() => {
-                        nextSlide();
-                    }, 4000);
-                } else {
-                    clearInterval(slideInterval);
-                    hideControls();
-                }
-            };
-            window.toggleFullscreen = () => {
-                if (!document.fullscreenElement) {
-                    container.requestFullscreen().catch(console.warn);
-                } else {
-                    document.exitFullscreen();
-                }
-            };
+    carouselAudio.onerror = () => {
+        console.warn('No se pudo cargar el audio del carrusel:', randomTrack);
+        carouselAudio = null;
+    };
 
-            showSlide();
-            showControls();
+    // Reproducir
+    carouselAudio.play().catch(e => {
+        console.warn('Reproducción de audio bloqueada:', e);
+        carouselAudio = null;
+    });
+}
+
+function updatePlayButton() {
+    const btn = document.getElementById('play-pause-btn');
+    const largeBtn = document.getElementById('carousel-play-large');
+    if (btn) btn.textContent = isPlaying ? '⏸' : '▶';
+    if (largeBtn) largeBtn.textContent = isPlaying ? '⏸' : '▶';
+}
+
+// === CAROUSEL MODERNO CON AUDIO ===
+function initCarousel() {
+    const wrapper = document.getElementById('carousel-wrapper');
+    const container = document.getElementById('carousel-container');
+    const playLargeBtn = document.getElementById('carousel-play-large');
+    const controls = document.querySelector('.carousel-controls');
+    const navBtns = document.querySelectorAll('.carousel-nav-btn');
+    const slides = [];
+
+    if (currentDog && currentDog.walks) {
+        currentDog.walks.forEach(wa => {
+            if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
+        });
+    }
+
+    if (!slides.length) {
+        wrapper.style.display = 'none';
+        return;
+    }
+
+    wrapper.style.display = 'flex';
+    let idx = 0;
+    let timeoutId = null;
+    isPlaying = false;
+
+    const img = document.getElementById('carousel-img');
+    const counter = document.getElementById('carousel-counter');
+
+    const showSlide = () => {
+        img.style.opacity = 0;
+        setTimeout(() => {
+            img.src = getPhotoUrl(slides[idx], 800, 500);
+            img.onload = () => { img.style.opacity = 1; };
+            counter.textContent = `${idx + 1} / ${slides.length}`;
+        }, 200);
+    };
+
+    const showControls = () => {
+        playLargeBtn.style.display = 'flex';
+        controls.classList.add('visible');
+        navBtns.forEach(btn => {
+            btn.style.opacity = '1';
+            btn.style.transform = 'translateY(0)';
+        });
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(hideControls, 3000);
+    };
+
+    const hideControls = () => {
+        if (!isPlaying) {
+            playLargeBtn.style.display = 'none';
+            controls.classList.remove('visible');
+            navBtns.forEach(btn => {
+                btn.style.opacity = '0';
+                btn.style.transform = 'translateY(20px)';
+            });
         }
+    };
+
+    container.addEventListener('mouseenter', showControls);
+    container.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        showControls();
+    }, { passive: false });
+    container.addEventListener('click', showControls);
+
+    window.prevSlide = () => {
+        idx = (idx - 1 + slides.length) % slides.length;
+        showSlide();
+        showControls();
+    };
+
+    window.nextSlide = () => {
+        idx = (idx + 1) % slides.length;
+        showSlide();
+        showControls();
+    };
+
+    window.togglePlay = () => {
+        isPlaying = !isPlaying;
+        updatePlayButton();
+
+        if (isPlaying) {
+            showControls();
+            playRandomCarouselTrack();
+        } else {
+            if (carouselAudio) {
+                carouselAudio.pause();
+                carouselAudio = null;
+            }
+            hideControls();
+        }
+    };
+
+    window.toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().catch(console.warn);
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
+    showSlide();
+    showControls();
+}
 
         // === RESET DB ===
         document.getElementById('toggle-demo-btn').onclick = async () => {
