@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PaseoDog - Sistema con Supabase</title>
-    <!-- FAVICON -->
     <link rel="icon" type="image/svg+xml" href="paseodog-logo.svg">
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
@@ -12,7 +11,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="PaseoDog">
     <link rel="apple-touch-icon" href="paseodog-logo.svg">
-    <!-- SUPABASE SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="./supabase.js"></script>
     <style>
@@ -644,87 +642,30 @@
             }
             #saludo-usuario { font-size: 1.2rem; }
             #theme-toggle {
-                width: 56px;
-                height: 56px;
-                font-size: 2rem;
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+                right: 12px;
+                top: -10px;
             }
-            #app-container { 
-                padding: 24px;
-                border-radius: var(--radius);
+            #app-container {
+                padding: 25px 20px;
             }
-            h2 { 
-                font-size: 2rem;
-                margin-bottom: 20px;
+            h2 {
+                font-size: 1.5rem;
+                margin-bottom: 16px;
             }
-            h3 { 
-                font-size: 1.4rem;
-                margin: 20px 0 12px 0;
-            }
-            input, textarea, select {
-                padding: 16px 18px;
-                font-size: 1.1rem;
-                margin-bottom: 18px;
-            }
-            label { 
-                font-size: 1.05rem;
-                margin-bottom: 8px;
+            h3 {
+                font-size: 1.15rem;
+                margin: 20px 0 10px 0;
             }
             button {
-                font-size: 1.1rem;
-                padding: 16px 28px;
-                min-height: 52px;
-            }
-            .dog-card {
-                padding: 18px;
-                margin-bottom: 14px;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-            .dog-card span {
-                font-size: 1.2rem;
-            }
-            .dog-card button {
-                width: 100%;
-                margin-top: 8px;
-            }
-            #carousel-wrapper { 
-                height: 280px;
-                margin-bottom: 20px;
-            }
-            .carousel-play-large {
-                width: 90px;
-                height: 90px;
-                font-size: 2.4rem;
-            }
-            .carousel-nav-btn {
-                width: 56px;
-                height: 56px;
-                font-size: 2rem;
-            }
-            .carousel-controls {
-                padding: 10px 18px;
-                gap: 20px;
-            }
-            #carousel-counter {
-                font-size: 1rem;
-                min-width: 50px;
-            }
-            .carousel-action-btn {
-                width: 42px;
-                height: 42px;
-                font-size: 1rem;
+                padding: 12px 18px;
+                font-size: 0.95rem;
             }
             .walk-session h3 {
-                font-size: 1.4rem;
-                padding: 18px 20px;
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
-            }
-            .admin-walk-controls {
-                width: 100%;
-                justify-content: flex-start;
+                font-size: 1.1rem;
+                padding: 15px 20px;
             }
             .admin-walk-btn {
                 padding: 8px 16px;
@@ -740,7 +681,7 @@
                 padding: 12px 16px;
                 font-size: 1rem;
             }
-            #profile-content { 
+            #profile-content {
                 grid-template-columns: 1fr;
                 gap: 24px;
             }
@@ -748,7 +689,7 @@
                 max-width: 200px;
                 height: 200px;
             }
-            .detail-row { 
+            .detail-row {
                 flex-direction: column;
                 align-items: flex-start;
                 padding: 14px 18px;
@@ -766,14 +707,14 @@
                 gap: 12px;
                 padding: 16px;
             }
-            .whatsapp-float { 
+            .whatsapp-float {
                 right: 16px;
                 bottom: 24px;
                 width: 64px;
                 height: 64px;
                 font-size: 38px;
             }
-            .audio-float { 
+            .audio-float {
                 right: 90px;
                 bottom: 24px;
                 width: 50px;
@@ -804,87 +745,26 @@
         }
         /* MÓVILES MUY PEQUEÑOS */
         @media (max-width: 380px) and (orientation: portrait) {
-            h1 { font-size: 2.4rem; }
-            #carousel-wrapper { height: 240px; }
-            .carousel-play-large {
-                width: 75px;
-                height: 75px;
-                font-size: 2rem;
-            }
-            .whatsapp-float { 
-                width: 56px;
-                height: 56px;
-                font-size: 32px;
-            }
+            h1 { font-size: 2.5rem; }
+            .whatsapp-float { right: 12px; width: 55px; height: 55px; font-size: 32px; }
+            .audio-float { right: 75px; width: 40px; height: 40px; font-size: 16px; }
+            .detail-value { font-size: 1rem; }
+            .detail-label { font-size: 0.95rem; }
         }
-        #loading-overlay {
-            display: flex;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .spinner {
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-        }
-        #toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: none;
-        }
-        .toast {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            padding: 14px 20px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            max-width: 300px;
-            transform: translateX(120%);
-            animation: slideIn 0.4s forwards, fadeOut 0.4s 2.6s forwards;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            pointer-events: auto;
-        }
-        .toast.success { border-left: 4px solid var(--primary); }
-        .toast.error { border-left: 4px solid var(--danger); }
-        .toast.info { border-left: 4px solid var(--secondary); }
-        @keyframes slideIn {
-            to { transform: translateX(0); }
-        }
-        @keyframes fadeOut {
-            to { opacity: 0; transform: translateX(120%); }
-        }
-        /* === CARRUSEL MODERNO (ESTILO YOUTUBE) === */
+        /* CARRUSEL DE PASEOS */
         #carousel-wrapper {
-            position: relative;
-            width: 100%;
-            height: 350px;
-            background: #000;
+            background: var(--bg-card);
             border-radius: var(--radius-lg);
             overflow: hidden;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 20px;
+            position: relative;
+            height: 400px; /* Altura fija para el carrusel */
+            border: 4px solid var(--border);
+            transition: var(--transition);
+        }
+        #carousel-wrapper:hover {
+            border-color: var(--primary);
         }
         #carousel-container {
             position: relative;
@@ -917,8 +797,7 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        #carousel-wrapper.active .carousel-play-large,
-        #carousel-wrapper:hover .carousel-play-large {
+        #carousel-wrapper.active .carousel-play-large, #carousel-wrapper:hover .carousel-play-large {
             opacity: 1;
         }
         .carousel-play-large:hover {
@@ -957,8 +836,7 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        #carousel-wrapper.active .carousel-nav-btn,
-        #carousel-wrapper:hover .carousel-nav-btn {
+        #carousel-wrapper.active .carousel-nav-btn, #carousel-wrapper:hover .carousel-nav-btn {
             opacity: 1;
         }
         .carousel-nav-btn:hover {
@@ -983,73 +861,28 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        #carousel-wrapper.active .carousel-controls,
-        #carousel-wrapper:hover .carousel-controls {
+        #carousel-wrapper.active .carousel-controls, #carousel-wrapper:hover .carousel-controls {
             opacity: 1;
         }
-        .carousel-controls.playing {
-            opacity: 0 !important;
-            pointer-events: none;
+        #carousel-wrapper.playing .carousel-controls {
+            opacity: 0;
         }
-        #carousel-counter {
-            color: white;
-            font-size: 0.9rem;
-            font-weight: bold;
-            min-width: 50px;
-            text-align: center;
-        }
-        .carousel-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .carousel-action-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+        .control-btn {
+            background: none;
             border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
+            color: white;
+            font-size: 1.2rem;
+            width: 30px;
+            height: 30px;
+            padding: 0;
         }
-        .carousel-action-btn:hover {
-            background: var(--primary);
+        .control-btn:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+            box-shadow: none;
         }
-        /* FULLSCREEN VERDADERO */
-        #carousel-container:fullscreen,
-        #carousel-container:-webkit-full-screen,
-        #carousel-container:-moz-full-screen,
-        #carousel-container:-ms-fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw !important;
-            height: 100vh !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            border-radius: 0 !important;
+        #carousel-container:fullscreen {
             background: #000;
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #carousel-container:fullscreen #carousel-img,
-        #carousel-container:-webkit-full-screen #carousel-img,
-        #carousel-container:-moz-full-screen #carousel-img,
-        #carousel-container:-ms-fullscreen #carousel-img {
-            width: 100vw !important;
-            height: 100vh !important;
-            object-fit: cover !important;
-        }
-        #carousel-container:fullscreen .carousel-play-large {
-            position: fixed !important;
-        }
-        #carousel-container:fullscreen .carousel-nav {
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
@@ -1061,100 +894,132 @@
             bottom: 30px !important;
         }
         @media (max-width: 768px) {
-            #carousel-wrapper { height: 280px; }
-            .carousel-play-large { width: 70px; height: 70px; font-size: 1.8rem; }
-            .carousel-nav-btn { width: 45px; height: 45px; font-size: 1.5rem; }
-            .carousel-controls { padding: 6px 12px; gap: 12px; }
+            #carousel-wrapper {
+                height: 280px;
+            }
+            .carousel-play-large {
+                width: 70px;
+                height: 70px;
+                font-size: 1.8rem;
+            }
+            .carousel-nav-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5rem;
+            }
+            .carousel-controls {
+                padding: 6px 12px;
+                gap: 12px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- FONDO DE PARTÍCULAS -->
     <div id="particles-container"></div>
-    <!-- TOAST -->
     <div id="toast-container"></div>
-    <!-- LOADING -->
+
     <div id="loading-overlay">
         <div class="spinner"></div>
         <p style="color: white; font-size: 1.2rem;">Conectando a Supabase...</p>
     </div>
-    <!-- BOTONES FLOTANTES -->
+
     <a href="#" id="whatsapp-btn" class="whatsapp-float" target="_blank" style="display:none;">
         <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.017-1.04 2.481 0 1.461 1.063 2.875 1.211 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.89-5.401 0-9.833 4.381-9.891 9.805-.001 2.0.518 3.882 1.477 5.579l-.827 3.031 3.176-.837zm9.148-5.592c-.08-.146-.264-.233-.55-.386-.285-.152-1.673-.828-1.933-.923-.26-.095-.447-.142-.633.142-.186.285-.724.923-.887 1.114-.163.192-.326.216-.607.074-.356-.188-1.498-.552-2.853-1.765-.892-.778-1.493-1.737-1.676-2.049-.184-.311-.018-.48.163-.665.156-.156.326-.37.49-.553.164-.183.218-.311.326-.518.109-.206.054-.388-.03-.54-.082-.152-.632-1.523-.867-2.083-.235-.561-.47-.484-.634-.492-.156-.007-.336-.008-.516-.008-.186 0-.486.074-.746.368-.26.295-.992.973-.992 2.378 0 1.403 1.012 2.766 1.155 2.966.143.201 1.954 3.018 4.74 4.256 2.787 1.237 3.344 1.111 3.972.968.629-.142 1.933-.78 2.209-1.522.276-.74.276-1.373.195-1.523z"/>
         </svg>
     </a>
-    <button id="audio-toggle" class="audio-float" title="Silenciar sonido">🔊</button>
-    <header>
-        <button id="theme-toggle" title="Cambiar Tema">🐩</button>
-        <h1>🐾 PaseoDog</h1>
-        <p id="saludo-usuario">Gestión Profesional de Paseos</p>
-    </header>
-    <main id="app-container">
-        <!-- LOGIN -->
+    <div id="audio-toggle" class="audio-float" role="button" aria-label="Toggle audio">🔊</div>
+
+    <div id="app-container">
+        <header>
+            <h1 class="dog-name-placeholder">PaseoDog</h1>
+            <p id="saludo-usuario">Bienvenido/a</p>
+            <button id="theme-toggle" aria-label="Cambiar tema">🌙</button>
+        </header>
+
         <section id="login-section">
-            <h2>🔐 Acceso al Sistema</h2>
+            <h2>🔐 Iniciar Sesión</h2>
             <form id="login-form">
-                <label>Correo Electrónico</label>
-                <input type="email" id="email" placeholder="ejemplo@paseos.com" required>
-                <label>Contraseña</label>
-                <input type="password" id="password" placeholder="••••••••" required>
-                <button type="submit">Iniciar Sesión</button>
-                <p id="error-message" class="error" style="display:none;"></p>
-                <div class="info-text">
-                    <strong>Admin:</strong> admin@paseos.com / admin123<br>
-                    <strong>Clientes:</strong> pass = 123456
+                <label for="email">Email</label><input type="email" id="email" required value="admin@paseos.com">
+                <div class="password-wrapper">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" required value="admin123">
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('password')">👁️</button>
                 </div>
+                <button type="submit" class="btn-primary ripple">Entrar</button>
             </form>
+            <p class="info-text">
+                👉 **Dueño:** Email de dueño y contraseña '123456'.<br>
+                👉 **Admin:** `admin@paseos.com` y `admin123`.
+            </p>
         </section>
-        <!-- ADMIN DASHBOARD -->
+
         <section id="admin-dashboard-section" style="display:none;">
-            <h2>👨‍💼 Panel de Administrador</h2>
-            <button class="add-dog-btn" onclick="showView('create-dog-section')">➕ Registrar Nuevo Mimoso</button>
-            <div id="dog-list-container"></div>
+            <h2>📋 Panel de Administración</h2>
+            <div id="dog-list-container">
+                </div>
+            <button class="add-dog-btn nav-button ripple" onclick="showView('create-dog-section')">🐕 Registrar Nuevo Perro</button>
+            <button class="nav-button" onclick="logout()">🚪 Cerrar Sesión</button>
         </section>
-        <!-- CREATE DOG -->
+
         <section id="create-dog-section" style="display:none;">
-            <h2>🐶 Registrar Nuevo Mimoso</h2>
+            <h2>➕ Registrar Nuevo Perro</h2>
             <form id="create-dog-form">
+                <h3>Datos del Perro</h3>
                 <label>Nombre</label><input type="text" id="new-dog-name" required>
                 <label>Raza</label><input type="text" id="new-dog-breed" required>
                 <label>Sexo</label><select id="new-dog-sex"><option>Macho</option><option>Hembra</option></select>
+                
+                <label>Edad (años)</label><input type="number" id="new-dog-age" value="1" min="0">
+                <label>Peso (kg)</label><input type="number" id="new-dog-weight" step="0.1" value="15.0" min="0.1">
+                <label>Alergias</label><input type="text" id="new-dog-alergias" placeholder="Ninguna o especificar">
+                <label>Nivel de Energía</label>
+                <select id="new-dog-energia">
+                    <option>Baja</option>
+                    <option selected>Media</option>
+                    <option>Alta</option>
+                </select>
+                <label>Socialización</label><input type="text" id="new-dog-social" placeholder="Con perros/personas/otro">
+                <h3>Datos del Dueño</h3>
                 <label>Nombre Dueño</label><input type="text" id="new-dog-owner" required>
-                <label>Email (Usuario)</label><input type="email" id="new-dog-email" required>
-                <label>Teléfono (WhatsApp)</label><input type="tel" id="new-dog-phone" required>
-                <button type="submit" class="save-btn">💾 Guardar en Supabase</button>
+                <label>Teléfono</label><input type="tel" id="new-dog-phone" required>
+                <label>Email (para login)</label><input type="email" id="new-dog-email" required>
+                <p class="info-text">La contraseña de los dueños es '123456'.</p>
+
+                <button type="submit" class="save-btn ripple">💾 Registrar Perro</button>
             </form>
             <button class="nav-button" onclick="goBack()">Cancelar</button>
         </section>
-        <!-- DOG DASHBOARD -->
+
         <section id="dog-selection-dashboard" style="display:none;">
-            <h2>🐕 Dashboard de <span class="dog-name-placeholder"></span></h2>
-            <div id="carousel-wrapper" style="display:none;">
+            <h2 class="dog-name-placeholder">🐶 Ficha de Perro</h2>
+            
+            <div id="carousel-wrapper">
                 <div id="carousel-container">
-                    <img id="carousel-img" src="" alt="Diapositiva">
-                    <button id="carousel-play-large" class="carousel-play-large" onclick="togglePlay()">▶</button>
+                    <img id="carousel-img" src="" alt="Fotos de Paseo">
                     <div class="carousel-nav">
-                        <button class="carousel-nav-btn" onclick="prevSlide()">‹</button>
-                        <button class="carousel-nav-btn" onclick="nextSlide()">›</button>
+                        <button class="carousel-nav-btn" id="prev-btn" onclick="prevSlide()">◀️</button>
+                        <button class="carousel-nav-btn" id="next-btn" onclick="nextSlide()">▶️</button>
                     </div>
+                    <button class="carousel-play-large" id="play-pause-btn-large" onclick="togglePlay()">▶️</button>
                     <div class="carousel-controls">
-                        <span id="carousel-counter"></span>
-                        <div class="carousel-actions">
-                            <button class="carousel-action-btn" id="play-pause-btn" onclick="togglePlay()">▶</button>
-                            <button class="carousel-action-btn" onclick="toggleFullscreen()">⛶</button>
-                        </div>
+                        <button id="play-pause-btn" class="control-btn" onclick="togglePlay()">▶️</button>
+                        <button id="fullscreen-btn" class="control-btn" onclick="toggleFullscreen()">🔲</button>
                     </div>
                 </div>
             </div>
-            <button id="admin-create-walk-btn" class="admin-action-button" style="display:none;" onclick="showView('create-walk-section')">
-                ➕ Crear Nuevo Paseo
-            </button>
+
+            <h4>Resumen del último paseo (<span id="last-walk-date">No hay paseos</span>)</h4>
+            <div id="walk-summary-content">
+                <div class="info-text">Aún no hay paseos registrados para <span class="dog-name-placeholder">este perro</span>.</div>
+            </div>
+
+            <button class="nav-button ripple" id="admin-create-walk-btn" onclick="showView('create-walk-section')">➕ Registrar Nuevo Paseo</button>
             <button class="nav-button" onclick="showView('walks-history-section')">📜 Historial de Paseos</button>
             <button class="nav-button" onclick="showView('profile-section')">📋 Ver/Editar Perfil</button>
             <button class="nav-button" onclick="goBack()" style="margin-top: 16px;">⬅️ Volver</button>
         </section>
-        <!-- CREATE WALK -->
+
         <section id="create-walk-section" style="display:none;">
             <h2>➕ Crear Nuevo Paseo</h2>
             <form id="walk-form">
@@ -1165,15 +1030,15 @@
                 <label>📅 Fecha</label><input type="date" id="walk-date" required>
                 <label>📸 Fotos del Paseo</label>
                 <div id="photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
-                <label class="nav-button" style="cursor: pointer; text-align: center;">
-                    📷 Seleccionar Fotos Reales
+                <label class="nav-button" style="cursor: pointer; text-align: center;"> 
+                    📷 Seleccionar Fotos Reales 
                     <input type="file" id="photo-upload" accept="image/*" multiple style="display: none;">
                 </label>
-                <button type="submit" class="save-btn">💾 Guardar Paseo</button>
+                <button type="submit" class="save-btn ripple">💾 Guardar Paseo</button>
             </form>
             <button class="nav-button" onclick="goBack()">Cancelar</button>
         </section>
-        <!-- PROFILE -->
+
         <section id="profile-section" style="display:none;">
             <h2>📋 Perfil Completo</h2>
             <div id="profile-content">
@@ -1182,83 +1047,243 @@
                     <input type="file" id="profile-photo-upload" accept="image/*" style="display: none;">
                     <p style="margin-top: 8px; font-size: 0.9rem; color: var(--text-secondary);">📷 Haz clic en la foto para cambiarla</p>
                 </div>
-                <div id="profile-details-view"></div>
+                <div id="profile-details-view">
+                    </div>
             </div>
-            <button class="nav-button" onclick="goBack()" style="margin-top: 24px;">⬅️ Volver</button>
-        </section>
-        <!-- HISTORY -->
-        <section id="walks-history-section" style="display:none;">
-            <h2>📜 Historial de Paseos</h2>
-            <div id="walks-history"></div>
+            <button class="nav-button edit-btn" onclick="showEditProfile()">✏️ Editar Datos</button>
             <button class="nav-button" onclick="goBack()" style="margin-top: 16px;">⬅️ Volver</button>
         </section>
-    </main>
-    <!-- LIGHTBOX -->
-    <div id="lightbox">
-        <span class="lightbox-close" id="close-lightbox">&times;</span>
-        <img id="lightbox-img" src="">
-    </div>
-    <script type="module">
-        import { 
-            loadDogs, 
-            loadWalks, 
-            createDog, 
-            createWalk, 
-            uploadPhoto, 
-            uploadProfilePhoto, 
-            updateDogProfilePhoto 
-        } from './supabase.js';
 
-        // === ESTADO GLOBAL ===
+        <div id="edit-profile-modal" style="display:none;" class="modal-overlay">
+            <div class="modal-content">
+                <h2>✏️ Editar Datos de Perfil</h2>
+                <form id="edit-profile-form">
+                    <label>Nombre</label><input type="text" id="edit-nombre" required>
+                    <label>Raza</label><input type="text" id="edit-raza" required>
+                    <label>Sexo</label><select id="edit-sexo"><option>Macho</option><option>Hembra</option></select>
+                    
+                    <label>Edad (años)</label><input type="number" id="edit-edad" min="0">
+                    <label>Peso (kg)</label><input type="number" id="edit-peso" step="0.1" min="0.1">
+                    <label>Alergias</label><input type="text" id="edit-alergias" placeholder="Ninguna o especificar">
+                    <label>Nivel de Energía</label>
+                    <select id="edit-energia">
+                        <option>Baja</option>
+                        <option>Media</option>
+                        <option>Alta</option>
+                    </select>
+                    <label>Socialización</label><input type="text" id="edit-social" placeholder="Con perros/personas/otro">
+                    <h3>Datos del Dueño</h3>
+                    <label>Dueño</label><input type="text" id="edit-dueno" required>
+                    <label>Teléfono</label><input type="tel" id="edit-telefono" required>
+                    
+                    <button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>
+                </form>
+                <button class="nav-button" onclick="hideEditProfile()">Cancelar</button>
+            </div>
+        </div>
+
+        <section id="walks-history-section" style="display:none;">
+            <h2>📜 Historial de Paseos</h2>
+            <p id="walk-history-dog-name" class="info-text">Historial para: <span class="dog-name-placeholder"></span></p>
+            <div id="walks-list-container">
+                </div>
+            <button class="nav-button" onclick="goBack()">⬅️ Volver</button>
+        </section>
+        
+        <div id="edit-walk-modal">
+            <div class="modal-content">
+                <h2>✏️ Editar Paseo (<span id="edit-walk-date-display"></span>)</h2>
+                <form id="edit-walk-form">
+                    <input type="hidden" id="edit-walk-id">
+                    <label>Duración (minutos)</label><input type="number" id="edit-duracion" required min="1">
+                    <label>Distancia (km)</label><input type="number" id="edit-distancia" step="0.1" required min="0.1">
+                    <label>Resumen Diario</label><textarea id="edit-resumen" rows="3"></textarea>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="edit-comportamiento">
+                        <label for="edit-comportamiento">Comportamiento o Problemas</label>
+                    </div>
+
+                    <label>Incidentes de Salud (si aplica)</label><input type="text" id="edit-incidentes">
+
+                    <h4>Galería de Fotos</h4>
+                    <div id="edit-photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
+                    
+                    <label class="nav-button" style="cursor: pointer; text-align: center;"> 
+                        📷 Añadir más Fotos 
+                        <input type="file" id="edit-photo-upload" accept="image/*" multiple style="display: none;">
+                    </label>
+
+                    <button type="submit" class="save-btn ripple">💾 Guardar Edición</button>
+                </form>
+                <button class="nav-button" onclick="hideEditWalk()">Cancelar</button>
+                <button class="nav-button" style="background: var(--danger); margin-top: 10px;" onclick="deleteWalk()">🗑️ Eliminar Paseo</button>
+            </div>
+        </div>
+
+        <div id="lightbox">
+            <span class="lightbox-close" id="close-lightbox">&times;</span>
+            <img id="lightbox-img" src="" alt="Foto en grande">
+        </div>
+    </div>
+
+    <style>
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 30, 40, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s;
+        }
+        .spinner {
+            border: 8px solid rgba(255, 255, 255, 0.1);
+            border-top: 8px solid var(--primary);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        /* Toast Notification */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+        }
+        .toast {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 18px 25px;
+            border-radius: var(--radius);
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-lg);
+            border-left: 5px solid var(--primary);
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            transform: translateX(100%);
+            opacity: 0;
+            max-width: 300px;
+        }
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .toast.error {
+            border-left-color: var(--danger);
+            color: var(--danger);
+        }
+        .toast.success {
+            border-left-color: var(--primary);
+            color: var(--primary-dark);
+        }
+    </style>
+
+    <script type="module">
+        import { loadDogs, createDog, updateDogProfile, updateWalk, deleteWalk as supabaseDeleteWalk, uploadProfilePhoto, updateDogProfilePhoto, loadWalks, createWalk, uploadWalkPhoto } from './supabase.js';
+
+        // --- GLOBAL STATE ---
         let currentUser = null;
         let currentDog = null;
         let currentView = 'login-section';
-        let backStack = [];
-        let isPlaying = false;
-        let carouselAudio = null;
-        let slideInterval = null;
-        let hideTimer = null;
+        const backStack = [];
         let isAudioEnabled = localStorage.getItem('paseoDogAudio') !== 'off';
         let uploadedPhotoUrls = [];
+        let walkToEdit = null;
+        let walkPhotosToDelete = [];
 
-        // === UTILIDADES ===
-        function showToast(message, type = 'info') {
+        // --- AUDIO/CAROUSEL STATE ---
+        let carouselSlides = [];
+        let idx = 0;
+        let slideInterval = null;
+        let isPlaying = false;
+        let carouselAudio = null;
+
+        // --- UTILS ---
+        window.showToast = (message, type = 'info') => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            toast.innerHTML = `<span>${message}</span>`;
+            toast.textContent = message;
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+            
+            // For animation
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 5000);
+        };
 
-        // === FUNCIONES GLOBALES ===
-        window.showView = function(id, dogId = null) {
-            const section = document.getElementById(id);
-            if (!section) {
-                console.error(`❌ Sección no encontrada: ${id}`);
-                return;
+        window.togglePasswordVisibility = (id) => {
+            const input = document.getElementById(id);
+            const button = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
             }
-            if (id !== currentView) backStack.push(currentView);
+        };
+
+        window.logout = () => {
+            currentUser = null;
+            currentDog = null;
+            backStack.length = 0;
+            window.showView('login-section');
+        };
+        
+        const updateThemeIcon = () => {
+            const icon = document.getElementById('theme-toggle');
+            icon.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+        };
+
+        document.getElementById('theme-toggle').onclick = () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('paseoDogTheme', newTheme);
+            updateThemeIcon();
+        };
+        
+        // --- VIEW MANAGEMENT ---
+        window.showView = async (id, dogId = null) => {
+            if (id !== currentView && id !== 'loading-overlay') backStack.push(currentView);
             currentView = id;
-            document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
-            section.style.display = 'block';
+
+            document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+            document.getElementById('loading-overlay').style.display = 'flex';
+
+            // Show the target section after loading
+            setTimeout(() => {
+                document.getElementById(id).style.display = 'block';
+                document.getElementById('loading-overlay').style.display = 'none';
+            }, 300);
 
             if (dogId) {
-                currentDog = { id: dogId };
-                loadDogs(null, true).then(dogs => {
-                    currentDog = dogs.find(d => d.id === dogId) || currentDog;
-                    document.querySelectorAll('.dog-name-placeholder').forEach(el => el.textContent = currentDog.nombre);
-                });
+                const dogs = await loadDogs(null, true);
+                currentDog = dogs.find(d => d.id === dogId) || currentDog;
+                document.querySelectorAll('.dog-name-placeholder').forEach(el => el.textContent = currentDog.nombre);
             }
 
             if (id === 'dog-selection-dashboard' && currentDog) {
                 document.getElementById('admin-create-walk-btn').style.display = currentUser?.isAdmin ? 'block' : 'none';
-                initCarousel();
+                await initCarousel();
+                await loadSummary(currentDog);
             }
             if (id === 'admin-dashboard-section') loadAdminDashboard();
             if (id === 'profile-section' && currentDog) loadProfile(currentDog);
             if (id === 'walks-history-section' && currentDog) loadHistory(currentDog);
             if (id === 'create-walk-section') initCreateWalk();
+
             document.getElementById('loading-overlay').style.display = 'none';
             updateWhatsApp();
         };
@@ -1273,8 +1298,10 @@
             e.preventDefault();
             const email = e.target.email.value.toLowerCase();
             const pass = e.target.password.value;
+
             if (email === 'admin@paseos.com' && pass === 'admin123') {
                 currentUser = { email, isAdmin: true };
+                document.getElementById('saludo-usuario').textContent = 'Bienvenido, Administrador';
                 window.showView('admin-dashboard-section');
             } else {
                 try {
@@ -1282,12 +1309,13 @@
                     if (dogs.length > 0 && pass === '123456') {
                         currentUser = { email, isAdmin: false };
                         currentDog = dogs[0];
+                        document.getElementById('saludo-usuario').textContent = `Bienvenido/a, Dueño de ${currentDog.nombre}`;
                         window.showView('dog-selection-dashboard');
                     } else {
                         showToast('Credenciales incorrectas', 'error');
                     }
                 } catch (err) {
-                    showToast('Error de conexión', 'error');
+                    showToast('Error de conexión: ' + err.message, 'error');
                 }
             }
         };
@@ -1299,21 +1327,22 @@
             try {
                 const dogs = await loadDogs(null, true);
                 container.innerHTML = '';
-                dogs.forEach(d => {
+                dogs.forEach((d, i) => {
                     const card = document.createElement('div');
                     card.className = 'dog-card';
+                    card.style.setProperty('--i', i);
                     card.innerHTML = `
                         <span>🐶 <strong>${d.nombre}</strong> <small>(${d.raza})</small></span>
-                        <button onclick="showView('dog-selection-dashboard','${d.id}')">Gestionar</button>
+                        <button onclick="window.showView('dog-selection-dashboard','${d.id}')" class="ripple">Gestionar</button>
                     `;
                     container.appendChild(card);
                 });
             } catch (err) {
-                container.innerHTML = '<p class="error">Error al cargar</p>';
+                container.innerHTML = '<p class="error">Error al cargar perros: ' + err.message + '</p>';
             }
         }
 
-        // === CREATE DOG ===
+        // === CREATE DOG (MODIFICADO) ===
         document.getElementById('create-dog-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
@@ -1325,55 +1354,123 @@
                         sexo: document.getElementById('new-dog-sex').value,
                         dueno: document.getElementById('new-dog-owner').value,
                         telefono: document.getElementById('new-dog-phone').value,
-                        foto_url: ''
+                        foto_url: '',
+                        // 💡 CAPTURA DE NUEVOS CAMPOS
+                        edad: document.getElementById('new-dog-age').value + ' años',
+                        peso: document.getElementById('new-dog-weight').value + ' kg',
+                        alergias: document.getElementById('new-dog-alergias').value || 'Ninguna',
+                        energia: document.getElementById('new-dog-energia').value,
+                        social: document.getElementById('new-dog-social').value || '?',
+                        // -----------------------------
                     }
                 };
                 await createDog(dogData);
                 showToast('✅ Perro registrado', 'success');
                 window.showView('admin-dashboard-section');
             } catch (err) {
-                showToast('Error al guardar: ' + err.message, 'error');
+                showToast('Error al registrar: ' + err.message, 'error');
             }
         });
 
-        // === CARRUSEL ===
-        function initCarousel() {
-            const wrapper = document.getElementById('carousel-wrapper');
-            loadWalks(currentDog.id).then(walks => {
-                const slides = walks.flatMap(w => w.fotos_urls || []).filter(Boolean);
-                if (!slides.length) {
-                    wrapper.style.display = 'none';
+        // === DASHBOARD & SUMMARY ===
+        async function loadSummary(dog) {
+            try {
+                const walks = await loadWalks(dog.id);
+                const container = document.getElementById('walk-summary-content');
+                container.innerHTML = '';
+
+                if (walks.length === 0) {
+                    document.getElementById('last-walk-date').textContent = 'No hay paseos';
+                    container.innerHTML = '<div class="info-text">Aún no hay paseos registrados para <span class="dog-name-placeholder">' + dog.nombre + '</span>.</div>';
                     return;
                 }
-                wrapper.style.display = 'flex';
-                let idx = 0;
+
+                const lastWalk = walks.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
+                document.getElementById('last-walk-date').textContent = new Date(lastWalk.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                let summaryHTML = `
+                    <div class="walk-metrics">
+                        <span>⏱️ Duración: ${lastWalk.duracion_minutos} min</span>
+                        <span>📏 Distancia: ${lastWalk.distancia_km} km</span>
+                        ${lastWalk.comportamiento_problemas ? `<span style="background: var(--danger-light); color: var(--danger);">⚠️ Comportamiento</span>` : `<span>😊 Buen Comportamiento</span>`}
+                    </div>
+                    <p>${lastWalk.resumen_diario}</p>
+                `;
+
+                if (lastWalk.incidentes_salud) {
+                    summaryHTML += `<div class="incident-alert">🩺 **Incidente de Salud:** ${lastWalk.incidentes_salud}</div>`;
+                }
+                
+                if (lastWalk.fotos_urls && lastWalk.fotos_urls.length > 0) {
+                    summaryHTML += `
+                        <div class="gallery">
+                            ${lastWalk.fotos_urls.map((url, i) => `
+                                <div class="photo-card" onclick="openLightbox('${url}')" style="--i: ${i};">
+                                    <img src="${url}" alt="Foto del paseo">
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = summaryHTML;
+
+            } catch (err) {
+                document.getElementById('walk-summary-content').innerHTML = `<p class="error">Error al cargar el resumen del paseo: ${err.message}</p>`;
+            }
+        }
+
+        // === CAROUSEL ===
+        async function initCarousel() {
+            try {
+                const walks = await loadWalks(currentDog.id);
+                carouselSlides = walks.flatMap(w => 
+                    w.fotos_urls.map(url => ({
+                        url,
+                        date: new Date(w.fecha).toLocaleDateString(),
+                        walkId: w.id,
+                        isPublic: w.es_publica
+                    }))
+                );
+                
+                if (carouselSlides.length === 0) {
+                    document.getElementById('carousel-wrapper').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('carousel-wrapper').style.display = 'block';
+
+                const wrapper = document.getElementById('carousel-wrapper');
                 const img = document.getElementById('carousel-img');
-                const counter = document.getElementById('carousel-counter');
+                const playLargeBtn = document.getElementById('play-pause-btn-large');
                 const controls = document.querySelector('.carousel-controls');
                 const navBtns = document.querySelectorAll('.carousel-nav-btn');
-                const playLargeBtn = document.getElementById('carousel-play-large');
+                let hideTimer = null;
 
                 const showSlide = () => {
-                    img.style.opacity = 0;
+                    const slide = carouselSlides[idx];
+                    img.style.opacity = '0';
                     setTimeout(() => {
-                        img.src = slides[idx];
-                        img.onload = () => { img.style.opacity = 1; };
-                        counter.textContent = `${idx + 1} / ${slides.length}`;
-                    }, 200);
+                        img.src = slide.url;
+                        img.style.opacity = '1';
+                    }, 300);
                 };
 
                 const updatePlayState = () => {
                     const btn = document.getElementById('play-pause-btn');
                     btn.textContent = isPlaying ? '⏸' : '▶';
                     playLargeBtn.textContent = isPlaying ? '⏸' : '▶';
+
                     if (isPlaying) {
                         playLargeBtn.classList.add('playing');
                         controls.classList.add('playing');
                         navBtns.forEach(b => b.classList.add('playing'));
+                        wrapper.classList.add('playing');
                     } else {
                         playLargeBtn.classList.remove('playing');
                         controls.classList.remove('playing');
                         navBtns.forEach(b => b.classList.remove('playing'));
+                        wrapper.classList.remove('playing');
                     }
                 };
 
@@ -1381,7 +1478,9 @@
                     wrapper.classList.add('active');
                     resetHideTimer();
                 };
+
                 const hideControls = () => wrapper.classList.remove('active');
+
                 const resetHideTimer = () => {
                     if (hideTimer) clearTimeout(hideTimer);
                     hideTimer = setTimeout(hideControls, 3000);
@@ -1391,8 +1490,18 @@
                 wrapper.addEventListener('mouseleave', resetHideTimer);
                 wrapper.addEventListener('touchstart', showControls, { passive: true });
 
-                window.nextSlide = () => { idx = (idx + 1) % slides.length; showSlide(); showControls(); };
-                window.prevSlide = () => { idx = (idx - 1 + slides.length) % slides.length; showSlide(); showControls(); };
+                window.nextSlide = () => {
+                    idx = (idx + 1) % slides.length;
+                    showSlide();
+                    showControls();
+                };
+
+                window.prevSlide = () => {
+                    idx = (idx - 1 + slides.length) % slides.length;
+                    showSlide();
+                    showControls();
+                };
+
                 window.togglePlay = () => {
                     if (!isPlaying) {
                         playRandomCarouselTrack();
@@ -1404,6 +1513,7 @@
                     updatePlayState();
                     showControls();
                 };
+
                 window.toggleFullscreen = () => {
                     const elem = document.getElementById('carousel-container');
                     if (!document.fullscreenElement) {
@@ -1421,83 +1531,135 @@
                 slideInterval = setInterval(() => {
                     if (!isPlaying) window.nextSlide();
                 }, 3000);
-            });
+
+            } catch (e) {
+                console.error("Error al inicializar carrusel:", e);
+                document.getElementById('carousel-wrapper').style.display = 'none';
+            }
         }
 
         function playRandomCarouselTrack() {
             if (!isAudioEnabled) return;
-            if (carouselAudio) { carouselAudio.pause(); carouselAudio = null; }
-            const track = 'musica1.mp3';
+            if (carouselAudio) {
+                carouselAudio.pause();
+                carouselAudio = null;
+            }
+            const tracks = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3'];
+            const track = tracks[Math.floor(Math.random() * tracks.length)];
             carouselAudio = new Audio(track);
-            carouselAudio.onended = () => { carouselAudio = null; isPlaying = false; updatePlayState(); };
-            carouselAudio.play().catch(e => console.warn('Audio blocked'));
+            carouselAudio.onended = () => {
+                carouselAudio = null;
+                isPlaying = false;
+                updatePlayState();
+            };
+            carouselAudio.play().catch(e => console.warn('Audio blocked or not found:', e));
         }
+
 
         // === CREATE WALK ===
         function initCreateWalk() {
             document.getElementById('walk-date').valueAsDate = new Date();
             document.getElementById('photo-preview').innerHTML = '';
+            document.getElementById('photo-upload').value = '';
             uploadedPhotoUrls = [];
             loadMultiDog();
         }
+
         async function loadMultiDog() {
             try {
                 const dogs = await loadDogs(null, true);
                 const container = document.getElementById('multi-dog-container');
                 container.innerHTML = '';
-                dogs.filter(d => d.id !== currentDog.id).forEach(d => {
-                    container.innerHTML += `
-                        <div class="dog-select-item">
-                            <input type="checkbox" value="${d.id}" id="md${d.id}">
-                            <label for="md${d.id}">${d.nombre}</label>
-                        </div>
+                
+                // Excluir al perro actual
+                const otherDogs = dogs.filter(d => d.id !== currentDog.id);
+
+                if (otherDogs.length === 0) {
+                    container.innerHTML = '<p class="info-text" style="border-left: 4px solid var(--warning);">No hay otros perros registrados para pasear juntos.</p>';
+                    return;
+                }
+
+                otherDogs.forEach((d, i) => {
+                    const item = document.createElement('div');
+                    item.className = 'dog-select-item';
+                    item.innerHTML = `
+                        <input type="checkbox" id="dog-${d.id}" value="${d.id}">
+                        <label for="dog-${d.id}">${d.nombre}</label>
                     `;
+                    container.appendChild(item);
                 });
+
             } catch (err) {
-                console.error('Error al cargar perros:', err);
+                document.getElementById('multi-dog-container').innerHTML = `<p class="error">Error al cargar compañeros: ${err.message}</p>`;
             }
         }
-        document.getElementById('photo-upload')?.addEventListener('change', async (e) => {
-            const files = Array.from(e.target.files);
+
+        document.getElementById('photo-upload').onchange = async (e) => {
+            const files = e.target.files;
+            if (files.length === 0) return;
+
             const preview = document.getElementById('photo-preview');
-            uploadedPhotoUrls = [];
+            preview.innerHTML = ''; // Limpiar previsualización
+            
+            showToast(`📤 Subiendo ${files.length} fotos...`, 'info');
+
             for (const file of files) {
-                const reader = new FileReader();
-                reader.onload = () => preview.innerHTML += `<img src="${reader.result}" style="opacity:0.6;">`;
-                reader.readAsDataURL(file);
                 try {
-                    const url = await uploadPhoto(file, currentDog.id);
+                    const url = await uploadWalkPhoto(file, currentDog.id);
                     uploadedPhotoUrls.push(url);
+                    
+                    const imgContainer = document.createElement('div');
+                    imgContainer.style.position = 'relative';
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = 'Foto subida';
+                    imgContainer.appendChild(img);
+                    preview.appendChild(imgContainer);
+
                 } catch (err) {
-                    showToast('Error al subir foto: ' + err.message, 'error');
+                    showToast('Error al subir una foto', 'error');
                 }
             }
-        });
-        document.getElementById('walk-form')?.addEventListener('submit', async (e) => {
+            showToast(`✅ Fotos subidas con éxito.`, 'success');
+        };
+
+        document.getElementById('walk-form').onsubmit = async (e) => {
             e.preventDefault();
+            
+            if (uploadedPhotoUrls.length === 0) {
+                showToast('Por favor, sube al menos una foto.', 'warning');
+                return;
+            }
+
             try {
                 const walkData = {
                     fecha: document.getElementById('walk-date').value,
-                    duracion_minutos: 60,
-                    distancia_km: 3.5,
-                    resumen_diario: 'Paseo guardado',
-                    comportamiento_problemas: false,
-                    incidentes_salud: '',
-                    fotos_urls: [...uploadedPhotoUrls]
+                    duracion_minutos: 60, 
+                    distancia_km: 3.5, 
+                    resumen_diario: 'Paseo guardado', 
+                    comportamiento_problemas: false, 
+                    incidentes_salud: '', 
+                    fotos_urls: [...uploadedPhotoUrls] 
                 };
+                
+                // Crear paseo para el perro principal
                 await createWalk(walkData, currentDog.id);
+                
+                // Crear paseo para los perros seleccionados
                 const selected = document.querySelectorAll('#multi-dog-container input:checked');
                 for (const cb of selected) {
                     await createWalk(walkData, cb.value);
                 }
+
                 showToast('✅ Paseo guardado con fotos reales', 'success');
                 window.showView('dog-selection-dashboard');
             } catch (err) {
                 showToast('Error al guardar: ' + err.message, 'error');
             }
-        });
+        };
 
-        // === PROFILE ===
+
+        // === PROFILE (MODIFICADO) ===
         function loadProfile(dog) {
             const view = document.getElementById('profile-details-view');
             view.innerHTML = `
@@ -1505,6 +1667,14 @@
                 <div class="detail-row"><span class="detail-label">Nombre:</span> <span class="detail-value">${dog.nombre}</span></div>
                 <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${dog.raza}</span></div>
                 <div class="detail-row"><span class="detail-label">Sexo:</span> <span class="detail-value">${dog.sexo}</span></div>
+                <div class="detail-row"><span class="detail-label">Edad:</span> <span class="detail-value">${dog.edad}</span></div>
+                <div class="detail-row"><span class="detail-label">Peso:</span> <span class="detail-value">${dog.peso}</span></div>
+                
+                <h3>🐶 Características y Salud</h3>
+                <div class="detail-row"><span class="detail-label">Nivel de Energía:</span> <span class="detail-value">${dog.energia}</span></div>
+                <div class="detail-row"><span class="detail-label">Socialización:</span> <span class="detail-value">${dog.social}</span></div>
+                <div class="detail-row"><span class="detail-label">Alergias:</span> <span class="detail-value">${dog.alergias}</span></div>
+
                 <h3>💊 Contacto</h3>
                 <div class="detail-row"><span class="detail-label">Dueño:</span> <span class="detail-value">${dog.dueno}</span></div>
                 <div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${dog.telefono}</span></div>
@@ -1514,67 +1684,274 @@
             const profilePhoto = document.getElementById('profile-photo');
             const uploadInput = document.getElementById('profile-photo-upload');
 
-            // Reemplazado via.placeholder.com por placehold.co
-const currentPhoto = dog.foto_url || 'https://placehold.co/250x250/4B5563/FFFFFF?text=Sin+foto';
-profilePhoto.src = currentPhoto;
-
+            // 💡 URL de placeholder corregida
+            const currentPhoto = dog.foto_url || 'https://placehold.co/250x250/4B5563/FFFFFF?text=Sin+foto';
+            profilePhoto.src = currentPhoto;
+            
             photoContainer.onclick = () => uploadInput.click();
-
-            uploadInput.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                try {
-                    const newUrl = await uploadProfilePhoto(file, dog.id);
-                    await updateDogProfilePhoto(dog.id, newUrl);
-                    profilePhoto.src = newUrl;
-                    currentDog.foto_url = newUrl;
-                    showToast('✅ Foto de perfil actualizada', 'success');
-                } catch (err) {
-                    showToast('Error al subir foto: ' + err.message, 'error');
-                }
-            };
         }
 
-        // === HISTORY ===
+        // === EDIT PROFILE ===
+        window.showEditProfile = () => {
+            const dog = currentDog;
+            
+            // Cargar datos en el formulario
+            document.getElementById('edit-nombre').value = dog.nombre;
+            document.getElementById('edit-raza').value = dog.raza;
+            document.getElementById('edit-sexo').value = dog.sexo;
+            document.getElementById('edit-dueno').value = dog.dueno;
+            document.getElementById('edit-telefono').value = dog.telefono;
+
+            // 💡 Carga de nuevos campos
+            document.getElementById('edit-edad').value = dog.edad ? parseInt(dog.edad) : '';
+            document.getElementById('edit-peso').value = dog.peso ? parseFloat(dog.peso) : '';
+            document.getElementById('edit-alergias').value = dog.alergias;
+            document.getElementById('edit-energia').value = dog.energia;
+            document.getElementById('edit-social').value = dog.social;
+
+
+            document.getElementById('edit-profile-modal').style.display = 'flex';
+        };
+
+        window.hideEditProfile = () => {
+            document.getElementById('edit-profile-modal').style.display = 'none';
+        };
+
+        document.getElementById('profile-photo-upload').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                showToast('📤 Subiendo foto de perfil...', 'info');
+                const newPhotoUrl = await uploadProfilePhoto(currentDog.id, file);
+                await updateDogProfilePhoto(currentDog.id, newPhotoUrl);
+                
+                // Actualizar la vista de perfil y el objeto currentDog
+                currentDog.foto_url = newPhotoUrl;
+                document.getElementById('profile-photo').src = newPhotoUrl;
+                showToast('✅ Foto de perfil actualizada', 'success');
+            } catch (err) {
+                showToast('Error al actualizar foto: ' + err.message, 'error');
+            }
+        };
+
+        document.getElementById('edit-profile-form').onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+                const dogData = {
+                    id: currentDog.id,
+                    nombre: document.getElementById('edit-nombre').value,
+                    raza: document.getElementById('edit-raza').value,
+                    sexo: document.getElementById('edit-sexo').value,
+                    dueno: document.getElementById('edit-dueno').value,
+                    telefono: document.getElementById('edit-telefono').value,
+                    
+                    // 💡 CAMBIOS: Capturando y formateando los nuevos campos
+                    edad: document.getElementById('edit-edad').value + ' años',
+                    peso: document.getElementById('edit-peso').value + ' kg',
+                    alergias: document.getElementById('edit-alergias').value || 'Ninguna',
+                    energia: document.getElementById('edit-energia').value,
+                    social: document.getElementById('edit-social').value || '?',
+                };
+                
+                await updateDogProfile(dogData);
+                
+                // Actualizar el objeto global y la vista
+                currentDog = { ...currentDog, ...dogData };
+                loadProfile(currentDog);
+                
+                showToast('✅ Perfil actualizado', 'success');
+                hideEditProfile();
+            } catch (err) {
+                showToast('Error al guardar: ' + err.message, 'error');
+            }
+        };
+
+
+        // === WALKS HISTORY ===
         async function loadHistory(dog) {
-            const container = document.getElementById('walks-history');
-            container.innerHTML = '<p>Cargando...</p>';
+            const container = document.getElementById('walks-list-container');
+            container.innerHTML = '<p>Cargando historial...</p>';
+
             try {
                 const walks = await loadWalks(dog.id);
+                if (walks.length === 0) {
+                    container.innerHTML = '<div class="info-text">No hay paseos registrados.</div>';
+                    return;
+                }
+
                 container.innerHTML = '';
-                walks.forEach(w => {
-                    const imgs = (w.fotos_urls || []).map(url => 
-                        `<div class="photo-card" onclick="openLightbox('${url}')">
-                            <img src="${url}" onerror="this.src='https://via.placeholder.com/150'">
-                        </div>`
-                    ).join('');
+                walks.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).forEach((walk, i) => {
+                    const dateDisplay = new Date(walk.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                    
+                    let galleryHTML = '';
+                    if (walk.fotos_urls && walk.fotos_urls.length > 0) {
+                        galleryHTML = `
+                            <div class="gallery">
+                                ${walk.fotos_urls.map(url => `
+                                    <div class="photo-card" onclick="openLightbox('${url}')">
+                                        <img src="${url}" alt="Foto del paseo">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+
                     const session = document.createElement('div');
                     session.className = 'walk-session';
+                    session.style.setProperty('--i', i);
                     session.innerHTML = `
-                        <h3>📅 ${w.fecha}</h3>
+                        <h3>
+                            Paseo del ${dateDisplay}
+                            ${currentUser.isAdmin ? `
+                                <div class="admin-walk-controls">
+                                    <button class="admin-walk-btn ripple" onclick="showEditWalk('${walk.id}')">✏️ Editar</button>
+                                </div>
+                            ` : ''}
+                        </h3>
                         <div class="walk-details">
                             <div class="walk-metrics">
-                                <span>⏱️ ${w.duracion_minutos} min</span>
-                                <span>📏 ${w.distancia_km} km</span>
-                                <span>📸 ${w.fotos_urls?.length || 0} fotos</span>
+                                <span>⏱️ ${walk.duracion_minutos} min</span>
+                                <span>📏 ${walk.distancia_km} km</span>
+                                ${walk.comportamiento_problemas ? `<span style="background: var(--danger-light); color: var(--danger);">⚠️ Comportamiento</span>` : `<span>😊 Sin Problemas</span>`}
                             </div>
-                            <p><strong>Resumen:</strong> ${w.resumen_diario}</p>
-                            ${w.comportamiento_problemas ? '<div class="incident-alert">⚠️ Problemas</div>' : '<div class="success-notice">✅ Bien</div>'}
-                            ${w.incidentes_salud ? `<div class="incident-alert">🩺 ${w.incidentes_salud}</div>` : ''}
-                            <div class="gallery">${imgs}</div>
+                            <p>${walk.resumen_diario}</p>
+                            ${walk.incidentes_salud ? `<div class="incident-alert">🩺 **Incidente de Salud:** ${walk.incidentes_salud}</div>` : ''}
                         </div>
+                        ${galleryHTML}
                     `;
                     container.appendChild(session);
                 });
+
             } catch (err) {
-                container.innerHTML = '<p class="error">Error al cargar historial</p>';
+                container.innerHTML = `<p class="error">Error al cargar historial: ${err.message}</p>`;
             }
         }
 
-        function openLightbox(url) {
+        // === EDIT WALK MODAL ===
+        window.showEditWalk = async (walkId) => {
+            try {
+                const walks = await loadWalks(currentDog.id);
+                walkToEdit = walks.find(w => w.id === walkId);
+                
+                if (!walkToEdit) throw new Error('Paseo no encontrado');
+
+                document.getElementById('edit-walk-id').value = walkToEdit.id;
+                document.getElementById('edit-walk-date-display').textContent = new Date(walkToEdit.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                document.getElementById('edit-duracion').value = walkToEdit.duracion_minutos;
+                document.getElementById('edit-distancia').value = walkToEdit.distancia_km;
+                document.getElementById('edit-resumen').value = walkToEdit.resumen_diario;
+                document.getElementById('edit-comportamiento').checked = walkToEdit.comportamiento_problemas;
+                document.getElementById('edit-incidentes').value = walkToEdit.incidentes_salud;
+
+                // Inicializar fotos
+                uploadedPhotoUrls = [...walkToEdit.fotos_urls];
+                walkPhotosToDelete = [];
+                renderEditPhotoPreview();
+
+                document.getElementById('edit-walk-modal').style.display = 'flex';
+            } catch (err) {
+                showToast('Error al cargar paseo: ' + err.message, 'error');
+            }
+        };
+
+        window.hideEditWalk = () => {
+            document.getElementById('edit-walk-modal').style.display = 'none';
+        };
+
+        function renderEditPhotoPreview() {
+            const preview = document.getElementById('edit-photo-preview');
+            preview.innerHTML = '';
+            
+            uploadedPhotoUrls.forEach((url, index) => {
+                const imgContainer = document.createElement('div');
+                imgContainer.style.position = 'relative';
+
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = `Foto ${index + 1}`;
+                imgContainer.appendChild(img);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-photo-btn';
+                deleteBtn.textContent = 'x';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    // Mover la URL a la lista de eliminación (si no es una URL local temporal)
+                    if (url.startsWith('http')) {
+                        walkPhotosToDelete.push(url);
+                    }
+                    uploadedPhotoUrls.splice(index, 1);
+                    renderEditPhotoPreview();
+                };
+                imgContainer.appendChild(deleteBtn);
+                preview.appendChild(imgContainer);
+            });
+        }
+
+        document.getElementById('edit-photo-upload').onchange = async (e) => {
+            const files = e.target.files;
+            if (files.length === 0) return;
+
+            showToast(`📤 Subiendo ${files.length} fotos...`, 'info');
+
+            for (const file of files) {
+                try {
+                    const url = await uploadWalkPhoto(file, currentDog.id);
+                    uploadedPhotoUrls.push(url);
+                } catch (err) {
+                    showToast('Error al subir una foto', 'error');
+                }
+            }
+            renderEditPhotoPreview();
+            showToast(`✅ Fotos añadidas.`, 'success');
+        };
+
+        document.getElementById('edit-walk-form').onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+                const updatedData = {
+                    id: document.getElementById('edit-walk-id').value,
+                    duracion_minutos: parseInt(document.getElementById('edit-duracion').value),
+                    distancia_km: parseFloat(document.getElementById('edit-distancia').value),
+                    resumen_diario: document.getElementById('edit-resumen').value,
+                    comportamiento_problemas: document.getElementById('edit-comportamiento').checked,
+                    incidentes_salud: document.getElementById('edit-incidentes').value,
+                    fotos_urls: uploadedPhotoUrls // Usar la lista actualizada
+                };
+                
+                await updateWalk(updatedData);
+                showToast('✅ Paseo editado con éxito', 'success');
+                hideEditWalk();
+                // Recargar el historial y el resumen
+                if (currentView === 'walks-history-section') loadHistory(currentDog);
+                if (currentView === 'dog-selection-dashboard') loadSummary(currentDog);
+
+                // No implementamos la eliminación de fotos del storage aquí, solo de la DB.
+            } catch (err) {
+                showToast('Error al guardar la edición: ' + err.message, 'error');
+            }
+        };
+
+        window.deleteWalk = async () => {
+            if (!confirm('¿Estás seguro de que quieres eliminar este paseo? Esta acción es irreversible.')) return;
+            try {
+                const walkId = document.getElementById('edit-walk-id').value;
+                await supabaseDeleteWalk(walkId);
+                showToast('🗑️ Paseo eliminado con éxito', 'success');
+                hideEditWalk();
+                if (currentView === 'walks-history-section') loadHistory(currentDog);
+                if (currentView === 'dog-selection-dashboard') loadSummary(currentDog);
+            } catch (err) {
+                showToast('Error al eliminar paseo: ' + err.message, 'error');
+            }
+        };
+
+        // === LIGHTBOX ===
+        window.openLightbox = (url) => {
             document.getElementById('lightbox-img').src = url;
             document.getElementById('lightbox').style.display = 'flex';
-        }
+        };
         document.getElementById('close-lightbox').onclick = () =>
             document.getElementById('lightbox').style.display = 'none';
 
@@ -1586,9 +1963,13 @@ profilePhoto.src = currentPhoto;
                 return;
             }
             btn.style.display = 'flex';
-            let num = "5491100000000";
+            let num = "5491100000000"; // Número de la guardería por defecto
             if (currentUser?.isAdmin && currentDog?.telefono) {
+                // Si es admin, mostramos el teléfono del dueño del perro actual
                 num = currentDog.telefono.replace(/[^0-9]/g, '');
+            } else if (!currentUser?.isAdmin && currentUser?.email) {
+                // Si es dueño, mostramos el número de la guardería/admin
+                // Mantenemos el número por defecto o el que se haya configurado
             }
             btn.href = `https://wa.me/${num}`;
         }
@@ -1605,6 +1986,32 @@ profilePhoto.src = currentPhoto;
 
         // === INIT ===
         window.onload = () => {
+            const savedTheme = localStorage.getItem('paseoDogTheme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+            updateThemeIcon();
+
+            // Generar partículas doradas (solo si estamos en modo oscuro)
+            const particlesContainer = document.getElementById('particles-container');
+            if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                for (let i = 0; i < 25; i++) {
+                    const p = document.createElement('div');
+                    p.classList.add('particle');
+                    const size = 4 + Math.random() * 14;
+                    p.style.width = `${size}px`;
+                    p.style.height = `${size}px`;
+                    p.style.left = `${Math.random() * 100}vw`;
+                    p.style.top = `${Math.random() * 100}vh`;
+                    particlesContainer.appendChild(p);
+                }
+            }
+            const observer = new MutationObserver(() => {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                particlesContainer.style.display = isDark ? 'block' : 'none';
+            });
+            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+            
             window.showView('login-section');
             updateWhatsApp();
         };
