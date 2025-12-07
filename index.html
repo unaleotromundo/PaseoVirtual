@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="./supabase.js"></script>
     <style>
-        /* >>>>> TU CSS COMPLETO (del archivo viejo, sin conflictos) <<<<< */
+        /* VARIABLES CSS - TEMA OSCURO DORADO PREMIUM */
         :root {
             --primary: #10b981;
             --primary-dark: #059669;
@@ -876,7 +876,6 @@
         @keyframes fadeOut {
             to { opacity: 0; transform: translateX(120%); }
         }
-
         /* === CARRUSEL MODERNO (ESTILO YOUTUBE) === */
         #carousel-wrapper {
             position: relative;
@@ -1024,7 +1023,6 @@
         .carousel-action-btn:hover {
             background: var(--primary);
         }
-
         /* FULLSCREEN VERDADERO */
         #carousel-container:fullscreen,
         #carousel-container:-webkit-full-screen,
@@ -1073,7 +1071,6 @@
             position: fixed !important;
             bottom: 30px !important;
         }
-
         @media (max-width: 768px) {
             #carousel-wrapper { height: 280px; }
             .carousel-play-large { width: 70px; height: 70px; font-size: 1.8rem; }
@@ -1236,7 +1233,7 @@
     <script type="module">
         import { loadDogs, loadWalks, createDog, createWalk, uploadPhoto } from './supabase.js';
 
-        // === ESTADO GLOBAL ===
+        // === DECLARACIONES GLOBALES ===
         let currentUser = null;
         let currentDog = null;
         let currentView = 'login-section';
@@ -1273,8 +1270,8 @@
             button.appendChild(circle);
         }
 
-        // === FUNCIONES PRINCIPALES ===
-        function showView(id, dogId = null) {
+        // === FUNCIONES EXPUESTAS EN EL SCOPE GLOBAL (para onclick en HTML) ===
+        window.showView = function(id, dogId = null) {
             const section = document.getElementById(id);
             if (!section) {
                 console.error(`Sección no encontrada: ${id}`);
@@ -1315,12 +1312,12 @@
             document.getElementById('loading-overlay').style.display = 'none';
             updateWhatsApp();
             window.scrollTo(0, 0);
-        }
+        };
 
-        function goBack() {
-            if (backStack.length) showView(backStack.pop());
-            else showView('login-section');
-        }
+        window.goBack = function() {
+            if (backStack.length) window.showView(backStack.pop());
+            else window.showView('login-section');
+        };
 
         // === LOGIN ===
         document.getElementById('login-form').onsubmit = async (e) => {
@@ -1329,14 +1326,14 @@
             const pass = e.target.password.value;
             if (email === 'admin@paseos.com' && pass === 'admin123') {
                 currentUser = { email, isAdmin: true };
-                showView('admin-dashboard-section');
+                window.showView('admin-dashboard-section');
             } else {
                 try {
                     const dogs = await loadDogs(email, false);
                     if (dogs.length > 0 && pass === '123456') {
                         currentUser = { email, isAdmin: false };
                         currentDog = dogs[0];
-                        showView('dog-selection-dashboard');
+                        window.showView('dog-selection-dashboard');
                     } else {
                         showToast('Credenciales incorrectas', 'error');
                     }
@@ -1489,7 +1486,7 @@
                 };
                 await createDog(dogData);
                 showToast('✅ Perro registrado', 'success');
-                showView('admin-dashboard-section');
+                window.showView('admin-dashboard-section');
             } catch (err) {
                 showToast('Error al guardar', 'error');
             } finally {
@@ -1560,7 +1557,7 @@
                     await createWalk(walkData, cb.value);
                 }
                 showToast('✅ Paseo guardado con fotos reales', 'success');
-                showView('dog-selection-dashboard');
+                window.showView('dog-selection-dashboard');
             } catch (err) {
                 showToast('❌ Error al guardar', 'error');
             } finally {
@@ -1588,7 +1585,6 @@
         }
 
         function toggleEditMode() {
-            // En versión Supabase, edición de perfil se haría con update, pero por ahora solo vista
             alert('Edición de perfil no implementada en Supabase aún.');
         }
 
@@ -1664,13 +1660,17 @@
                 carouselAudio.pause();
                 carouselAudio = null;
                 isPlaying = false;
-                updatePlayState();
+                // Actualizar estado visual
+                const playPauseBtn = document.getElementById('play-pause-btn');
+                const playLargeBtn = document.getElementById('carousel-play-large');
+                if (playPauseBtn) playPauseBtn.textContent = '▶';
+                if (playLargeBtn) playLargeBtn.textContent = '▶';
             }
         };
 
         // === INIT ===
         window.onload = () => {
-            showView('login-section');
+            window.showView('login-section');
             updateWhatsApp();
             document.querySelectorAll('.ripple').forEach(btn => {
                 btn.addEventListener('click', createRipple);
