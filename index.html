@@ -1265,7 +1265,22 @@
             fields.forEach(k => {
                 e.innerHTML += `<label>${k.charAt(0).toUpperCase() + k.slice(1)}</label><input type="text" name="${k}" value="${p[k]}">`;
             });
-            e.innerHTML += '<button type="submit" class="save-btn ripple">Guardar Cambios</button>';
+            e.innerHTML += '<button type="submit" class="save-btn ripple">Guardar e.innerHTML += '<button type="submit" class="save-btn ripple">Guardar Cambios</button>';
+e.onsubmit = (ev) => {
+    ev.preventDefault();
+    const formData = new FormData(ev.target);
+    fields.forEach(k => {
+        currentDog.perfil[k] = formData.get(k);
+    });
+    if(tempPhotoId) currentDog.perfil.foto_id = tempPhotoId;
+    const idx = MOCK_DOGS.findIndex(d => d.id === currentDog.id);
+    MOCK_DOGS[idx] = currentDog;
+    saveDB(MOCK_DOGS);
+    showToast('✅ Perfil actualizado', 'success');
+    isEditing = false;
+    tempPhotoId = null;
+    loadProfile(currentDog);
+};
             v.style.display = isEditing ? 'none' : 'block';
             e.style.display = isEditing ? 'block' : 'none';
             if (isEditing) {
@@ -1602,7 +1617,105 @@
                 location.reload();
             }
         };
+// AGREGAR ESTAS FUNCIONES AL FINAL DEL <script>, antes de window.onload
 
+// Cargar DB desde localStorage o crear nueva
+function loadDB() {
+    const data = localStorage.getItem(DB_KEY);
+    if (data) {
+        return JSON.parse(data);
+    }
+    return DATABASE ? DATABASE.dogs : [];
+}
+
+// Guardar DB en localStorage
+function saveDB(data) {
+    localStorage.setItem(DB_KEY, JSON.stringify(data));
+    MOCK_DOGS = data;
+}
+
+// Generar URL de foto (usando Picsum o placeholder)
+function getPhotoUrl(id, width, height) {
+    if (!id) id = 1000;
+    return `https://picsum.photos/id/${id}/${width}/${height}`;
+}
+
+// Cargar base de datos externa
+async function loadExternalDB() {
+    try {
+        const response = await fetch(DB_URL);
+        if (!response.ok) throw new Error('No se pudo cargar DB externa');
+        DATABASE = await response.json();
+        TRAINER_PHONE = DATABASE.trainer_phone || TRAINER_PHONE;
+        return true;
+    } catch (error) {
+        console.warn('Usando DB local de respaldo');
+        // DB de respaldo si no existe el archivo externo
+        DATABASE = {
+            trainer_phone: "5491100000000",
+            photo_references: {
+                random: [1, 237, 433, 659, 718, 783, 837, 1025, 1074]
+            },
+            dogs: [
+                {
+                    id: 1,
+                    nombre: "Fido",
+                    dueno_email: "cliente@paseos.com",
+                    perfil: {
+                        raza: "Labrador",
+                        sexo: "Macho",
+                        dueno: "Juan Pérez",
+                        telefono: "+5491123456789",
+                        foto_id: 237,
+                        edad: "3 años",
+                        peso: "30 kg",
+                        alergias: "Ninguna",
+                        energia: "Alta",
+                        social: "Muy sociable"
+                    },
+                    walks: []
+                },
+                {
+                    id: 2,
+                    nombre: "Luna",
+                    dueno_email: "luna@paseos.com",
+                    perfil: {
+                        raza: "Golden Retriever",
+                        sexo: "Hembra",
+                        dueno: "María García",
+                        telefono: "+5491198765432",
+                        foto_id: 433,
+                        edad: "2 años",
+                        peso: "25 kg",
+                        alergias: "Polen",
+                        energia: "Media",
+                        social: "Sociable"
+                    },
+                    walks: []
+                },
+                {
+                    id: 3,
+                    nombre: "Max",
+                    dueno_email: "max@paseos.com",
+                    perfil: {
+                        raza: "Pastor Alemán",
+                        sexo: "Macho",
+                        dueno: "Carlos López",
+                        telefono: "+5491187654321",
+                        foto_id: 659,
+                        edad: "4 años",
+                        peso: "35 kg",
+                        alergias: "Ninguna",
+                        energia: "Muy alta",
+                        social: "Selectivo"
+                    },
+                    walks: []
+                }
+            ]
+        };
+        return true;
+    }
+}
         // === INIT ===
         window.onload = async () => {
             document.getElementById('loading-overlay').style.display = 'flex';
