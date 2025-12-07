@@ -1514,8 +1514,9 @@
             const profilePhoto = document.getElementById('profile-photo');
             const uploadInput = document.getElementById('profile-photo-upload');
 
-            const currentPhoto = dog.foto_url || 'https://via.placeholder.com/250/4B5563/FFFFFF?text=Sin+foto';
-            profilePhoto.src = currentPhoto;
+            // Reemplazado via.placeholder.com por placehold.co
+const currentPhoto = dog.foto_url || 'https://placehold.co/250x250/4B5563/FFFFFF?text=Sin+foto';
+profilePhoto.src = currentPhoto;
 
             photoContainer.onclick = () => uploadInput.click();
 
