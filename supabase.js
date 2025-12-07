@@ -33,7 +33,15 @@ export async function loadDogs(email = null, isAdmin = false) {
 
     console.log('✅ [LOAD DOGS] Perros cargados:', data.length);
     console.table(data);
-    return data;
+    // Incluir aquí la lógica para asegurar que los nuevos campos existen, aunque sea como null
+    return data.map(dog => ({
+        ...dog,
+        edad: dog.edad || null,
+        peso: dog.peso || null,
+        alergias: dog.alergias || '',
+        energia: dog.energia || 'Bajo',
+        social: dog.social || 'Buena'
+    }));
 }
 
 /**
@@ -127,7 +135,7 @@ export async function updateDogProfile(dogData) {
             alergias: dogData.alergias,
             energia: dogData.energia,
             social: dogData.social,
-            // foto_url no se actualiza aquí, sino en updateDogProfilePhoto
+            // foto_url no se actualiza aquí
         })
         .eq('id', dogData.id);
 
@@ -213,16 +221,11 @@ export async function deleteWalk(walkId) {
 
 /**
  * 📤 Subir foto de paseo al bucket 'photos'
- * 💡 FUNCIÓN RENOMBRADA DE 'uploadPhoto' A 'uploadWalkPhoto'
  */
 export async function uploadWalkPhoto(file, dogId) {
     const timestamp = Date.now();
     const fileName = `${dogId}/${timestamp}-${file.name}`;
     console.log('📤 [UPLOAD PHOTO] Subiendo archivo a Storage...');
-    console.log('   Nombre original:', file.name);
-    console.log('   Tipo:', file.type);
-    console.log('   Tamaño:', file.size, 'bytes');
-    console.log('   Ruta en bucket:', fileName);
 
     const { error: uploadError } = await supabase
         .storage
@@ -236,8 +239,6 @@ export async function uploadWalkPhoto(file, dogId) {
         console.error('❌ [UPLOAD PHOTO] ERROR al subir archivo:', uploadError.message);
         throw new Error('Error al subir foto: ' + uploadError.message);
     }
-
-    console.log('✅ [UPLOAD PHOTO] Archivo subido con éxito');
 
     const { data, error: urlError } = await supabase
         .storage
