@@ -12,6 +12,7 @@ console.log('✅ [SUPABASE] Cliente creado con éxito');
 
 /**
  * 🐶 Cargar perros desde Supabase
+ * Incluye la inicialización de los nuevos campos de perfil.
  */
 export async function loadDogs(email = null, isAdmin = false) {
     console.log('📥 [LOAD DOGS] Iniciando carga de perros...');
@@ -33,7 +34,7 @@ export async function loadDogs(email = null, isAdmin = false) {
 
     console.log('✅ [LOAD DOGS] Perros cargados:', data.length);
     console.table(data);
-    // Incluir aquí la lógica para asegurar que los nuevos campos existen, aunque sea como null
+    // Mapeo para asegurar que los nuevos campos existen, aunque sea como null
     return data.map(dog => ({
         ...dog,
         edad: dog.edad || null,
@@ -179,7 +180,7 @@ export async function createWalk(walkData, dogId) {
 }
 
 /**
- * 💾 Actualizar paseo
+ * 💾 Actualizar paseo (Requerido para la edición de paseos en el HTML)
  */
 export async function updateWalk(walkData) {
     console.log('💾 [UPDATE WALK] Actualizando paseo ID:', walkData.id);
@@ -203,7 +204,7 @@ export async function updateWalk(walkData) {
 }
 
 /**
- * 🗑️ Eliminar paseo
+ * 🗑️ Eliminar paseo (Requerido por el botón de eliminación en el HTML)
  */
 export async function deleteWalk(walkId) {
     console.log('🗑️ [DELETE WALK] Eliminando paseo ID:', walkId);
@@ -225,7 +226,7 @@ export async function deleteWalk(walkId) {
 export async function uploadWalkPhoto(file, dogId) {
     const timestamp = Date.now();
     const fileName = `${dogId}/${timestamp}-${file.name}`;
-    console.log('📤 [UPLOAD PHOTO] Subiendo archivo a Storage...');
+    console.log('📤 [UPLOAD PHOTO] Subiendo archivo de paseo a Storage...');
 
     const { error: uploadError } = await supabase
         .storage
@@ -259,6 +260,7 @@ export async function uploadWalkPhoto(file, dogId) {
  * 📤 Subir foto de perfil al bucket 'photos'
  */
 export async function uploadProfilePhoto(dogId, file) {
+    // Usamos dogId como primer argumento para que coincida con la firma en el HTML
     const fileName = `profile/${dogId}/avatar-${Date.now()}-${file.name}`;
     console.log('📤 [PERFIL] Subiendo foto de perfil:', fileName);
     
