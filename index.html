@@ -1332,12 +1332,14 @@
         }
 
         function hideControls() {
-            document.getElementById('carousel-play-large').style.display = 'none';
-            document.querySelector('.carousel-controls').classList.remove('visible');
-            document.querySelectorAll('.carousel-nav-btn').forEach(btn => {
-                btn.style.opacity = '0';
-                btn.style.transform = 'translateY(20px)';
-            });
+            if (!isPlaying) {
+                document.getElementById('carousel-play-large').style.display = 'none';
+                document.querySelector('.carousel-controls').classList.remove('visible');
+                document.querySelectorAll('.carousel-nav-btn').forEach(btn => {
+                    btn.style.opacity = '0';
+                    btn.style.transform = 'translateY(20px)';
+                });
+            }
         }
 
         function showControls() {
@@ -1354,46 +1356,140 @@
         // === CAROUSEL MODERNO CON AUDIO ===
         let timeoutId = null;
         function initCarousel() {
-            const wrapper = document.getElementById('carousel-wrapper');
-            const container = document.getElementById('carousel-container');
-            const slides = [];
-            if (currentDog && currentDog.walks) {
-                currentDog.walks.forEach(wa => {
-                    if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
-                });
+    const wrapper = document.getElementById('carousel-wrapper');
+    const container = document.getElementById('carousel-container');
+    const slides = [];
+    if (currentDog && currentDog.walks) {
+        currentDog.walks.forEach(wa => {
+            if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
+        });
+    }
+    if (!slides.length) {
+        wrapper.style.display = 'none';
+        return;
+    }
+    wrapper.style.display = 'flex';
+    let idx = 0;
+    isPlaying = false;
+
+    const img = document.getElementById('carousel-img');
+    const counter = document.getElementById('carousel-counter');
+
+    const showSlide = () => {
+        img.style.opacity = 0;
+        setTimeout(() => {
+            img.src = getPhotoUrl(slides[idx], 800, 500);
+            img.onload = () => { img.style.opacity = 1; };
+            counter.textContent = `${idx + 1} / ${slides.length}`;
+        }, 200);
+    };
+
+    // ===== AGREGA ESTAS FUNCIONES AQUÍ =====
+    window.nextSlide = () => {
+        idx = (idx + 1) % slides.length;
+        showSlide();
+        showControls();
+    };
+
+    window.prevSlide = () => {
+        idx = (idx - 1 + slides.length) % slides.length;
+        showSlide();
+        showControls();
+    };
+
+    window.togglePlay = () => {
+        if (!isPlaying) {
+            playRandomCarouselTrack();
+            isPlaying = true;
+        } else {
+            if (carouselAudio) {
+                carouselAudio.pause();
+                carouselAudio = null;
             }
-            if (!slides.length) {
-                wrapper.style.display = 'none';
-                return;
-            }
-            wrapper.style.display = 'flex';
-            let idx = 0;
             isPlaying = false;
+        }
+        updatePlayButton();
+        showControls();
+    };
+    // ===== FIN DE LAS FUNCIONES =====
 
-            const img = document.getElementById('carousel-img');
-            const counter = document.getElementById('carousel-counter');
+    // Comportamiento unificado: mostrar controles al pasar mouse o tocar
+    container.addEventListener('mouseenter', showControls);
+    container.addEventListener('mousemove', showControls);
+    container.addEventListener('touchstart', (e) => {
+        showControls();
+    }, { passive: true });
+    
+    container.addEventListener('click', (e) => {
+        if (!e.target.closest('button')) {
+            showControls();
+        }
+    });
 
-            const showSlide = () => {
-                img.style.opacity = 0;
-                setTimeout(() => {
-                    img.src = getPhotoUrl(slides[idx], 800, 500);
-                    img.onload = () => { img.style.opacity = 1; };
-                    counter.textContent = `${idx + 1} / ${slides.length}`;
-                }, 200);
-            };
+    window.toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().catch(console.warn);
+        } else {
+            document.exitFullscreen();
+        }
+    };
 
+    showSlide();
+    showControls();
+    
+    // Avance automático cada 3 segundos
+    slideInterval = setInterval(() => {
+        if (!isPlaying) {
+            window.nextSlide();
+        }
+    }, 3000);
+}
+
+<<<<<<< HEAD
                         // Comportamiento unificado: mostrar controles al pasar mouse o tocar
+=======
+>>>>>>> parent of 0f31942 (rrr)
             container.addEventListener('mouseenter', showControls);
-            container.addEventListener('mousemove', showControls);
             container.addEventListener('touchstart', (e) => {
+                e.preventDefault();
                 showControls();
-            }, { passive: true });
-            
-            container.addEventListener('click', (e) => {
-                if (!e.target.closest('button')) {
+            }, { passive: false });
+            container.addEventListener('click', showControls);
+
+            window.prevSlide = () => {
+                idx = (idx - 1 + slides.length) % slides.length;
+                showSlide();
+                showControls();
+            };
+            window.nextSlide = () => {
+                idx = (idx + 1) % slides.length;
+                showSlide();
+                showControls();
+            };
+            window.togglePlay = () => {
+                isPlaying = !isPlaying;
+                updatePlayButton();
+                if (isPlaying) {
+                    playRandomCarouselTrack();
+                    // Iniciar avance automático de imágenes cada 5 segundos
+                    slideInterval = setInterval(() => {
+                        window.nextSlide();
+                    }, 5000);
+                    // Ocultar controles después de 1 segundo
+                    setTimeout(hideControls, 1000);
+                } else {
+                    if (carouselAudio) {
+                        carouselAudio.pause();
+                        carouselAudio = null;
+                    }
+                    // Detener avance automático
+                    if (slideInterval) {
+                        clearInterval(slideInterval);
+                        slideInterval = null;
+                    }
                     showControls();
                 }
-            });
+            };
 
             window.toggleFullscreen = () => {
                 if (!document.fullscreenElement) {
