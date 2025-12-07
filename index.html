@@ -34,1926 +34,1383 @@
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --radius: 12px;
-            --radius-lg: 16px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --gold: #ffc107;
         }
+
         [data-theme="dark"] {
-            --primary: #D4AF37;
-            --primary-dark: #B8860B;
-            --primary-light: rgba(212, 175, 55, 0.15);
-            --secondary: #60a5fa;
-            --secondary-dark: #3b82f6;
-            --danger: #f87171;
-            --danger-light: #450a0a;
-            --warning: #fbbf24;
-            --warning-light: #451a03;
-            --text-primary: #f8f9fa;
-            --text-secondary: #b0b0b0;
-            --bg-body: #0F0F1B;
-            --bg-card: #1A1A2E;
-            --bg-input: #25253A;
-            --border: #33334D;
-            --shadow: 0 4px 12px -1px rgba(0, 0, 0, 0.6);
-            --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.7);
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --bg-body: #111827;
+            --bg-card: #1f2937;
+            --bg-input: #374151;
+            --border: #374151;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --primary: #ffc107; /* Dorado para Premium */
+            --primary-dark: #e0a800;
+            --primary-light: #4b3d17;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* RESET & BASE */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--bg-body);
+            background-color: var(--bg-body);
             color: var(--text-primary);
             line-height: 1.6;
-            min-height: 100vh;
-            padding: 20px;
-            transition: background 0.3s, color 0.3s;
+            transition: background-color 0.3s, color 0.3s;
         }
-        [data-theme="light"] body {
-            background: linear-gradient(135deg, #f9fafb 0%, #e0f2fe 100%);
-        }
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            position: relative;
-            animation: fadeInDown 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-        h1 {
-            color: var(--primary);
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 8px;
-            text-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
-            animation: heartbeatGlow 4s ease-in-out 1.5s infinite;
-        }
-        #saludo-usuario {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-        #theme-toggle {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: var(--bg-card);
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 1.8rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            overflow: hidden;
-            position: relative;
-        }
-        #theme-toggle:hover {
-            transform: scale(1.1);
-            border-color: var(--primary);
-        }
-        #app-container {
-            max-width: 900px;
+
+        /* LAYOUT */
+        .container {
+            max-width: 1000px;
             margin: 0 auto;
-            background: var(--bg-card);
-            padding: 40px;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
-            animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            opacity: 0;
+            padding: 20px;
         }
-        h2 {
+
+        /* HEADINGS */
+        h1, h2, h3 {
             color: var(--text-primary);
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 24px;
-            padding-bottom: 12px;
-            border-bottom: 3px solid var(--primary-light);
+            margin-bottom: 10px;
         }
-        h3 {
-            color: var(--text-primary);
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin: 24px 0 12px 0;
+
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 2rem; }
+        h3 { font-size: 1.5rem; }
+
+        /* CARDS */
+        .card {
+            background-color: var(--bg-card);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            transition: background-color 0.3s, box-shadow 0.3s;
         }
-        h4 {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 16px 0 8px 0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        input, textarea, select {
-            width: 100%;
-            padding: 14px 16px;
-            margin-bottom: 16px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 1rem;
-            transition: var(--transition);
-            background: var(--bg-input);
-            color: var(--text-primary);
-        }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
+
+        /* FORMS & INPUTS */
         label {
             display: block;
-            color: var(--text-primary);
-            font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 0.95rem;
-        }
-        .password-wrapper {
-            position: relative;
-            margin-bottom: 16px;
-        }
-        .password-wrapper input {
-            margin-bottom: 0;
-            padding-right: 50px;
-        }
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.5rem;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-weight: bold;
             color: var(--text-secondary);
         }
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            margin: 16px 0;
-            padding: 12px;
-            background: var(--bg-input);
-            border-radius: var(--radius);
+
+        input[type="text"], 
+        input[type="email"], 
+        input[type="password"], 
+        input[type="number"], 
+        input[type="tel"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
             border: 1px solid var(--border);
-        }
-        .checkbox-group input {
-            width: 20px;
-            height: 20px;
-            margin: 0 12px 0 0;
-            cursor: pointer;
-            accent-color: var(--primary);
-        }
-        .checkbox-group label {
-            margin: 0;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        button {
-            font-family: inherit;
-            font-size: 1rem;
-            font-weight: 600;
-            padding: 14px 24px;
-            border: none;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-        button.ripple {
-            position: relative;
-            overflow: hidden;
-        }
-        .ripple-effect {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0);
-            animation: ripple 0.6s ease-out;
-        }
-        [data-theme="dark"] .ripple-effect {
-            background: rgba(212, 175, 55, 0.5);
-        }
-        @keyframes ripple {
-            to { transform: scale(4); opacity: 0; }
-        }
-        button[type="submit"],
-        .btn-primary,
-        .add-dog-btn,
-        .nav-button,
-        .admin-action-button {
-            background: var(--primary);
-            color: white;
-            width: 100%;
-            margin-top: 8px;
-        }
-        [data-theme="dark"] button:hover {
-            animation: glowIn 0.6s ease-out;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
-        }
-        .edit-btn {
-            background: var(--warning);
-            color: white;
-            width: auto;
-            padding: 8px 16px;
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
-        .save-btn {
-            background: var(--primary);
-            color: white;
-            width: 100%;
-            margin-top: 20px;
-        }
-        .dog-card {
-            background: var(--bg-input);
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: var(--transition);
-            opacity: 0;
-            animation: popIn 0.5s ease-out forwards;
-            animation-delay: calc(var(--i) * 0.1s);
-        }
-        .dog-card:hover {
-            border-color: var(--primary);
-            box-shadow: var(--shadow);
-            transform: translateX(4px);
-        }
-        .dog-card span {
-            font-size: 1.1rem;
+            border-radius: 4px;
+            background-color: var(--bg-input);
             color: var(--text-primary);
+            transition: border-color 0.3s, background-color 0.3s;
         }
-        .dog-card button {
-            background: var(--primary);
-            color: white;
-            padding: 10px 20px;
-            width: auto;
-            margin: 0;
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-light);
         }
-        .walk-session {
-            background: var(--bg-card);
-            border: 2px solid var(--border);
-            border-radius: var(--radius-lg);
-            margin-bottom: 32px;
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            opacity: 0;
-            animation: fadeInUp 0.6s cubic-bezier(0.34, 1.2, 0.6, 1) forwards;
-            animation-delay: calc(var(--i) * 0.08s);
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
         }
-        .walk-session h3 {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 20px 24px;
-            margin: 0;
-            font-size: 1.3rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .admin-walk-controls {
-            display: flex;
-            gap: 8px;
-        }
-        .admin-walk-btn {
-            background: rgba(255, 255, 255, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            padding: 5px 12px;
-            font-size: 0.85rem;
-            width: auto;
-            color: white;
-        }
-        .admin-walk-btn:hover {
-            background: white;
-            color: var(--primary);
-        }
-        .walk-details {
-            padding: 24px;
-            border-left: 4px solid var(--primary-light);
-            background: var(--bg-input);
-        }
-        .walk-metrics {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-            margin: 16px 0;
-        }
-        .walk-metrics span {
-            background: var(--bg-card);
-            padding: 10px 16px;
-            border-radius: var(--radius);
-            font-weight: 600;
-            color: var(--secondary);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border);
-        }
-        .incident-alert {
-            background: var(--danger-light);
-            color: #991b1b;
-            padding: 16px;
-            margin: 12px 0;
-            border-radius: var(--radius);
-            border-left: 5px solid var(--danger);
-            font-weight: 500;
-        }
-        .success-notice {
-            background: var(--primary-light);
-            color: #065f46;
-            padding: 12px 16px;
-            margin: 12px 0;
-            border-radius: var(--radius);
-            font-weight: 500;
-        }
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 16px;
-            padding: 24px;
-            background: var(--bg-card);
-        }
-        .photo-card {
-            position: relative;
-            border-radius: var(--radius);
-            overflow: hidden;
+
+        /* BUTTONS */
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
-            aspect-ratio: 1;
-            box-shadow: var(--shadow-sm);
-            transition: transform 0.2s;
-        }
-        .photo-card:hover {
-            transform: scale(1.05);
-        }
-        .photo-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        #profile-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 32px;
-            margin-top: 24px;
-        }
-        #profile-photo-container {
+            font-weight: bold;
+            transition: background-color 0.3s, opacity 0.3s;
+            margin-right: 10px;
+            display: inline-block;
             text-align: center;
         }
-        #profile-photo {
-            width: 100%;
-            max-width: 250px;
-            height: 250px;
-            object-fit: cover;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
-            border: 4px solid var(--primary-light);
-            cursor: pointer;
-        }
-        .detail-row {
-            padding: 12px 16px;
-            margin: 8px 0;
-            background: var(--bg-input);
-            border-radius: var(--radius);
-            border-left: 4px solid var(--primary);
-            display: flex;
-            align-items: center;
-        }
-        .detail-label {
-            font-weight: 700;
-            color: var(--text-secondary);
-            min-width: 140px;
-        }
-        .detail-value {
-            color: var(--text-primary);
-        }
-        .whatsapp-float,
-        .audio-float {
-            position: fixed;
-            bottom: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 5000;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-        .whatsapp-float {
-            right: 30px;
-            background-color: #25d366;
+
+        .btn.primary {
+            background-color: var(--primary);
             color: white;
-            width: 60px;
-            height: 60px;
-            font-size: 35px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
         }
-        .whatsapp-float:hover {
-            transform: scale(1.1);
-            box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.4);
+
+        .btn.primary:hover {
+            background-color: var(--primary-dark);
         }
-        .audio-float {
-            right: 100px;
-            background: rgba(30, 30, 40, 0.85);
-            color: #d4af37;
-            width: 44px;
-            height: 44px;
-            font-size: 18px;
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            backdrop-filter: blur(4px);
-            cursor: pointer;
-        }
-        .audio-float:hover {
-            transform: scale(1.1);
+
+        .btn.secondary {
+            background-color: var(--text-secondary);
             color: white;
-            background: rgba(212, 175, 55, 0.3);
         }
-        [data-theme="light"] .audio-float {
-            background: rgba(255, 255, 255, 0.85);
-            color: #4b5563;
+
+        .btn.secondary:hover {
+            opacity: 0.8;
         }
-        [data-theme="light"] .audio-float:hover {
-            color: #10b981;
+
+        .btn.danger {
+            background-color: var(--danger);
+            color: white;
         }
-        .error {
+
+        .btn.danger:hover {
+            background-color: var(--danger-light);
             color: var(--danger);
-            background: var(--danger-light);
-            padding: 12px;
-            border-radius: var(--radius);
-            text-align: center;
-            margin-top: 10px;
         }
-        .info-text {
-            background: #dbeafe;
-            color: #1e40af;
-            padding: 12px 16px;
-            border-radius: var(--radius);
-            margin: 12px 0;
-            border-left: 4px solid var(--secondary);
-        }
-        #photo-preview img,
-        #edit-photo-preview img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin: 5px;
-        }
-        .delete-photo-btn {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: red;
-            color: white;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: none;
-            font-size: 12px;
-        }
-        #edit-walk-modal,
-        #lightbox {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content {
-            background: var(--bg-card);
-            padding: 30px;
-            border-radius: var(--radius-lg);
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-        }
-        #lightbox-img {
-            max-width: 90%;
-            max-height: 85vh;
-            border-radius: var(--radius);
-        }
-        .lightbox-close {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            color: white;
-            font-size: 3rem;
-            cursor: pointer;
-        }
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-24px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(24px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes popIn {
-            0% { transform: scale(0.9); opacity: 0; }
-            70% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes glowIn {
-            0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
-            70% { box-shadow: 0 0 20px 4px rgba(212, 175, 55, 0.4); }
-            100% { box-shadow: 0 0 12px 2px rgba(212, 175, 55, 0.3); }
-        }
-        @keyframes heartbeatGlow {
-            0%, 100% { text-shadow: 0 0 12px rgba(212, 175, 55, 0.4); }
-            50% { text-shadow: 0 0 24px rgba(212, 175, 55, 0.8), 0 0 36px rgba(212, 175, 55, 0.6); }
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #particles-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-            display: none;
-        }
-        [data-theme="dark"] #particles-container {
-            display: block;
-        }
-        .particle {
-            position: absolute;
-            background: rgba(212, 175, 55, 0.6);
-            border-radius: 50%;
-            animation: float 15s infinite ease-in-out;
-            box-shadow: 0 0 8px rgba(212, 175, 55, 0.7);
-        }
-        .particle:nth-child(2n) { animation-duration: 18s; animation-delay: 2s; }
-        .particle:nth-child(3n) { animation-duration: 22s; animation-delay: 4s; }
-        .particle:nth-child(5n) { animation-duration: 25s; animation-delay: 1s; }
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
-            25% { transform: translate(10vw, -20vh) scale(1.1); }
-            50% { transform: translate(20vw, -40vh) scale(0.9); }
-            75% { transform: translate(-15vw, -30vh) scale(1.05); }
-        }
-        #multi-dog-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .dog-select-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px;
-            background: var(--bg-input);
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-        /* MÓVIL VERTICAL - TODO MÁS GRANDE Y CERCA */
-        @media (max-width: 768px) and (orientation: portrait) {
-            body { 
-                padding: 12px;
-                font-size: 1.1rem;
-            }
-            header { margin-bottom: 24px; }
-            h1 { 
-                font-size: 2.8rem;
-                margin-bottom: 12px;
-            }
-            #saludo-usuario { font-size: 1.2rem; }
-            #theme-toggle {
-                width: 40px;
-                height: 40px;
-                font-size: 1.5rem;
-                right: 12px;
-                top: -10px;
-            }
-            #app-container {
-                padding: 25px 20px;
-            }
-            h2 {
-                font-size: 1.5rem;
-                margin-bottom: 16px;
-            }
-            h3 {
-                font-size: 1.15rem;
-                margin: 20px 0 10px 0;
-            }
-            button {
-                padding: 12px 18px;
-                font-size: 0.95rem;
-            }
-            .walk-session h3 {
-                font-size: 1.1rem;
-                padding: 15px 20px;
-            }
-            .admin-walk-btn {
-                padding: 8px 16px;
-                font-size: 0.95rem;
-            }
-            .walk-details {
-                padding: 20px;
-            }
-            .walk-metrics {
-                gap: 12px;
-            }
-            .walk-metrics span {
-                padding: 12px 16px;
-                font-size: 1rem;
-            }
-            #profile-content {
-                grid-template-columns: 1fr;
-                gap: 24px;
-            }
-            #profile-photo {
-                max-width: 200px;
-                height: 200px;
-            }
-            .detail-row {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 14px 18px;
-                gap: 6px;
-            }
-            .detail-label {
-                font-size: 1rem;
-                min-width: auto;
-            }
-            .detail-value {
-                font-size: 1.1rem;
-            }
-            .gallery {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-                gap: 12px;
-                padding: 16px;
-            }
-            .whatsapp-float {
-                right: 16px;
-                bottom: 24px;
-                width: 64px;
-                height: 64px;
-                font-size: 38px;
-            }
-            .audio-float {
-                right: 90px;
-                bottom: 24px;
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-            .info-text {
-                font-size: 1rem;
-                padding: 14px 18px;
-            }
-            .error {
-                font-size: 1rem;
-                padding: 14px;
-            }
-            .modal-content {
-                padding: 24px;
-                width: 95%;
-            }
-            #toast-container {
-                top: 12px;
-                right: 12px;
-            }
-            .toast {
-                max-width: calc(100vw - 32px);
-                font-size: 1rem;
-                padding: 16px 20px;
-            }
-        }
-        /* MÓVILES MUY PEQUEÑOS */
-        @media (max-width: 380px) and (orientation: portrait) {
-            h1 { font-size: 2.5rem; }
-            .whatsapp-float { right: 12px; width: 55px; height: 55px; font-size: 32px; }
-            .audio-float { right: 75px; width: 40px; height: 40px; font-size: 16px; }
-            .detail-value { font-size: 1rem; }
-            .detail-label { font-size: 0.95rem; }
-        }
-        /* CARRUSEL DE PASEOS */
-        #carousel-wrapper {
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
-            margin-bottom: 20px;
-            position: relative;
-            height: 400px; /* Altura fija para el carrusel */
-            border: 4px solid var(--border);
-            transition: var(--transition);
-        }
-        #carousel-wrapper:hover {
-            border-color: var(--primary);
-        }
-        #carousel-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-        #carousel-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            transition: opacity 0.3s ease;
-        }
-        .carousel-play-large {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border: none;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 200;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        #carousel-wrapper.active .carousel-play-large, #carousel-wrapper:hover .carousel-play-large {
-            opacity: 1;
-        }
-        .carousel-play-large:hover {
-            background: rgba(212, 175, 55, 0.9);
-        }
-        .carousel-play-large.playing {
-            opacity: 0 !important;
-            pointer-events: none;
-        }
-        .carousel-nav {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            pointer-events: none;
-            z-index: 150;
-        }
-        .carousel-nav-btn {
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            pointer-events: auto;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        #carousel-wrapper.active .carousel-nav-btn, #carousel-wrapper:hover .carousel-nav-btn {
-            opacity: 1;
-        }
-        .carousel-nav-btn:hover {
-            background: rgba(212, 175, 55, 0.8);
-        }
-        .carousel-nav-btn.playing {
-            opacity: 0 !important;
-            pointer-events: none;
-        }
-        .carousel-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 16px;
-            border-radius: 20px;
-            z-index: 150;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        #carousel-wrapper.active .carousel-controls, #carousel-wrapper:hover .carousel-controls {
-            opacity: 1;
-        }
-        #carousel-wrapper.playing .carousel-controls {
-            opacity: 0;
-        }
-        .control-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            width: 30px;
-            height: 30px;
-            padding: 0;
-        }
-        .control-btn:hover {
-            color: var(--primary);
-            transform: scale(1.1);
-            box-shadow: none;
-        }
-        #carousel-container:fullscreen {
-            background: #000;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-        }
-        #carousel-container:fullscreen .carousel-controls {
-            position: fixed !important;
-            bottom: 30px !important;
-        }
-        @media (max-width: 768px) {
-            #carousel-wrapper {
-                height: 280px;
-            }
-            .carousel-play-large {
-                width: 70px;
-                height: 70px;
-                font-size: 1.8rem;
-            }
-            .carousel-nav-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 1.5rem;
-            }
-            .carousel-controls {
-                padding: 6px 12px;
-                gap: 12px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div id="particles-container"></div>
-    <div id="toast-container"></div>
 
-    <div id="loading-overlay">
-        <div class="spinner"></div>
-        <p style="color: white; font-size: 1.2rem;">Conectando a Supabase...</p>
-    </div>
+        /* UTILITIES */
+        .text-center { text-align: center; }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; }
+        .flex-start { justify-content: flex-start; }
+        .mt-20 { margin-top: 20px; }
 
-    <a href="#" id="whatsapp-btn" class="whatsapp-float" target="_blank" style="display:none;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.89-5.401 0-9.833 4.381-9.891 9.805-.001 2.0.518 3.882 1.477 5.579l-.827 3.031 3.176-.837zm9.148-5.592c-.08-.146-.264-.233-.55-.386-.285-.152-1.673-.828-1.933-.923-.26-.095-.447-.142-.633.142-.186.285-.724.923-.887 1.114-.163.192-.326.216-.607.074-.356-.188-1.498-.552-2.853-1.765-.892-.778-1.493-1.737-1.676-2.049-.184-.311-.018-.48.163-.665.156-.156.326-.37.49-.553.164-.183.218-.311.326-.518.109-.206.054-.388-.03-.54-.082-.152-.632-1.523-.867-2.083-.235-.561-.47-.484-.634-.492-.156-.007-.336-.008-.516-.008-.186 0-.486.074-.746.368-.26.295-.992.973-.992 2.378 0 1.403 1.012 2.766 1.155 2.966.143.201 1.954 3.018 4.74 4.256 2.787 1.237 3.344 1.111 3.972.968.629-.142 1.933-.78 2.209-1.522.276-.74.276-1.373.195-1.523z"/>
-        </svg>
-    </a>
-    <div id="audio-toggle" class="audio-float" role="button" aria-label="Toggle audio">🔊</div>
-
-    <div id="app-container">
-        <header>
-            <h1 class="dog-name-placeholder">PaseoDog</h1>
-            <p id="saludo-usuario">Bienvenido/a</p>
-            <button id="theme-toggle" aria-label="Cambiar tema">🌙</button>
-        </header>
-
-        <section id="login-section">
-            <h2>🔐 Iniciar Sesión</h2>
-            <form id="login-form">
-                <label for="email">Email</label><input type="email" id="email" required value="admin@paseos.com">
-                <div class="password-wrapper">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" required value="admin123">
-                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('password')">👁️</button>
-                </div>
-                <button type="submit" class="btn-primary ripple">Entrar</button>
-            </form>
-            <p class="info-text">
-                👉 **Dueño:** Email de dueño y contraseña '123456'.<br>
-                👉 **Admin:** `admin@paseos.com` y `admin123`.
-            </p>
-        </section>
-
-        <section id="admin-dashboard-section" style="display:none;">
-            <h2>📋 Panel de Administración</h2>
-            <div id="dog-list-container">
-                </div>
-            <button class="add-dog-btn nav-button ripple" onclick="showView('create-dog-section')">🐕 Registrar Nuevo Perro</button>
-            <button class="nav-button" onclick="logout()">🚪 Cerrar Sesión</button>
-        </section>
-
-        <section id="create-dog-section" style="display:none;">
-            <h2>➕ Registrar Nuevo Perro</h2>
-            <form id="create-dog-form">
-                <h3>Datos del Perro</h3>
-                <label>Nombre</label><input type="text" id="new-dog-name" required>
-                <label>Raza</label><input type="text" id="new-dog-breed" required>
-                <label>Sexo</label><select id="new-dog-sex"><option>Macho</option><option>Hembra</option></select>
-                
-                <label>Edad (años)</label><input type="number" id="new-dog-age" value="1" min="0">
-                <label>Peso (kg)</label><input type="number" id="new-dog-weight" step="0.1" value="15.0" min="0.1">
-                <label>Alergias</label><input type="text" id="new-dog-alergias" placeholder="Ninguna o especificar">
-                <label>Nivel de Energía</label>
-                <select id="new-dog-energia">
-                    <option>Baja</option>
-                    <option selected>Media</option>
-                    <option>Alta</option>
-                </select>
-                <label>Socialización</label><input type="text" id="new-dog-social" placeholder="Con perros/personas/otro">
-                <h3>Datos del Dueño</h3>
-                <label>Nombre Dueño</label><input type="text" id="new-dog-owner" required>
-                <label>Teléfono</label><input type="tel" id="new-dog-phone" required>
-                <label>Email (para login)</label><input type="email" id="new-dog-email" required>
-                <p class="info-text">La contraseña de los dueños es '123456'.</p>
-
-                <button type="submit" class="save-btn ripple">💾 Registrar Perro</button>
-            </form>
-            <button class="nav-button" onclick="goBack()">Cancelar</button>
-        </section>
-
-        <section id="dog-selection-dashboard" style="display:none;">
-            <h2 class="dog-name-placeholder">🐶 Ficha de Perro</h2>
-            
-            <div id="carousel-wrapper">
-                <div id="carousel-container">
-                    <img id="carousel-img" src="" alt="Fotos de Paseo">
-                    <div class="carousel-nav">
-                        <button class="carousel-nav-btn" id="prev-btn" onclick="prevSlide()">◀️</button>
-                        <button class="carousel-nav-btn" id="next-btn" onclick="nextSlide()">▶️</button>
-                    </div>
-                    <button class="carousel-play-large" id="play-pause-btn-large" onclick="togglePlay()">▶️</button>
-                    <div class="carousel-controls">
-                        <button id="play-pause-btn" class="control-btn" onclick="togglePlay()">▶️</button>
-                        <button id="fullscreen-btn" class="control-btn" onclick="toggleFullscreen()">🔲</button>
-                    </div>
-                </div>
-            </div>
-
-            <h4>Resumen del último paseo (<span id="last-walk-date">No hay paseos</span>)</h4>
-            <div id="walk-summary-content">
-                <div class="info-text">Aún no hay paseos registrados para <span class="dog-name-placeholder">este perro</span>.</div>
-            </div>
-
-            <button class="nav-button ripple" id="admin-create-walk-btn" onclick="showView('create-walk-section')">➕ Registrar Nuevo Paseo</button>
-            <button class="nav-button" onclick="showView('walks-history-section')">📜 Historial de Paseos</button>
-            <button class="nav-button" onclick="showView('profile-section')">📋 Ver/Editar Perfil</button>
-            <button class="nav-button" onclick="goBack()" style="margin-top: 16px;">⬅️ Volver</button>
-        </section>
-
-        <section id="create-walk-section" style="display:none;">
-            <h2>➕ Crear Nuevo Paseo</h2>
-            <form id="walk-form">
-                <div style="background: var(--bg-input); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px;">
-                    <label style="color: var(--secondary);">🐶 ¿Quién más vino al paseo?</label>
-                    <div id="multi-dog-container"></div>
-                </div>
-                <label>📅 Fecha</label><input type="date" id="walk-date" required>
-                <label>📸 Fotos del Paseo</label>
-                <div id="photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
-                <label class="nav-button" style="cursor: pointer; text-align: center;"> 
-                    📷 Seleccionar Fotos Reales 
-                    <input type="file" id="photo-upload" accept="image/*" multiple style="display: none;">
-                </label>
-                <button type="submit" class="save-btn ripple">💾 Guardar Paseo</button>
-            </form>
-            <button class="nav-button" onclick="goBack()">Cancelar</button>
-        </section>
-
-        <section id="profile-section" style="display:none;">
-            <h2>📋 Perfil Completo</h2>
-            <div id="profile-content">
-                <div id="profile-photo-container" title="Haz clic para cambiar la foto">
-                    <img id="profile-photo" src="" alt="Foto del Perro" style="width: 100%; max-width: 250px; height: 250px; object-fit: cover; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); border: 4px solid var(--primary-light);">
-                    <input type="file" id="profile-photo-upload" accept="image/*" style="display: none;">
-                    <p style="margin-top: 8px; font-size: 0.9rem; color: var(--text-secondary);">📷 Haz clic en la foto para cambiarla</p>
-                </div>
-                <div id="profile-details-view">
-                    </div>
-            </div>
-            <button class="nav-button edit-btn" onclick="showEditProfile()">✏️ Editar Datos</button>
-            <button class="nav-button" onclick="goBack()" style="margin-top: 16px;">⬅️ Volver</button>
-        </section>
-
-        <div id="edit-profile-modal" style="display:none;" class="modal-overlay">
-            <div class="modal-content">
-                <h2>✏️ Editar Datos de Perfil</h2>
-                <form id="edit-profile-form">
-                    <label>Nombre</label><input type="text" id="edit-nombre" required>
-                    <label>Raza</label><input type="text" id="edit-raza" required>
-                    <label>Sexo</label><select id="edit-sexo"><option>Macho</option><option>Hembra</option></select>
-                    
-                    <label>Edad (años)</label><input type="number" id="edit-edad" min="0">
-                    <label>Peso (kg)</label><input type="number" id="edit-peso" step="0.1" min="0.1">
-                    <label>Alergias</label><input type="text" id="edit-alergias" placeholder="Ninguna o especificar">
-                    <label>Nivel de Energía</label>
-                    <select id="edit-energia">
-                        <option>Baja</option>
-                        <option>Media</option>
-                        <option>Alta</option>
-                    </select>
-                    <label>Socialización</label><input type="text" id="edit-social" placeholder="Con perros/personas/otro">
-                    <h3>Datos del Dueño</h3>
-                    <label>Dueño</label><input type="text" id="edit-dueno" required>
-                    <label>Teléfono</label><input type="tel" id="edit-telefono" required>
-                    
-                    <button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>
-                </form>
-                <button class="nav-button" onclick="hideEditProfile()">Cancelar</button>
-            </div>
-        </div>
-
-        <section id="walks-history-section" style="display:none;">
-            <h2>📜 Historial de Paseos</h2>
-            <p id="walk-history-dog-name" class="info-text">Historial para: <span class="dog-name-placeholder"></span></p>
-            <div id="walks-list-container">
-                </div>
-            <button class="nav-button" onclick="goBack()">⬅️ Volver</button>
-        </section>
-        
-        <div id="edit-walk-modal">
-            <div class="modal-content">
-                <h2>✏️ Editar Paseo (<span id="edit-walk-date-display"></span>)</h2>
-                <form id="edit-walk-form">
-                    <input type="hidden" id="edit-walk-id">
-                    <label>Duración (minutos)</label><input type="number" id="edit-duracion" required min="1">
-                    <label>Distancia (km)</label><input type="number" id="edit-distancia" step="0.1" required min="0.1">
-                    <label>Resumen Diario</label><textarea id="edit-resumen" rows="3"></textarea>
-                    
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="edit-comportamiento">
-                        <label for="edit-comportamiento">Comportamiento o Problemas</label>
-                    </div>
-
-                    <label>Incidentes de Salud (si aplica)</label><input type="text" id="edit-incidentes">
-
-                    <h4>Galería de Fotos</h4>
-                    <div id="edit-photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
-                    
-                    <label class="nav-button" style="cursor: pointer; text-align: center;"> 
-                        📷 Añadir más Fotos 
-                        <input type="file" id="edit-photo-upload" accept="image/*" multiple style="display: none;">
-                    </label>
-
-                    <button type="submit" class="save-btn ripple">💾 Guardar Edición</button>
-                </form>
-                <button class="nav-button" onclick="hideEditWalk()">Cancelar</button>
-                <button class="nav-button" style="background: var(--danger); margin-top: 10px;" onclick="deleteWalk()">🗑️ Eliminar Paseo</button>
-            </div>
-        </div>
-
-        <div id="lightbox">
-            <span class="lightbox-close" id="close-lightbox">&times;</span>
-            <img id="lightbox-img" src="" alt="Foto en grande">
-        </div>
-    </div>
-
-    <style>
+        /* LOADING & MESSAGES */
         #loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(30, 30, 40, 0.95);
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.3s;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            z-index: 10000;
+            display: none; /* Inicia oculto */
         }
-        .spinner {
-            border: 8px solid rgba(255, 255, 255, 0.1);
-            border-top: 8px solid var(--primary);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-        /* Toast Notification */
-        #toast-container {
+
+        #message-container {
             position: fixed;
             top: 20px;
             right: 20px;
-            z-index: 3000;
+            z-index: 1000;
         }
+
         .toast {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            padding: 18px 25px;
-            border-radius: var(--radius);
+            padding: 10px 20px;
             margin-bottom: 10px;
+            border-radius: 5px;
             box-shadow: var(--shadow-lg);
-            border-left: 5px solid var(--primary);
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-            transform: translateX(100%);
+            color: white;
+            font-weight: bold;
             opacity: 0;
-            max-width: 300px;
+            transform: translateY(-20px);
+            transition: opacity 0.3s, transform 0.3s;
         }
-        .toast.show {
-            transform: translateX(0);
-            opacity: 1;
+
+        .toast.success { background-color: var(--primary-dark); }
+        .toast.error { background-color: var(--danger); }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        /* HEADER */
+        header {
+            background-color: var(--bg-card);
+            padding: 15px 20px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-        .toast.error {
-            border-left-color: var(--danger);
-            color: var(--danger);
+
+        header .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
         }
-        .toast.success {
-            border-left-color: var(--primary);
-            color: var(--primary-dark);
+
+        header .logo img {
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        /* PROFILE SECTION */
+        #dog-profile-section .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        #dog-profile-section .profile-img-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            flex-shrink: 0;
+        }
+
+        #dog-profile-section .profile-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #dog-profile-section .profile-name {
+            font-size: 3rem;
+            margin: 0;
+        }
+        
+        #dog-profile-section .profile-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        #dog-profile-section .info-item {
+            flex: 1 1 200px;
+            background-color: var(--bg-input);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        #dog-profile-section .info-item strong {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 3px;
+        }
+
+
+        /* WALK DETAIL */
+        #walk-detail-section {
+            padding-top: 20px;
+        }
+
+        #walk-carousel-section {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .carousel-slide {
+            width: 100%;
+            height: auto;
+            display: none;
+            cursor: pointer;
+        }
+
+        .carousel-slide:first-child {
+            display: block;
+        }
+
+        /* === CORRECCIÓN CARRUSEL CSS === */
+        .carousel-controls {
+            position: absolute;
+            top: 50%;
+            /* Centrar verticalmente */
+            transform: translateY(-50%); 
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 10;
+            /* Iniciar oculto y transicionar la visibilidad */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out; 
+            pointer-events: none; /* Permite hacer clic en el perro/paseo si los controles están ocultos */
+        }
+
+        .carousel-controls button {
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+            /* FIX: Estabilizar el tamaño del botón */
+            box-sizing: border-box; 
+            transition: background 0.2s, transform 0.2s;
+            pointer-events: auto; /* Permite hacer clic en los botones */
+        }
+
+        .carousel-controls button:hover {
+            background: rgba(0, 0, 0, 0.7);
+            /* Escala para el efecto hover sin mover el botón */
+            transform: scale(1.1) translateY(0); 
+        }
+
+        /* Estilo para el botón de Play/Pause central */
+        #carousel-play-pause {
+            /* Mantiene el botón centralizado */
+            margin: 0 auto;
+            display: block; 
+        }
+
+        /* FOOTER & ACCIONES FIJAS */
+        #whatsapp-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--shadow-lg);
+            text-decoration: none;
+            z-index: 100;
+        }
+
+        #audio-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        /* MODAL (GENERAL) */
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--bg-card);
+            margin: auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-btn {
+            color: var(--text-secondary);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: var(--text-primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* Lightbox */
+        #lightbox {
+            z-index: 2000;
+        }
+
+        #lightbox-content {
+            padding: 0;
+            width: auto;
+            max-width: 90%;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        #lightbox-img {
+            display: block;
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 8px;
         }
     </style>
+</head>
+<body>
+    <div id="loading-overlay">Cargando...</div>
+
+    <div id="message-container"></div>
+
+    <header id="main-header" style="display: none;">
+        <div class="logo">
+            <img src="paseodog-logo.svg" alt="PaseoDog Logo">
+            <span>PaseoDog</span>
+        </div>
+        <nav>
+            <button id="logout-btn" class="btn secondary">Cerrar Sesión</button>
+            <button id="theme-toggle" class="btn secondary">🌞</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        
+        <section id="login-section" class="card" style="display: block;">
+            <h2 class="text-center">Bienvenido a PaseoDog</h2>
+            <form id="auth-form">
+                <h3>Iniciar Sesión / Registrarse</h3>
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+                
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" required>
+                
+                <div class="flex-row mt-20">
+                    <button type="button" class="btn primary" onclick="handleAuth('login')">Iniciar Sesión</button>
+                    <button type="button" class="btn secondary" onclick="handleAuth('signup')">Registrarse</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="admin-dashboard-section" style="display: none;">
+            <h2>Panel de Control <span id="dashboard-title"></span></h2>
+            <div id="dog-list-container">
+                </div>
+            
+            <button id="register-dog-btn" class="btn primary mt-20" style="display: none;">Registrar Nuevo Perro</button>
+        </section>
+
+        <section id="dog-profile-section" class="card" style="display: none;">
+            <div class="profile-header">
+                <div class="profile-img-container">
+                    <img id="profile-photo" class="profile-img" src="placeholder.jpg" alt="Foto del perro">
+                    <input type="file" id="photo-upload-input" accept="image/*" style="display: none;">
+                    <button id="change-photo-btn" class="btn primary" style="position: absolute; bottom: 5px; right: 5px; opacity: 0.8;">&#x270E;</button>
+                </div>
+                <div>
+                    <h1 id="dog-name" class="profile-name">Nombre</h1>
+                    <p id="owner-info">Dueño: <span id="dog-owner"></span> - Teléfono: <span id="dog-phone"></span></p>
+                    <button id="edit-profile-btn" class="btn secondary mt-20" style="display: none;">Editar datos del perfil</button>
+                </div>
+            </div>
+
+            <h3>Información Detallada</h3>
+            <div class="profile-info">
+                <div class="info-item"><strong>Raza</strong> <span id="dog-raza"></span></div>
+                <div class="info-item"><strong>Sexo</strong> <span id="dog-sexo"></span></div>
+                <div class="info-item"><strong>Edad</strong> <span id="dog-edad"></span> años</div>
+                <div class="info-item"><strong>Peso</strong> <span id="dog-peso"></span> kg</div>
+                <div class="info-item"><strong>Energía</strong> <span id="dog-energia"></span></div>
+                <div class="info-item"><strong>Socialización</strong> <span id="dog-social"></span></div>
+                <div class="info-item full-width"><strong>Alergias</strong> <span id="dog-alergias"></span></div>
+            </div>
+
+            <h3 class="mt-20">Historial de Paseos (<span id="walk-count">0</span>)</h3>
+            <button id="add-walk-btn" class="btn primary" style="display: none;">Registrar Nuevo Paseo</button>
+            <div id="walk-history-list" class="mt-20">
+                </div>
+            
+            <button id="back-to-dashboard-btn" class="btn secondary mt-20">Volver al Dashboard</button>
+        </section>
+
+        <section id="walk-detail-section" class="card" style="display: none;">
+            <h2 id="walk-date">Detalle del Paseo</h2>
+            <div id="walk-carousel-section">
+                <div id="carousel-container">
+                    </div>
+                <div id="carousel-controls" class="carousel-controls">
+                    <button id="carousel-prev" onclick="window.prevSlide()">&#10094;</button>
+                    <button id="carousel-play-pause" onclick="window.togglePlayPause()">▶</button>
+                    <button id="carousel-next" onclick="window.nextSlide()">&#10095;</button>
+                </div>
+            </div>
+
+            <div id="walk-info">
+                <p><strong>Duración:</strong> <span id="walk-duration"></span> minutos</p>
+                <p><strong>Distancia:</strong> <span id="walk-distance"></span> km</p>
+                <p><strong>Resumen:</strong> <span id="walk-summary"></span></p>
+                <p><strong>Comportamiento:</strong> <span id="walk-behavior"></span></p>
+                <p><strong>Salud:</strong> <span id="walk-health"></span></p>
+            </div>
+
+            <div class="flex-row flex-start mt-20">
+                <button id="edit-walk-btn" class="btn primary" style="display: none;">Editar Paseo</button>
+                <button id="delete-walk-btn" class="btn danger" style="display: none;">Eliminar Paseo</button>
+            </div>
+            
+            <button id="back-to-profile-btn" class="btn secondary mt-20">Volver al Perfil</button>
+        </section>
+
+        <section id="walk-form-section" class="card" style="display: none;">
+            <h2 id="walk-form-title">Registrar Nuevo Paseo</h2>
+            <form id="walk-form">
+                <input type="hidden" id="walk-id">
+                
+                <label for="walk-form-date">Fecha</label>
+                <input type="date" id="walk-form-date" required>
+
+                <label for="walk-form-duration">Duración (minutos)</label>
+                <input type="number" id="walk-form-duration" min="1" required>
+
+                <label for="walk-form-distance">Distancia (km)</label>
+                <input type="number" id="walk-form-distance" step="0.1" min="0" required>
+                
+                <label for="walk-form-summary">Resumen Diario</label>
+                <textarea id="walk-form-summary"></textarea>
+
+                <label for="walk-form-behavior">Comportamiento o Problemas</label>
+                <textarea id="walk-form-behavior"></textarea>
+                
+                <label for="walk-form-health">Incidentes de Salud</label>
+                <textarea id="walk-form-health"></textarea>
+
+                <h3 class="mt-20">Fotos del Paseo</h3>
+                <input type="file" id="walk-photo-input" accept="image/*" multiple>
+                <div id="walk-photo-preview" class="mt-10">
+                    </div>
+                
+                <div class="flex-row mt-20">
+                    <button type="submit" class="btn primary">Guardar Paseo</button>
+                    <button type="button" class="btn secondary" onclick="window.showDogProfileView(window.currentDog)">Cancelar</button>
+                </div>
+            </form>
+        </section>
+        
+        <section id="new-dog-section" class="card" style="display: none;">
+            <h2>Registrar Nuevo Perro/Dueño</h2>
+            <form id="new-dog-form">
+                <h3>Datos del Perro</h3>
+                <label for="new-dog-name">Nombre del Perro</label>
+                <input type="text" id="new-dog-name" required>
+                
+                <label for="new-dog-raza">Raza</label>
+                <input type="text" id="new-dog-raza" required>
+                
+                <label for="new-dog-sexo">Sexo</label>
+                <select id="new-dog-sexo" required>
+                    <option value="Macho">Macho</option>
+                    <option value="Hembra">Hembra</option>
+                </select>
+                
+                <label for="new-dog-edad">Edad (años):</label>
+                <input type="number" id="new-dog-edad" min="0">
+                
+                <label for="new-dog-peso">Peso (kg):</label>
+                <input type="number" id="new-dog-peso" step="0.1" min="0">
+                
+                <label for="new-dog-alergias">Alergias:</label>
+                <textarea id="new-dog-alergias"></textarea>
+                
+                <label for="new-dog-energia">Nivel de Energía:</label>
+                <select id="new-dog-energia">
+                    <option value="Bajo">Bajo</option>
+                    <option value="Medio">Medio</option>
+                    <option value="Alto">Alto</option>
+                </select>
+                
+                <label for="new-dog-social">Socialización:</label>
+                <select id="new-dog-social">
+                    <option value="Excelente">Excelente</option>
+                    <option value="Buena">Buena</option>
+                    <option value="Necesita Mejorar">Necesita Mejorar</option>
+                </select>
+                
+                <h3 class="mt-20">Datos del Dueño</h3>
+                <label for="new-dog-owner">Nombre del Dueño</label>
+                <input type="text" id="new-dog-owner" required>
+                
+                <label for="new-dog-email">Email (Usuario)</label>
+                <input type="email" id="new-dog-email" required>
+                
+                <label for="new-dog-phone">Teléfono</label>
+                <input type="tel" id="new-dog-phone" required>
+                
+                <div class="flex-row mt-20">
+                    <button type="submit" class="btn primary">Registrar y Crear Cuenta</button>
+                    <button type="button" class="btn secondary" onclick="window.showView('admin-dashboard-section')">Cancelar</button>
+                </div>
+            </form>
+        </section>
+
+    </div> <div id="edit-profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="document.getElementById('edit-profile-modal').style.display='none';">&times;</span>
+            <h2>Editar Perfil de <span id="modal-dog-name"></span></h2>
+            <form id="edit-dog-form">
+                <input type="hidden" id="edit-dog-id">
+                
+                <label for="edit-nombre">Nombre:</label>
+                <input type="text" id="edit-nombre" required>
+
+                <label for="edit-raza">Raza:</label>
+                <input type="text" id="edit-raza" required>
+
+                <label for="edit-sexo">Sexo:</label>
+                <select id="edit-sexo" required>
+                    <option value="Macho">Macho</option>
+                    <option value="Hembra">Hembra</option>
+                </select>
+                
+                <label for="edit-dueno">Dueño:</label>
+                <input type="text" id="edit-dueno" required>
+                
+                <label for="edit-telefono">Teléfono:</label>
+                <input type="tel" id="edit-telefono" required>
+                
+                <label for="edit-edad">Edad (años):</label>
+                <input type="number" id="edit-edad" min="0">
+                
+                <label for="edit-peso">Peso (kg):</label>
+                <input type="number" id="edit-peso" step="0.1" min="0">
+                
+                <label for="edit-alergias">Alergias:</label>
+                <textarea id="edit-alergias"></textarea>
+                
+                <label for="edit-energia">Nivel de Energía:</label>
+                <select id="edit-energia">
+                    <option value="Bajo">Bajo</option>
+                    <option value="Medio">Medio</option>
+                    <option value="Alto">Alto</option>
+                </select>
+                
+                <label for="edit-social">Socialización:</label>
+                <select id="edit-social">
+                    <option value="Excelente">Excelente</option>
+                    <option value="Buena">Buena</option>
+                    <option value="Necesita Mejorar">Necesita Mejorar</option>
+                </select>
+
+                <button type="submit" class="btn primary">Guardar Cambios</button>
+                <button type="button" class="btn secondary" onclick="document.getElementById('edit-profile-modal').style.display='none';">Cancelar</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="lightbox" class="modal" onclick="document.getElementById('lightbox').style.display='none';">
+        <div id="lightbox-content">
+            <span class="close-btn" id="close-lightbox">&times;</span>
+            <img id="lightbox-img" src="" alt="Foto del paseo">
+        </div>
+    </div>
+
+
+    <a id="whatsapp-btn" href="#" target="_blank" style="display: none;">&#x1F4AC;</a>
+    <div id="audio-toggle">🔊</div>
+
 
     <script type="module">
-        import { loadDogs, createDog, updateDogProfile, updateWalk, deleteWalk as supabaseDeleteWalk, uploadProfilePhoto, updateDogProfilePhoto, loadWalks, createWalk, uploadWalkPhoto } from './supabase.js';
+        import { loadDogs, loadWalks, createWalk, uploadWalkPhoto, updateWalk, deleteWalk, uploadProfilePhoto, updateDogProfilePhoto, updateDogProfile, supabase } from './supabase.js';
 
-        // --- GLOBAL STATE ---
+        // === ESTADO GLOBAL ===
         let currentUser = null;
-        let currentDog = null;
+        let dogs = [];
+        window.currentDog = null;
+        let currentWalk = null;
         let currentView = 'login-section';
-        const backStack = [];
         let isAudioEnabled = localStorage.getItem('paseoDogAudio') !== 'off';
-        let uploadedPhotoUrls = [];
-        let walkToEdit = null;
-        let walkPhotosToDelete = [];
 
-        // --- AUDIO/CAROUSEL STATE ---
-        let carouselSlides = [];
-        let idx = 0;
-        let slideInterval = null;
-        let isPlaying = false;
-        let carouselAudio = null;
+        // --- VARIABLES GLOBALES DEL CARRUSEL (CORRECCIÓN DE ÁMBITO) ---
+        let slides = [];
+        let currentSlideIndex = 0;
+        let carouselIntervalId = null;
+        let controlsTimeout = null; // Para gestionar el temporizador de ocultar/mostrar controles
+        const HIDE_CONTROLS_DELAY = 3000; // 3 segundos
 
-        // --- UTILS ---
-        window.showToast = (message, type = 'info') => {
-            const container = document.getElementById('toast-container');
+        // === FUNCIONES DE UTILIDAD ===
+
+        function showLoading(message = 'Cargando...') {
+            document.getElementById('loading-overlay').textContent = message;
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function showToast(message, type = 'success', duration = 3000) {
+            const container = document.getElementById('message-container');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.textContent = message;
             container.appendChild(toast);
-            
-            // For animation
-            setTimeout(() => toast.classList.add('show'), 10);
-            
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
             setTimeout(() => {
                 toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => toast.remove());
-            }, 5000);
-        };
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 300);
+            }, duration);
+        }
 
-        window.togglePasswordVisibility = (id) => {
-            const input = document.getElementById(id);
-            const button = input.nextElementSibling;
-            if (input.type === 'password') {
-                input.type = 'text';
-                button.textContent = '🙈';
+        function showSuccess(message) { showToast(message, 'success'); }
+        function showError(message) { showToast(message, 'error', 5000); }
+
+        window.showView = (viewId) => {
+            document.querySelectorAll('section').forEach(section => {
+                section.style.display = 'none';
+            });
+            const header = document.getElementById('main-header');
+            if (viewId === 'login-section') {
+                header.style.display = 'none';
             } else {
-                input.type = 'password';
-                button.textContent = '👁️';
+                header.style.display = 'flex';
             }
-        };
-
-        window.logout = () => {
-            currentUser = null;
-            currentDog = null;
-            backStack.length = 0;
-            window.showView('login-section');
-        };
-        
-        const updateThemeIcon = () => {
-            const icon = document.getElementById('theme-toggle');
-            icon.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-        };
-
-        document.getElementById('theme-toggle').onclick = () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('paseoDogTheme', newTheme);
-            updateThemeIcon();
-        };
-        
-        // --- VIEW MANAGEMENT ---
-        window.showView = async (id, dogId = null) => {
-            if (id !== currentView && id !== 'loading-overlay') backStack.push(currentView);
-            currentView = id;
-
-            document.querySelectorAll('section').forEach(s => s.style.display = 'none');
-            document.getElementById('loading-overlay').style.display = 'flex';
-
-            // Show the target section after loading
-            setTimeout(() => {
-                document.getElementById(id).style.display = 'block';
-                document.getElementById('loading-overlay').style.display = 'none';
-            }, 300);
-
-            if (dogId) {
-                const dogs = await loadDogs(null, true);
-                currentDog = dogs.find(d => d.id === dogId) || currentDog;
-                document.querySelectorAll('.dog-name-placeholder').forEach(el => el.textContent = currentDog.nombre);
-            }
-
-            if (id === 'dog-selection-dashboard' && currentDog) {
-                document.getElementById('admin-create-walk-btn').style.display = currentUser?.isAdmin ? 'block' : 'none';
-                await initCarousel();
-                await loadSummary(currentDog);
-            }
-            if (id === 'admin-dashboard-section') loadAdminDashboard();
-            if (id === 'profile-section' && currentDog) loadProfile(currentDog);
-            if (id === 'walks-history-section' && currentDog) loadHistory(currentDog);
-            if (id === 'create-walk-section') initCreateWalk();
-
-            document.getElementById('loading-overlay').style.display = 'none';
+            document.getElementById(viewId).style.display = 'block';
+            currentView = viewId;
             updateWhatsApp();
         };
 
-        window.goBack = function() {
-            if (backStack.length) window.showView(backStack.pop());
-            else window.showView('login-section');
-        };
+        // === AUTENTICACIÓN ===
 
-        // === LOGIN ===
-        document.getElementById('login-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const email = e.target.email.value.toLowerCase();
-            const pass = e.target.password.value;
-
-            if (email === 'admin@paseos.com' && pass === 'admin123') {
-                currentUser = { email, isAdmin: true };
-                document.getElementById('saludo-usuario').textContent = 'Bienvenido, Administrador';
-                window.showView('admin-dashboard-section');
-            } else {
-                try {
-                    const dogs = await loadDogs(email, false);
-                    if (dogs.length > 0 && pass === '123456') {
-                        currentUser = { email, isAdmin: false };
-                        currentDog = dogs[0];
-                        document.getElementById('saludo-usuario').textContent = `Bienvenido/a, Dueño de ${currentDog.nombre}`;
-                        window.showView('dog-selection-dashboard');
-                    } else {
-                        showToast('Credenciales incorrectas', 'error');
-                    }
-                } catch (err) {
-                    showToast('Error de conexión: ' + err.message, 'error');
-                }
-            }
-        };
-
-        // === ADMIN ===
-        async function loadAdminDashboard() {
-            const container = document.getElementById('dog-list-container');
-            container.innerHTML = '<p>Cargando...</p>';
-            try {
-                const dogs = await loadDogs(null, true);
-                container.innerHTML = '';
-                dogs.forEach((d, i) => {
-                    const card = document.createElement('div');
-                    card.className = 'dog-card';
-                    card.style.setProperty('--i', i);
-                    card.innerHTML = `
-                        <span>🐶 <strong>${d.nombre}</strong> <small>(${d.raza})</small></span>
-                        <button onclick="window.showView('dog-selection-dashboard','${d.id}')" class="ripple">Gestionar</button>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (err) {
-                container.innerHTML = '<p class="error">Error al cargar perros: ' + err.message + '</p>';
-            }
-        }
-
-        // === CREATE DOG (MODIFICADO) ===
-        document.getElementById('create-dog-form')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            try {
-                const dogData = {
-                    nombre: document.getElementById('new-dog-name').value,
-                    dueno_email: document.getElementById('new-dog-email').value,
-                    perfil: {
-                        raza: document.getElementById('new-dog-breed').value,
-                        sexo: document.getElementById('new-dog-sex').value,
-                        dueno: document.getElementById('new-dog-owner').value,
-                        telefono: document.getElementById('new-dog-phone').value,
-                        foto_url: '',
-                        // 💡 CAPTURA DE NUEVOS CAMPOS
-                        edad: document.getElementById('new-dog-age').value + ' años',
-                        peso: document.getElementById('new-dog-weight').value + ' kg',
-                        alergias: document.getElementById('new-dog-alergias').value || 'Ninguna',
-                        energia: document.getElementById('new-dog-energia').value,
-                        social: document.getElementById('new-dog-social').value || '?',
-                        // -----------------------------
-                    }
-                };
-                await createDog(dogData);
-                showToast('✅ Perro registrado', 'success');
-                window.showView('admin-dashboard-section');
-            } catch (err) {
-                showToast('Error al registrar: ' + err.message, 'error');
-            }
-        });
-
-        // === DASHBOARD & SUMMARY ===
-        async function loadSummary(dog) {
-            try {
-                const walks = await loadWalks(dog.id);
-                const container = document.getElementById('walk-summary-content');
-                container.innerHTML = '';
-
-                if (walks.length === 0) {
-                    document.getElementById('last-walk-date').textContent = 'No hay paseos';
-                    container.innerHTML = '<div class="info-text">Aún no hay paseos registrados para <span class="dog-name-placeholder">' + dog.nombre + '</span>.</div>';
-                    return;
-                }
-
-                const lastWalk = walks.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
-                document.getElementById('last-walk-date').textContent = new Date(lastWalk.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-
-                let summaryHTML = `
-                    <div class="walk-metrics">
-                        <span>⏱️ Duración: ${lastWalk.duracion_minutos} min</span>
-                        <span>📏 Distancia: ${lastWalk.distancia_km} km</span>
-                        ${lastWalk.comportamiento_problemas ? `<span style="background: var(--danger-light); color: var(--danger);">⚠️ Comportamiento</span>` : `<span>😊 Buen Comportamiento</span>`}
-                    </div>
-                    <p>${lastWalk.resumen_diario}</p>
-                `;
-
-                if (lastWalk.incidentes_salud) {
-                    summaryHTML += `<div class="incident-alert">🩺 **Incidente de Salud:** ${lastWalk.incidentes_salud}</div>`;
-                }
-                
-                if (lastWalk.fotos_urls && lastWalk.fotos_urls.length > 0) {
-                    summaryHTML += `
-                        <div class="gallery">
-                            ${lastWalk.fotos_urls.map((url, i) => `
-                                <div class="photo-card" onclick="openLightbox('${url}')" style="--i: ${i};">
-                                    <img src="${url}" alt="Foto del paseo">
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                }
-
-                container.innerHTML = summaryHTML;
-
-            } catch (err) {
-                document.getElementById('walk-summary-content').innerHTML = `<p class="error">Error al cargar el resumen del paseo: ${err.message}</p>`;
-            }
-        }
-
-        // === CAROUSEL ===
-        async function initCarousel() {
-            try {
-                const walks = await loadWalks(currentDog.id);
-                carouselSlides = walks.flatMap(w => 
-                    w.fotos_urls.map(url => ({
-                        url,
-                        date: new Date(w.fecha).toLocaleDateString(),
-                        walkId: w.id,
-                        isPublic: w.es_publica
-                    }))
-                );
-                
-                if (carouselSlides.length === 0) {
-                    document.getElementById('carousel-wrapper').style.display = 'none';
-                    return;
-                }
-
-                document.getElementById('carousel-wrapper').style.display = 'block';
-
-                const wrapper = document.getElementById('carousel-wrapper');
-                const img = document.getElementById('carousel-img');
-                const playLargeBtn = document.getElementById('play-pause-btn-large');
-                const controls = document.querySelector('.carousel-controls');
-                const navBtns = document.querySelectorAll('.carousel-nav-btn');
-                let hideTimer = null;
-
-                const showSlide = () => {
-                    const slide = carouselSlides[idx];
-                    img.style.opacity = '0';
-                    setTimeout(() => {
-                        img.src = slide.url;
-                        img.style.opacity = '1';
-                    }, 300);
-                };
-
-                const updatePlayState = () => {
-                    const btn = document.getElementById('play-pause-btn');
-                    btn.textContent = isPlaying ? '⏸' : '▶';
-                    playLargeBtn.textContent = isPlaying ? '⏸' : '▶';
-
-                    if (isPlaying) {
-                        playLargeBtn.classList.add('playing');
-                        controls.classList.add('playing');
-                        navBtns.forEach(b => b.classList.add('playing'));
-                        wrapper.classList.add('playing');
-                    } else {
-                        playLargeBtn.classList.remove('playing');
-                        controls.classList.remove('playing');
-                        navBtns.forEach(b => b.classList.remove('playing'));
-                        wrapper.classList.remove('playing');
-                    }
-                };
-
-                const showControls = () => {
-                    wrapper.classList.add('active');
-                    resetHideTimer();
-                };
-
-                const hideControls = () => wrapper.classList.remove('active');
-
-                const resetHideTimer = () => {
-                    if (hideTimer) clearTimeout(hideTimer);
-                    hideTimer = setTimeout(hideControls, 3000);
-                };
-
-                wrapper.addEventListener('mouseenter', showControls);
-                wrapper.addEventListener('mouseleave', resetHideTimer);
-                wrapper.addEventListener('touchstart', showControls, { passive: true });
-
-                window.nextSlide = () => {
-                    idx = (idx + 1) % slides.length;
-                    showSlide();
-                    showControls();
-                };
-
-                window.prevSlide = () => {
-                    idx = (idx - 1 + slides.length) % slides.length;
-                    showSlide();
-                    showControls();
-                };
-
-                window.togglePlay = () => {
-                    if (!isPlaying) {
-                        playRandomCarouselTrack();
-                        isPlaying = true;
-                    } else {
-                        if (carouselAudio) carouselAudio.pause();
-                        isPlaying = false;
-                    }
-                    updatePlayState();
-                    showControls();
-                };
-
-                window.toggleFullscreen = () => {
-                    const elem = document.getElementById('carousel-container');
-                    if (!document.fullscreenElement) {
-                        elem.requestFullscreen?.() || elem.webkitRequestFullscreen?.();
-                    } else {
-                        document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-                    }
-                };
-
-                showSlide();
-                updatePlayState();
-                hideControls();
-
-                if (slideInterval) clearInterval(slideInterval);
-                slideInterval = setInterval(() => {
-                    if (!isPlaying) window.nextSlide();
-                }, 3000);
-
-            } catch (e) {
-                console.error("Error al inicializar carrusel:", e);
-                document.getElementById('carousel-wrapper').style.display = 'none';
-            }
-        }
-
-        function playRandomCarouselTrack() {
-            if (!isAudioEnabled) return;
-            if (carouselAudio) {
-                carouselAudio.pause();
-                carouselAudio = null;
-            }
-            const tracks = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3'];
-            const track = tracks[Math.floor(Math.random() * tracks.length)];
-            carouselAudio = new Audio(track);
-            carouselAudio.onended = () => {
-                carouselAudio = null;
-                isPlaying = false;
-                updatePlayState();
-            };
-            carouselAudio.play().catch(e => console.warn('Audio blocked or not found:', e));
-        }
-
-
-        // === CREATE WALK ===
-        function initCreateWalk() {
-            document.getElementById('walk-date').valueAsDate = new Date();
-            document.getElementById('photo-preview').innerHTML = '';
-            document.getElementById('photo-upload').value = '';
-            uploadedPhotoUrls = [];
-            loadMultiDog();
-        }
-
-        async function loadMultiDog() {
-            try {
-                const dogs = await loadDogs(null, true);
-                const container = document.getElementById('multi-dog-container');
-                container.innerHTML = '';
-                
-                // Excluir al perro actual
-                const otherDogs = dogs.filter(d => d.id !== currentDog.id);
-
-                if (otherDogs.length === 0) {
-                    container.innerHTML = '<p class="info-text" style="border-left: 4px solid var(--warning);">No hay otros perros registrados para pasear juntos.</p>';
-                    return;
-                }
-
-                otherDogs.forEach((d, i) => {
-                    const item = document.createElement('div');
-                    item.className = 'dog-select-item';
-                    item.innerHTML = `
-                        <input type="checkbox" id="dog-${d.id}" value="${d.id}">
-                        <label for="dog-${d.id}">${d.nombre}</label>
-                    `;
-                    container.appendChild(item);
-                });
-
-            } catch (err) {
-                document.getElementById('multi-dog-container').innerHTML = `<p class="error">Error al cargar compañeros: ${err.message}</p>`;
-            }
-        }
-
-        document.getElementById('photo-upload').onchange = async (e) => {
-            const files = e.target.files;
-            if (files.length === 0) return;
-
-            const preview = document.getElementById('photo-preview');
-            preview.innerHTML = ''; // Limpiar previsualización
-            
-            showToast(`📤 Subiendo ${files.length} fotos...`, 'info');
-
-            for (const file of files) {
-                try {
-                    const url = await uploadWalkPhoto(file, currentDog.id);
-                    uploadedPhotoUrls.push(url);
-                    
-                    const imgContainer = document.createElement('div');
-                    imgContainer.style.position = 'relative';
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.alt = 'Foto subida';
-                    imgContainer.appendChild(img);
-                    preview.appendChild(imgContainer);
-
-                } catch (err) {
-                    showToast('Error al subir una foto', 'error');
-                }
-            }
-            showToast(`✅ Fotos subidas con éxito.`, 'success');
-        };
-
-        document.getElementById('walk-form').onsubmit = async (e) => {
-            e.preventDefault();
-            
-            if (uploadedPhotoUrls.length === 0) {
-                showToast('Por favor, sube al menos una foto.', 'warning');
+        async function handleAuth(type) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (!email || !password) {
+                showError('Por favor, ingresa email y contraseña.');
                 return;
             }
 
+            showLoading('Autenticando...');
             try {
-                const walkData = {
-                    fecha: document.getElementById('walk-date').value,
-                    duracion_minutos: 60, 
-                    distancia_km: 3.5, 
-                    resumen_diario: 'Paseo guardado', 
-                    comportamiento_problemas: false, 
-                    incidentes_salud: '', 
-                    fotos_urls: [...uploadedPhotoUrls] 
-                };
-                
-                // Crear paseo para el perro principal
-                await createWalk(walkData, currentDog.id);
-                
-                // Crear paseo para los perros seleccionados
-                const selected = document.querySelectorAll('#multi-dog-container input:checked');
-                for (const cb of selected) {
-                    await createWalk(walkData, cb.value);
+                let session;
+                if (type === 'login') {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    session = data.session;
+                } else { // signup
+                    const { data, error } = await supabase.auth.signUp({ email, password });
+                    if (error) throw error;
+                    session = data.session;
                 }
 
-                showToast('✅ Paseo guardado con fotos reales', 'success');
-                window.showView('dog-selection-dashboard');
-            } catch (err) {
-                showToast('Error al guardar: ' + err.message, 'error');
-            }
-        };
-
-
-        // === PROFILE (MODIFICADO) ===
-        function loadProfile(dog) {
-            const view = document.getElementById('profile-details-view');
-            view.innerHTML = `
-                <h3>🐕 Datos Básicos</h3>
-                <div class="detail-row"><span class="detail-label">Nombre:</span> <span class="detail-value">${dog.nombre}</span></div>
-                <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${dog.raza}</span></div>
-                <div class="detail-row"><span class="detail-label">Sexo:</span> <span class="detail-value">${dog.sexo}</span></div>
-                <div class="detail-row"><span class="detail-label">Edad:</span> <span class="detail-value">${dog.edad}</span></div>
-                <div class="detail-row"><span class="detail-label">Peso:</span> <span class="detail-value">${dog.peso}</span></div>
-                
-                <h3>🐶 Características y Salud</h3>
-                <div class="detail-row"><span class="detail-label">Nivel de Energía:</span> <span class="detail-value">${dog.energia}</span></div>
-                <div class="detail-row"><span class="detail-label">Socialización:</span> <span class="detail-value">${dog.social}</span></div>
-                <div class="detail-row"><span class="detail-label">Alergias:</span> <span class="detail-value">${dog.alergias}</span></div>
-
-                <h3>💊 Contacto</h3>
-                <div class="detail-row"><span class="detail-label">Dueño:</span> <span class="detail-value">${dog.dueno}</span></div>
-                <div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${dog.telefono}</span></div>
-            `;
-            
-            const photoContainer = document.getElementById('profile-photo-container');
-            const profilePhoto = document.getElementById('profile-photo');
-            const uploadInput = document.getElementById('profile-photo-upload');
-
-            // 💡 URL de placeholder corregida
-            const currentPhoto = dog.foto_url || 'https://placehold.co/250x250/4B5563/FFFFFF?text=Sin+foto';
-            profilePhoto.src = currentPhoto;
-            
-            photoContainer.onclick = () => uploadInput.click();
-        }
-
-        // === EDIT PROFILE ===
-        window.showEditProfile = () => {
-            const dog = currentDog;
-            
-            // Cargar datos en el formulario
-            document.getElementById('edit-nombre').value = dog.nombre;
-            document.getElementById('edit-raza').value = dog.raza;
-            document.getElementById('edit-sexo').value = dog.sexo;
-            document.getElementById('edit-dueno').value = dog.dueno;
-            document.getElementById('edit-telefono').value = dog.telefono;
-
-            // 💡 Carga de nuevos campos
-            document.getElementById('edit-edad').value = dog.edad ? parseInt(dog.edad) : '';
-            document.getElementById('edit-peso').value = dog.peso ? parseFloat(dog.peso) : '';
-            document.getElementById('edit-alergias').value = dog.alergias;
-            document.getElementById('edit-energia').value = dog.energia;
-            document.getElementById('edit-social').value = dog.social;
-
-
-            document.getElementById('edit-profile-modal').style.display = 'flex';
-        };
-
-        window.hideEditProfile = () => {
-            document.getElementById('edit-profile-modal').style.display = 'none';
-        };
-
-        document.getElementById('profile-photo-upload').onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            try {
-                showToast('📤 Subiendo foto de perfil...', 'info');
-                const newPhotoUrl = await uploadProfilePhoto(currentDog.id, file);
-                await updateDogProfilePhoto(currentDog.id, newPhotoUrl);
-                
-                // Actualizar la vista de perfil y el objeto currentDog
-                currentDog.foto_url = newPhotoUrl;
-                document.getElementById('profile-photo').src = newPhotoUrl;
-                showToast('✅ Foto de perfil actualizada', 'success');
-            } catch (err) {
-                showToast('Error al actualizar foto: ' + err.message, 'error');
-            }
-        };
-
-        document.getElementById('edit-profile-form').onsubmit = async (e) => {
-            e.preventDefault();
-            try {
-                const dogData = {
-                    id: currentDog.id,
-                    nombre: document.getElementById('edit-nombre').value,
-                    raza: document.getElementById('edit-raza').value,
-                    sexo: document.getElementById('edit-sexo').value,
-                    dueno: document.getElementById('edit-dueno').value,
-                    telefono: document.getElementById('edit-telefono').value,
-                    
-                    // 💡 CAMBIOS: Capturando y formateando los nuevos campos
-                    edad: document.getElementById('edit-edad').value + ' años',
-                    peso: document.getElementById('edit-peso').value + ' kg',
-                    alergias: document.getElementById('edit-alergias').value || 'Ninguna',
-                    energia: document.getElementById('edit-energia').value,
-                    social: document.getElementById('edit-social').value || '?',
-                };
-                
-                await updateDogProfile(dogData);
-                
-                // Actualizar el objeto global y la vista
-                currentDog = { ...currentDog, ...dogData };
-                loadProfile(currentDog);
-                
-                showToast('✅ Perfil actualizado', 'success');
-                hideEditProfile();
-            } catch (err) {
-                showToast('Error al guardar: ' + err.message, 'error');
-            }
-        };
-
-
-        // === WALKS HISTORY ===
-        async function loadHistory(dog) {
-            const container = document.getElementById('walks-list-container');
-            container.innerHTML = '<p>Cargando historial...</p>';
-
-            try {
-                const walks = await loadWalks(dog.id);
-                if (walks.length === 0) {
-                    container.innerHTML = '<div class="info-text">No hay paseos registrados.</div>';
-                    return;
+                if (session) {
+                    await checkUserSession(session);
                 }
-
-                container.innerHTML = '';
-                walks.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).forEach((walk, i) => {
-                    const dateDisplay = new Date(walk.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-                    
-                    let galleryHTML = '';
-                    if (walk.fotos_urls && walk.fotos_urls.length > 0) {
-                        galleryHTML = `
-                            <div class="gallery">
-                                ${walk.fotos_urls.map(url => `
-                                    <div class="photo-card" onclick="openLightbox('${url}')">
-                                        <img src="${url}" alt="Foto del paseo">
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `;
-                    }
-
-                    const session = document.createElement('div');
-                    session.className = 'walk-session';
-                    session.style.setProperty('--i', i);
-                    session.innerHTML = `
-                        <h3>
-                            Paseo del ${dateDisplay}
-                            ${currentUser.isAdmin ? `
-                                <div class="admin-walk-controls">
-                                    <button class="admin-walk-btn ripple" onclick="showEditWalk('${walk.id}')">✏️ Editar</button>
-                                </div>
-                            ` : ''}
-                        </h3>
-                        <div class="walk-details">
-                            <div class="walk-metrics">
-                                <span>⏱️ ${walk.duracion_minutos} min</span>
-                                <span>📏 ${walk.distancia_km} km</span>
-                                ${walk.comportamiento_problemas ? `<span style="background: var(--danger-light); color: var(--danger);">⚠️ Comportamiento</span>` : `<span>😊 Sin Problemas</span>`}
-                            </div>
-                            <p>${walk.resumen_diario}</p>
-                            ${walk.incidentes_salud ? `<div class="incident-alert">🩺 **Incidente de Salud:** ${walk.incidentes_salud}</div>` : ''}
-                        </div>
-                        ${galleryHTML}
-                    `;
-                    container.appendChild(session);
-                });
-
-            } catch (err) {
-                container.innerHTML = `<p class="error">Error al cargar historial: ${err.message}</p>`;
+            } catch (error) {
+                console.error('Error de autenticación:', error.message);
+                showError(error.message);
+            } finally {
+                hideLoading();
             }
         }
 
-        // === EDIT WALK MODAL ===
-        window.showEditWalk = async (walkId) => {
-            try {
-                const walks = await loadWalks(currentDog.id);
-                walkToEdit = walks.find(w => w.id === walkId);
-                
-                if (!walkToEdit) throw new Error('Paseo no encontrado');
-
-                document.getElementById('edit-walk-id').value = walkToEdit.id;
-                document.getElementById('edit-walk-date-display').textContent = new Date(walkToEdit.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-                document.getElementById('edit-duracion').value = walkToEdit.duracion_minutos;
-                document.getElementById('edit-distancia').value = walkToEdit.distancia_km;
-                document.getElementById('edit-resumen').value = walkToEdit.resumen_diario;
-                document.getElementById('edit-comportamiento').checked = walkToEdit.comportamiento_problemas;
-                document.getElementById('edit-incidentes').value = walkToEdit.incidentes_salud;
-
-                // Inicializar fotos
-                uploadedPhotoUrls = [...walkToEdit.fotos_urls];
-                walkPhotosToDelete = [];
-                renderEditPhotoPreview();
-
-                document.getElementById('edit-walk-modal').style.display = 'flex';
-            } catch (err) {
-                showToast('Error al cargar paseo: ' + err.message, 'error');
+        async function checkUserSession(session) {
+            if (!session) {
+                window.showView('login-section');
+                return;
             }
-        };
 
-        window.hideEditWalk = () => {
-            document.getElementById('edit-walk-modal').style.display = 'none';
-        };
-
-        function renderEditPhotoPreview() {
-            const preview = document.getElementById('edit-photo-preview');
-            preview.innerHTML = '';
+            const email = session.user.email;
             
-            uploadedPhotoUrls.forEach((url, index) => {
-                const imgContainer = document.createElement('div');
-                imgContainer.style.position = 'relative';
+            // Asumiendo que el admin es un email específico
+            const isAdmin = email === 'admin@paseodog.com'; 
+            
+            currentUser = { email, isAdmin };
 
-                const img = document.createElement('img');
-                img.src = url;
-                img.alt = `Foto ${index + 1}`;
-                imgContainer.appendChild(img);
+            await loadDogData(isAdmin, email);
+            
+            if (isAdmin) {
+                setupAdminDashboard();
+            } else {
+                setupOwnerProfile();
+            }
+        }
 
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'delete-photo-btn';
-                deleteBtn.textContent = 'x';
-                deleteBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    // Mover la URL a la lista de eliminación (si no es una URL local temporal)
-                    if (url.startsWith('http')) {
-                        walkPhotosToDelete.push(url);
-                    }
-                    uploadedPhotoUrls.splice(index, 1);
-                    renderEditPhotoPreview();
+        async function loadDogData(isAdmin, email) {
+            showLoading('Cargando datos de perros...');
+            try {
+                dogs = await loadDogs(email, isAdmin);
+                hideLoading();
+            } catch (error) {
+                showError('Error al cargar datos: ' + error.message);
+                hideLoading();
+            }
+        }
+
+        async function setupAdminDashboard() {
+            document.getElementById('dashboard-title').textContent = 'Admin';
+            document.getElementById('register-dog-btn').style.display = 'block';
+            document.getElementById('register-dog-btn').onclick = () => window.showView('new-dog-section');
+            renderDogList(dogs, true);
+            window.showView('admin-dashboard-section');
+        }
+
+        async function setupOwnerProfile() {
+            document.getElementById('dashboard-title').textContent = 'Mi Perfil';
+            document.getElementById('register-dog-btn').style.display = 'none';
+            if (dogs.length > 0) {
+                window.currentDog = dogs[0];
+                await window.showDogProfileView(dogs[0]);
+            } else {
+                // Si el dueño no tiene perro asignado, se le podría mostrar un formulario o mensaje
+                showError('No tienes un perro registrado. Contacta al administrador.');
+                window.showView('admin-dashboard-section'); // O una vista de bienvenida/error
+            }
+        }
+
+        function renderDogList(dogList, isAdmin) {
+            const container = document.getElementById('dog-list-container');
+            container.innerHTML = '';
+            
+            if (dogList.length === 0) {
+                container.innerHTML = '<p class="text-center">No hay perros registrados.</p>';
+                return;
+            }
+
+            dogList.forEach(dog => {
+                const div = document.createElement('div');
+                div.className = 'card flex-row';
+                div.innerHTML = `
+                    <div style="flex-grow: 1;">
+                        <h3>${dog.nombre}</h3>
+                        <p>Dueño: ${dog.dueno}</p>
+                        <p>Raza: ${dog.raza}</p>
+                    </div>
+                    <button class="btn primary" data-dog-id="${dog.id}">Ver Perfil</button>
+                `;
+                div.querySelector('button').onclick = async (e) => {
+                    window.currentDog = dog;
+                    await window.showDogProfileView(dog);
                 };
-                imgContainer.appendChild(deleteBtn);
-                preview.appendChild(imgContainer);
+                container.appendChild(div);
             });
         }
 
-        document.getElementById('edit-photo-upload').onchange = async (e) => {
-            const files = e.target.files;
+        // === VISTAS DE PERFIL Y PASEO ===
+        
+        window.showDogProfileView = async (dog) => {
+            showLoading('Cargando perfil...');
+            window.currentDog = dog; // Asegurar que sea global
+
+            // 1. Cargar datos del perfil
+            document.getElementById('dog-name').textContent = dog.nombre;
+            document.getElementById('dog-owner').textContent = dog.dueno;
+            document.getElementById('dog-phone').textContent = dog.telefono;
+            document.getElementById('dog-raza').textContent = dog.raza;
+            document.getElementById('dog-sexo').textContent = dog.sexo;
+            
+            // Cargar nuevos campos
+            document.getElementById('dog-edad').textContent = dog.edad || 'N/A';
+            document.getElementById('dog-peso').textContent = dog.peso ? `${dog.peso}` : 'N/A';
+            document.getElementById('dog-alergias').textContent = dog.alergias || 'Ninguna';
+            document.getElementById('dog-energia').textContent = dog.energia || 'N/A';
+            document.getElementById('dog-social').textContent = dog.social || 'N/A';
+            
+            const profilePhoto = document.getElementById('profile-photo');
+            profilePhoto.src = dog.foto_url || 'placeholder.jpg';
+            profilePhoto.alt = `Foto de ${dog.nombre}`;
+
+            // 2. Configurar botones de edición
+            const isAdminOrOwner = currentUser.isAdmin || (currentUser.email === dog.dueno_email);
+            
+            document.getElementById('add-walk-btn').style.display = isAdminOrOwner ? 'block' : 'none';
+            document.getElementById('edit-profile-btn').style.display = isAdminOrOwner ? 'block' : 'none';
+            document.getElementById('change-photo-btn').style.display = isAdminOrOwner ? 'block' : 'none';
+            document.getElementById('back-to-dashboard-btn').style.display = currentUser.isAdmin ? 'block' : 'none';
+            
+            // Asignar handlers
+            document.getElementById('add-walk-btn').onclick = () => window.showWalkForm(dog.id);
+            document.getElementById('edit-profile-btn').onclick = () => window.openEditProfileModal(dog);
+
+            // 3. Cargar historial de paseos
+            const walks = await loadWalks(dog.id);
+            renderWalkHistory(walks, dog.id);
+            document.getElementById('walk-count').textContent = walks.length;
+
+            window.showView('dog-profile-section');
+            hideLoading();
+        };
+
+        function renderWalkHistory(walks, dogId) {
+            const list = document.getElementById('walk-history-list');
+            list.innerHTML = '';
+            
+            if (walks.length === 0) {
+                list.innerHTML = '<p>Aún no hay paseos registrados.</p>';
+                return;
+            }
+
+            walks.forEach(walk => {
+                const div = document.createElement('div');
+                div.className = 'card flex-row mt-10';
+                div.innerHTML = `
+                    <div style="flex-grow: 1;">
+                        <p><strong>Fecha:</strong> ${walk.fecha}</p>
+                        <p>Duración: ${walk.duracion_minutos} min</p>
+                    </div>
+                    <button class="btn secondary" data-walk-id="${walk.id}">Ver Detalles</button>
+                `;
+                div.querySelector('button').onclick = () => window.showWalkDetail(walk);
+                list.appendChild(div);
+            });
+        }
+
+        window.showWalkDetail = (walk) => {
+            window.currentWalk = walk;
+            
+            document.getElementById('walk-date').textContent = `Paseo del ${walk.fecha}`;
+            document.getElementById('walk-duration').textContent = walk.duracion_minutos;
+            document.getElementById('walk-distance').textContent = walk.distancia_km;
+            document.getElementById('walk-summary').textContent = walk.resumen_diario || 'N/A';
+            document.getElementById('walk-behavior').textContent = walk.comportamiento_problemas || 'N/A';
+            document.getElementById('walk-health').textContent = walk.incidentes_salud || 'N/A';
+
+            // Configurar botones de edición/eliminación
+            const isAdminOrOwner = currentUser.isAdmin || (currentUser.email === window.currentDog.dueno_email);
+            document.getElementById('edit-walk-btn').style.display = isAdminOrOwner ? 'block' : 'none';
+            document.getElementById('delete-walk-btn').style.display = isAdminOrOwner ? 'block' : 'none';
+            
+            document.getElementById('edit-walk-btn').onclick = () => window.showWalkForm(window.currentDog.id, walk);
+
+            // Inicializar Carrusel
+            window.initCarousel(walk);
+
+            window.showView('walk-detail-section');
+        };
+
+        window.showWalkForm = (dogId, walk = null) => {
+            document.getElementById('walk-form').reset();
+            document.getElementById('walk-photo-preview').innerHTML = '';
+            document.getElementById('walk-id').value = '';
+            
+            if (walk) {
+                document.getElementById('walk-form-title').textContent = 'Editar Paseo';
+                document.getElementById('walk-id').value = walk.id;
+                document.getElementById('walk-form-date').value = walk.fecha;
+                document.getElementById('walk-form-duration').value = walk.duracion_minutos;
+                document.getElementById('walk-form-distance').value = walk.distancia_km;
+                document.getElementById('walk-form-summary').value = walk.resumen_diario;
+                document.getElementById('walk-form-behavior').value = walk.comportamiento_problemas;
+                document.getElementById('walk-form-health').value = walk.incidentes_salud;
+                // Mostrar fotos existentes (si es edición)
+                if (walk.fotos_urls) {
+                    window.walkPhotosUrls = [...walk.fotos_urls];
+                    walk.fotos_urls.forEach(url => addPhotoPreview(url));
+                } else {
+                    window.walkPhotosUrls = [];
+                }
+            } else {
+                document.getElementById('walk-form-title').textContent = 'Registrar Nuevo Paseo';
+                window.walkPhotosUrls = [];
+                document.getElementById('walk-form-date').value = new Date().toISOString().substring(0, 10);
+            }
+            
+            window.showView('walk-form-section');
+        };
+
+        // === LÓGICA DE PASEOS (GUARDAR, ELIMINAR, FOTOS) ===
+
+        async function handleWalkSubmit(event) {
+            event.preventDefault();
+            const dogId = window.currentDog.id;
+            const isEdit = !!document.getElementById('walk-id').value;
+
+            showLoading(isEdit ? 'Guardando edición del paseo...' : 'Registrando paseo...');
+
+            const walkData = {
+                id: document.getElementById('walk-id').value,
+                fecha: document.getElementById('walk-form-date').value,
+                duracion_minutos: parseInt(document.getElementById('walk-form-duration').value),
+                distancia_km: parseFloat(document.getElementById('walk-form-distance').value),
+                resumen_diario: document.getElementById('walk-form-summary').value,
+                comportamiento_problemas: document.getElementById('walk-form-behavior').value,
+                incidentes_salud: document.getElementById('walk-form-health').value,
+                fotos_urls: window.walkPhotosUrls
+            };
+            
+            const photoFiles = Array.from(document.getElementById('walk-photo-input').files);
+            
+            try {
+                // 1. Subir fotos nuevas
+                const newPhotoUrls = [];
+                for (const file of photoFiles) {
+                    const url = await uploadWalkPhoto(file, dogId);
+                    newPhotoUrls.push(url);
+                }
+                
+                walkData.fotos_urls = [...window.walkPhotosUrls, ...newPhotoUrls];
+
+                // 2. Guardar/Actualizar el paseo en DB
+                let result;
+                if (isEdit) {
+                    await updateWalk(walkData);
+                    result = { id: walkData.id, ...walkData };
+                } else {
+                    result = await createWalk(walkData, dogId);
+                }
+
+                showSuccess(`Paseo ${isEdit ? 'actualizado' : 'registrado'} con éxito.`);
+                await window.showDogProfileView(window.currentDog);
+                
+            } catch (error) {
+                showError('Error al guardar el paseo: ' + error.message);
+                console.error(error);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function handleDeleteWalk() {
+            if (!confirm("¿Estás seguro de que quieres eliminar este paseo? Esta acción es irreversible.")) return;
+
+            showLoading('Eliminando paseo...');
+            try {
+                await deleteWalk(window.currentWalk.id);
+                showSuccess('Paseo eliminado con éxito.');
+                await window.showDogProfileView(window.currentDog);
+            } catch (error) {
+                showError('Error al eliminar paseo: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // === FOTOS Y PREVIEWS ===
+
+        function addPhotoPreview(url) {
+            const container = document.getElementById('walk-photo-preview');
+            const div = document.createElement('div');
+            div.className = 'photo-preview-item';
+            div.style.display = 'inline-block';
+            div.style.marginRight = '10px';
+            div.style.position = 'relative';
+            div.innerHTML = `
+                <img src="${url}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">
+                <button data-url="${url}" class="remove-photo-btn btn danger" style="position: absolute; top: -5px; right: -5px; padding: 3px 6px; line-height: 1;">&times;</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function handlePhotoPreviewChange(event) {
+            const files = event.target.files;
             if (files.length === 0) return;
 
-            showToast(`📤 Subiendo ${files.length} fotos...`, 'info');
-
             for (const file of files) {
-                try {
-                    const url = await uploadWalkPhoto(file, currentDog.id);
-                    uploadedPhotoUrls.push(url);
-                } catch (err) {
-                    showToast('Error al subir una foto', 'error');
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        // Temporalmente mostramos el blob/url local, el URL final se obtendrá en handleWalkSubmit
+                        addPhotoPreview(e.target.result); 
+                    };
+                    reader.readAsDataURL(file);
                 }
             }
-            renderEditPhotoPreview();
-            showToast(`✅ Fotos añadidas.`, 'success');
+        }
+
+        function handleRemovePhoto(event) {
+            const btn = event.target.closest('.remove-photo-btn');
+            if (!btn) return;
+            
+            const urlToRemove = btn.dataset.url;
+            
+            // Si la URL es una URL pública (ya guardada), la quitamos del array que se guardará
+            window.walkPhotosUrls = window.walkPhotosUrls.filter(url => url !== urlToRemove);
+            
+            // Quitar del DOM
+            btn.parentElement.remove();
+            
+            // Si era una foto nueva (URL de blob), no necesitamos hacer nada más que quitarla del DOM,
+            // ya que no está en el array window.walkPhotosUrls.
+            
+            // Nota: Para simplificar, asumimos que el usuario no está eliminando fotos nuevas cargadas
+            // que aún no tienen URL de Supabase. La lógica en handleWalkSubmit es la que se encarga de
+            // tomar las nuevas de input.files y las viejas de window.walkPhotosUrls.
+        }
+
+        // === EDICIÓN DE FOTO DE PERFIL ===
+
+        async function handleProfilePhotoChange() {
+            const input = document.getElementById('photo-upload-input');
+            input.click();
+
+            input.onchange = async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                showLoading('Subiendo foto de perfil...');
+                try {
+                    const dogId = window.currentDog.id;
+                    const publicUrl = await uploadProfilePhoto(dogId, file);
+                    await updateDogProfilePhoto(dogId, publicUrl);
+                    
+                    window.currentDog.foto_url = publicUrl;
+                    document.getElementById('profile-photo').src = publicUrl;
+                    
+                    showSuccess('Foto de perfil actualizada.');
+
+                } catch (error) {
+                    showError('Error al cambiar foto: ' + error.message);
+                } finally {
+                    hideLoading();
+                }
+            };
+        }
+
+        // === LÓGICA DE EDICIÓN DE PERFIL (MODAL) ===
+
+        window.openEditProfileModal = (dog) => {
+            if (!dog) {
+                showError('No hay perfil de perro cargado para editar.');
+                return;
+            }
+
+            // Cargar datos actuales del perro en el formulario del modal
+            document.getElementById('modal-dog-name').textContent = dog.nombre;
+            document.getElementById('edit-dog-id').value = dog.id;
+            document.getElementById('edit-nombre').value = dog.nombre;
+            document.getElementById('edit-raza').value = dog.raza || '';
+            document.getElementById('edit-sexo').value = dog.sexo || 'Macho';
+            document.getElementById('edit-dueno').value = dog.dueno || '';
+            document.getElementById('edit-telefono').value = dog.telefono || '';
+            
+            // Nuevos campos
+            document.getElementById('edit-edad').value = dog.edad || '';
+            document.getElementById('edit-peso').value = dog.peso || '';
+            document.getElementById('edit-alergias').value = dog.alergias || '';
+            document.getElementById('edit-energia').value = dog.energia || 'Bajo';
+            document.getElementById('edit-social').value = dog.social || 'Buena';
+
+            // Mostrar el modal
+            document.getElementById('edit-profile-modal').style.display = 'flex';
         };
 
-        document.getElementById('edit-walk-form').onsubmit = async (e) => {
-            e.preventDefault();
-            try {
-                const updatedData = {
-                    id: document.getElementById('edit-walk-id').value,
-                    duracion_minutos: parseInt(document.getElementById('edit-duracion').value),
-                    distancia_km: parseFloat(document.getElementById('edit-distancia').value),
-                    resumen_diario: document.getElementById('edit-resumen').value,
-                    comportamiento_problemas: document.getElementById('edit-comportamiento').checked,
-                    incidentes_salud: document.getElementById('edit-incidentes').value,
-                    fotos_urls: uploadedPhotoUrls // Usar la lista actualizada
-                };
+        async function saveDogProfileChanges(event) {
+            event.preventDefault();
+            showLoading('Guardando cambios del perfil...');
+
+            const dogId = document.getElementById('edit-dog-id').value;
+            
+            const updatedDogData = {
+                id: dogId,
+                nombre: document.getElementById('edit-nombre').value,
+                raza: document.getElementById('edit-raza').value,
+                sexo: document.getElementById('edit-sexo').value,
+                dueno: document.getElementById('edit-dueno').value,
+                telefono: document.getElementById('edit-telefono').value,
                 
-                await updateWalk(updatedData);
-                showToast('✅ Paseo editado con éxito', 'success');
-                hideEditWalk();
-                // Recargar el historial y el resumen
-                if (currentView === 'walks-history-section') loadHistory(currentDog);
-                if (currentView === 'dog-selection-dashboard') loadSummary(currentDog);
+                // Nuevos campos
+                edad: document.getElementById('edit-edad').value ? parseInt(document.getElementById('edit-edad').value) : null,
+                peso: document.getElementById('edit-peso').value ? parseFloat(document.getElementById('edit-peso').value) : null,
+                alergias: document.getElementById('edit-alergias').value,
+                energia: document.getElementById('edit-energia').value,
+                social: document.getElementById('edit-social').value,
+            };
 
-                // No implementamos la eliminación de fotos del storage aquí, solo de la DB.
-            } catch (err) {
-                showToast('Error al guardar la edición: ' + err.message, 'error');
-            }
-        };
-
-        window.deleteWalk = async () => {
-            if (!confirm('¿Estás seguro de que quieres eliminar este paseo? Esta acción es irreversible.')) return;
             try {
-                const walkId = document.getElementById('edit-walk-id').value;
-                await supabaseDeleteWalk(walkId);
-                showToast('🗑️ Paseo eliminado con éxito', 'success');
-                hideEditWalk();
-                if (currentView === 'walks-history-section') loadHistory(currentDog);
-                if (currentView === 'dog-selection-dashboard') loadSummary(currentDog);
-            } catch (err) {
-                showToast('Error al eliminar paseo: ' + err.message, 'error');
+                await updateDogProfile(updatedDogData); // Llama a la función de supabase.js
+
+                // 1. Actualizar el objeto global del perro
+                window.currentDog = { ...window.currentDog, ...updatedDogData };
+                
+                // 2. Cerrar modal
+                document.getElementById('edit-profile-modal').style.display = 'none';
+                
+                // 3. Recargar la vista del perfil para reflejar los cambios
+                await window.showDogProfileView(window.currentDog); 
+
+                showSuccess('Perfil de ' + updatedDogData.nombre + ' actualizado con éxito!');
+
+            } catch (error) {
+                showError('Error al guardar el perfil: ' + error.message);
+                console.error('Error al guardar perfil:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // === LÓGICA DEL CARRUSEL (COMPLETA Y CORREGIDA) ===
+
+        function showSlide(index) {
+            if (slides.length === 0) return;
+
+            // Ocultar todos
+            slides.forEach(slide => slide.style.display = 'none');
+
+            // Calcular el índice (loop infinito)
+            currentSlideIndex = (index + slides.length) % slides.length;
+
+            // Mostrar el actual
+            slides[currentSlideIndex].style.display = 'block';
+        }
+
+        function startCarousel() {
+            if (slides.length > 1 && !carouselIntervalId) {
+                console.log('⚙️ [CAROUSEL] Iniciando temporizador...');
+                carouselIntervalId = setInterval(window.nextSlide, 5000); // 5 segundos
+                document.getElementById('carousel-play-pause').textContent = '⏸';
+            }
+        }
+
+        function stopCarousel() {
+            if (carouselIntervalId) {
+                console.log('⚙️ [CAROUSEL] Deteniendo temporizador...');
+                clearInterval(carouselIntervalId);
+                carouselIntervalId = null;
+                document.getElementById('carousel-play-pause').textContent = '▶';
+            }
+        }
+
+        window.togglePlayPause = () => {
+            // Reiniciar el temporizador de ocultar al interactuar
+            resetControlsTimeout(); 
+            if (carouselIntervalId) {
+                stopCarousel();
+            } else {
+                startCarousel();
             }
         };
 
+        window.nextSlide = () => {
+            showSlide(currentSlideIndex + 1);
+        };
+
+        window.prevSlide = () => {
+            showSlide(currentSlideIndex - 1);
+            // Detener/Reiniciar el autoplay y reiniciar el temporizador de ocultar
+            stopCarousel(); 
+            startCarousel(); 
+            resetControlsTimeout();
+        };
+
+        // --- LÓGICA DE VISIBILIDAD DE CONTROLES ---
+
+        function showControls() {
+            document.getElementById('carousel-controls').style.opacity = '1';
+            document.getElementById('carousel-controls').style.pointerEvents = 'auto';
+        }
+
+        function hideControls() {
+            document.getElementById('carousel-controls').style.opacity = '0';
+            document.getElementById('carousel-controls').style.pointerEvents = 'none';
+        }
+
+        function resetControlsTimeout() {
+            // 1. Cancelar el temporizador de ocultar anterior
+            if (controlsTimeout) {
+                clearTimeout(controlsTimeout);
+            }
+            // 2. Mostrar controles inmediatamente
+            showControls(); 
+            
+            // 3. Establecer un nuevo temporizador para ocultar
+            controlsTimeout = setTimeout(hideControls, HIDE_CONTROLS_DELAY);
+        }
+
+        function setupCarouselControls(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            // Desvincular listeners viejos si existen
+            container.removeEventListener('mousemove', resetControlsTimeout);
+            container.removeEventListener('mouseleave', handleCarouselMouseLeave);
+
+            // 💡 ASIGNAR ESCUCHAS DE EVENTOS AL CONTENEDOR PRINCIPAL
+            container.addEventListener('mousemove', resetControlsTimeout);
+            container.addEventListener('mouseleave', handleCarouselMouseLeave);
+
+            // Iniciar con controles ocultos
+            hideControls(); 
+        }
+        
+        function handleCarouselMouseLeave() {
+            // Ocultar inmediatamente si está pausado, o iniciar el timeout si está reproduciéndose
+            if (carouselIntervalId) {
+                 resetControlsTimeout();
+            } else {
+                 hideControls();
+            }
+        }
+
+        // === INICIALIZACIÓN PRINCIPAL DEL CARRUSEL (INTEGRADA) ===
+
+        window.initCarousel = (walk) => {
+            console.log('🖼️ [CAROUSEL] Inicializando carrusel...');
+            const carouselContainer = document.getElementById('carousel-container');
+            const walkCarouselSection = document.getElementById('walk-carousel-section'); 
+            
+            // Limpiar el carrusel y detener cualquier intervalo anterior
+            carouselContainer.innerHTML = '';
+            stopCarousel(); 
+            hideControls(); // Asegurarse que se ocultan si no hay fotos
+
+            if (walk && walk.fotos && walk.fotos.length > 0) {
+                walk.fotos.forEach((foto, index) => {
+                    const img = document.createElement('img');
+                    img.className = 'carousel-slide';
+                    img.src = foto.id;
+                    img.alt = `Foto del paseo ${index + 1}`;
+                    img.style.display = 'none';
+                    img.onclick = () => window.openLightbox(foto.id);
+                    carouselContainer.appendChild(img);
+                });
+
+                // 💡 RECARGAR VARIABLE GLOBAL 'slides'
+                slides = document.querySelectorAll('#carousel-container .carousel-slide');
+                currentSlideIndex = 0;
+
+                if (slides.length > 0) {
+                    showSlide(currentSlideIndex);
+
+                    if (slides.length > 1) {
+                        // Iniciar la reproducción automática
+                        startCarousel(); 
+                        // Configurar los listeners para ocultar/mostrar controles
+                        setupCarouselControls('walk-carousel-section'); 
+                    } else {
+                        hideControls(); // Ocultar si solo hay 1 foto
+                    }
+                }
+            } else {
+                console.log('ℹ️ [CAROUSEL] No hay fotos para este paseo.');
+                slides = [];
+            }
+        };
+        
         // === LIGHTBOX ===
-        window.openLightbox = (url) => {
+        window.openLightbox = function(url) {
             document.getElementById('lightbox-img').src = url;
             document.getElementById('lightbox').style.display = 'flex';
-        };
-        document.getElementById('close-lightbox').onclick = () =>
-            document.getElementById('lightbox').style.display = 'none';
+        }
 
         // === WHATSAPP ===
         function updateWhatsApp() {
@@ -1963,13 +1420,14 @@
                 return;
             }
             btn.style.display = 'flex';
-            let num = "5491100000000"; // Número de la guardería por defecto
-            if (currentUser?.isAdmin && currentDog?.telefono) {
-                // Si es admin, mostramos el teléfono del dueño del perro actual
-                num = currentDog.telefono.replace(/[^0-9]/g, '');
-            } else if (!currentUser?.isAdmin && currentUser?.email) {
-                // Si es dueño, mostramos el número de la guardería/admin
-                // Mantenemos el número por defecto o el que se haya configurado
+            // Número predeterminado (ejemplo)
+            let num = "5491100000000"; 
+            if (currentUser?.isAdmin && window.currentDog?.telefono) {
+                num = window.currentDog.telefono.replace(/[^0-9]/g, '');
+            } else if (!currentUser?.isAdmin && currentUser?.email === window.currentDog?.dueno_email && window.currentDog?.telefono) {
+                // Si es el dueño, podría apuntar al número del admin/paseador (aquí se requeriría ese número)
+                // Por defecto, apuntamos al dueño si es admin, o al número ejemplo si no lo es.
+                // Para este ejemplo, si es dueño, el botón sigue siendo para el paseador (ejemplo)
             }
             btn.href = `https://wa.me/${num}`;
         }
@@ -1984,36 +1442,113 @@
             localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
         };
 
-        // === INIT ===
-        window.onload = () => {
-            const savedTheme = localStorage.getItem('paseoDogTheme');
-            if (savedTheme) {
-                document.documentElement.setAttribute('data-theme', savedTheme);
-            }
-            updateThemeIcon();
-
-            // Generar partículas doradas (solo si estamos en modo oscuro)
-            const particlesContainer = document.getElementById('particles-container');
-            if (document.documentElement.getAttribute('data-theme') === 'dark') {
-                for (let i = 0; i < 25; i++) {
-                    const p = document.createElement('div');
-                    p.classList.add('particle');
-                    const size = 4 + Math.random() * 14;
-                    p.style.width = `${size}px`;
-                    p.style.height = `${size}px`;
-                    p.style.left = `${Math.random() * 100}vw`;
-                    p.style.top = `${Math.random() * 100}vh`;
-                    particlesContainer.appendChild(p);
-                }
-            }
-            const observer = new MutationObserver(() => {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                particlesContainer.style.display = isDark ? 'block' : 'none';
-            });
-            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        // === INIT & EVENT LISTENERS ===
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Asignar listeners de formularios y botones
+            document.getElementById('walk-form').addEventListener('submit', handleWalkSubmit);
+            document.getElementById('delete-walk-btn').addEventListener('click', handleDeleteWalk);
+            document.getElementById('new-dog-form').addEventListener('submit', handleNewDogSubmit);
+            document.getElementById('edit-dog-form').addEventListener('submit', saveDogProfileChanges); // Listener para el modal de edición
             
-            window.showView('login-section');
-            updateWhatsApp();
+            document.getElementById('walk-photo-input').addEventListener('change', handlePhotoPreviewChange);
+            document.getElementById('walk-photo-preview').addEventListener('click', handleRemovePhoto);
+            
+            document.getElementById('change-photo-btn').addEventListener('click', handleProfilePhotoChange);
+
+            document.getElementById('logout-btn').onclick = async () => {
+                showLoading('Cerrando sesión...');
+                const { error } = await supabase.auth.signOut();
+                currentUser = null;
+                window.currentDog = null;
+                dogs = [];
+                if (error) {
+                    showError('Error al cerrar sesión: ' + error.message);
+                }
+                window.showView('login-section');
+                hideLoading();
+            };
+            
+            document.getElementById('back-to-profile-btn').onclick = () => window.showDogProfileView(window.currentDog);
+            
+            document.getElementById('back-to-dashboard-btn').onclick = () => window.showView('admin-dashboard-section');
+
+            // Iniciar sesión persistente
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                checkUserSession(session);
+            });
+            
+            document.getElementById('theme-toggle').onclick = toggleTheme;
+            document.getElementById('close-lightbox').onclick = () =>
+            document.getElementById('lightbox').style.display = 'none';
+        });
+        
+        async function handleNewDogSubmit(event) {
+            event.preventDefault();
+            showLoading('Registrando nuevo perro...');
+
+            const dogData = {
+                nombre: document.getElementById('new-dog-name').value,
+                dueno_email: document.getElementById('new-dog-email').value,
+                perfil: {
+                    raza: document.getElementById('new-dog-raza').value,
+                    sexo: document.getElementById('new-dog-sexo').value,
+                    dueno: document.getElementById('new-dog-owner').value,
+                    telefono: document.getElementById('new-dog-phone').value,
+                    // Nuevos campos
+                    edad: document.getElementById('new-dog-edad').value,
+                    peso: document.getElementById('new-dog-peso').value,
+                    alergias: document.getElementById('new-dog-alergias').value,
+                    energia: document.getElementById('new-dog-energia').value,
+                    social: document.getElementById('new-dog-social').value,
+                }
+            };
+            
+            // Crear usuario para el nuevo dueño (usando un password temporal)
+            const tempPassword = dogData.dueno_email.split('@')[0] + '123'; // Password temporal simple
+            try {
+                const { data: userData, error: userError } = await supabase.auth.signUp({ 
+                    email: dogData.dueno_email, 
+                    password: tempPassword 
+                });
+                
+                if (userError && userError.message !== 'User already registered') {
+                    // Ignoramos el error si el usuario ya existe, continuamos con el upsert del perro
+                    throw userError;
+                }
+                
+                await createDog(dogData);
+                
+                showSuccess(`Perro ${dogData.nombre} registrado. Dueño: ${dogData.dueno_email}. Contraseña temporal: ${tempPassword}`);
+                document.getElementById('new-dog-form').reset();
+                await loadDogData(true, currentUser.email);
+                setupAdminDashboard();
+                
+            } catch (error) {
+                showError('Error al registrar: ' + error.message);
+                console.error(error);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            document.getElementById('theme-toggle').textContent = newTheme === 'dark' ? '🌞' : '🌙';
+        }
+
+        function updateThemeIcon() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            document.getElementById('theme-toggle').textContent = currentTheme === 'dark' ? '🌞' : '🌙';
+        }
+        
+        // === INIT FINAL ===
+        window.onload = () => {
+            // El resto de la inicialización se hace en DOMContentLoaded y checkUserSession
+            updateThemeIcon(); 
         };
     </script>
 </body>
