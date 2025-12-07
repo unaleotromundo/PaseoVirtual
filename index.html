@@ -630,11 +630,6 @@
             border-radius: 8px;
             border: 1px solid var(--border);
         }
-        /* TABLET Y MÓVIL HORIZONTAL */
-        @media (max-width: 1024px) and (orientation: landscape) {
-            body { padding: 15px; }
-            #app-container { padding: 30px; }
-        }
         /* MÓVIL VERTICAL - TODO MÁS GRANDE Y CERCA */
         @media (max-width: 768px) and (orientation: portrait) {
             body { 
@@ -1233,7 +1228,7 @@
     <script type="module">
         import { loadDogs, loadWalks, createDog, createWalk, uploadPhoto } from './supabase.js';
 
-        // === DECLARACIONES GLOBALES ===
+        // === ESTADO GLOBAL ===
         let currentUser = null;
         let currentDog = null;
         let currentView = 'login-section';
@@ -1270,13 +1265,14 @@
             button.appendChild(circle);
         }
 
-        // === FUNCIONES EXPUESTAS EN EL SCOPE GLOBAL (para onclick en HTML) ===
+        // === EXPONER FUNCIONES EN EL SCOPE GLOBAL ===
         window.showView = function(id, dogId = null) {
             const section = document.getElementById(id);
             if (!section) {
-                console.error(`Sección no encontrada: ${id}`);
+                console.error(`❌ [VISTA] Sección no encontrada: ${id}`);
                 return;
             }
+            console.log(`✅ [VISTA] Mostrando: ${id}`);
 
             if (id !== currentView) backStack.push(currentView);
             currentView = id;
@@ -1315,6 +1311,7 @@
         };
 
         window.goBack = function() {
+            console.log('⬅️ [VISTA] Navegando hacia atrás');
             if (backStack.length) window.showView(backStack.pop());
             else window.showView('login-section');
         };
@@ -1324,8 +1321,10 @@
             e.preventDefault();
             const email = e.target.email.value.toLowerCase();
             const pass = e.target.password.value;
+            console.log('🔑 [LOGIN] Intentando iniciar sesión:', email);
             if (email === 'admin@paseos.com' && pass === 'admin123') {
                 currentUser = { email, isAdmin: true };
+                console.log('✅ [LOGIN] Admin autenticado');
                 window.showView('admin-dashboard-section');
             } else {
                 try {
@@ -1333,11 +1332,14 @@
                     if (dogs.length > 0 && pass === '123456') {
                         currentUser = { email, isAdmin: false };
                         currentDog = dogs[0];
+                        console.log('✅ [LOGIN] Cliente autenticado:', currentDog.nombre);
                         window.showView('dog-selection-dashboard');
                     } else {
+                        console.warn('❌ [LOGIN] Credenciales incorrectas');
                         showToast('Credenciales incorrectas', 'error');
                     }
                 } catch (err) {
+                    console.error('💥 [LOGIN] Error de conexión:', err);
                     showToast('Error de conexión', 'error');
                 }
             }
@@ -1346,12 +1348,15 @@
         // === CARRUSEL ===
         function initCarousel() {
             const wrapper = document.getElementById('carousel-wrapper');
+            console.log('🎬 [CARRUSEL] Iniciando...');
             loadWalks(currentDog.id).then(walks => {
                 const slides = walks.flatMap(w => w.fotos_urls || []).filter(Boolean);
                 if (!slides.length) {
+                    console.warn('⚠️ [CARRUSEL] Sin fotos para mostrar');
                     wrapper.style.display = 'none';
                     return;
                 }
+                console.log(`✅ [CARRUSEL] ${slides.length} fotos cargadas`);
                 wrapper.style.display = 'flex';
                 let idx = 0;
                 const img = document.getElementById('carousel-img');
@@ -1438,11 +1443,12 @@
             lastPlayedTrack = track;
             carouselAudio = new Audio(track);
             carouselAudio.onended = () => { carouselAudio = null; isPlaying = false; updatePlayState(); };
-            carouselAudio.play().catch(e => console.warn('Audio blocked'));
+            carouselAudio.play().catch(e => console.warn('🔇 [AUDIO] Reproducción bloqueada:', e));
         }
 
         // === ADMIN ===
         async function loadAdminDashboard() {
+            console.log('👨‍💼 [ADMIN] Cargando lista de perros...');
             const container = document.getElementById('dog-list-container');
             container.innerHTML = '<p>Cargando...</p>';
             try {
@@ -1460,42 +1466,45 @@
                     container.appendChild(card);
                     card.querySelector('button').addEventListener('click', (e) => createRipple(e));
                 });
+                console.log(`✅ [ADMIN] ${dogs.length} perros listados`);
             } catch (err) {
+                console.error('💥 [ADMIN] Error al cargar perros:', err);
                 container.innerHTML = '<p class="error">Error al cargar</p>';
             }
         }
 
         // === CREATE DOG ===
         document.getElementById('create-dog-form')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = e.submitter;
-    const orig = btn.innerHTML;
-    btn.innerHTML = '🔄 Guardando...';
-    btn.disabled = true;
-    try {
-        const dogData = {
-            nombre: document.getElementById('new-dog-name').value,
-            dueno_email: document.getElementById('new-dog-email').value,
-            perfil: {
-                raza: document.getElementById('new-dog-breed').value,
-                sexo: document.getElementById('new-dog-sex').value,
-                dueno: document.getElementById('new-dog-owner').value,
-                telefono: document.getElementById('new-dog-phone').value,
-                foto_url: ''
+            e.preventDefault();
+            const btn = e.submitter;
+            const orig = btn.innerHTML;
+            btn.innerHTML = '🔄 Guardando...';
+            btn.disabled = true;
+            console.log('💾 [PERRO] Creando nuevo perro...');
+            try {
+                const dogData = {
+                    nombre: document.getElementById('new-dog-name').value,
+                    dueno_email: document.getElementById('new-dog-email').value,
+                    perfil: {
+                        raza: document.getElementById('new-dog-breed').value,
+                        sexo: document.getElementById('new-dog-sex').value,
+                        dueno: document.getElementById('new-dog-owner').value,
+                        telefono: document.getElementById('new-dog-phone').value,
+                        foto_url: ''
+                    }
+                };
+                await createDog(dogData);
+                console.log('✅ [PERRO] Perro registrado con éxito');
+                showToast('✅ Perro registrado', 'success');
+                window.showView('admin-dashboard-section');
+            } catch (err) {
+                console.error('💥 [PERRO] Error al guardar:', err);
+                showToast('Error al guardar', 'error');
+            } finally {
+                btn.innerHTML = orig;
+                btn.disabled = false;
             }
-        };
-        await createDog(dogData);
-        showToast('✅ Perro registrado', 'success');
-        e.target.reset(); // Limpiar formulario
-        window.showView('admin-dashboard-section');
-    } catch (err) {
-        console.error('Error completo:', err);
-        showToast(err.message || 'Error al guardar', 'error');
-    } finally {
-        btn.innerHTML = orig;
-        btn.disabled = false;
-    }
-});
+        });
 
         // === CREATE WALK ===
         function initCreateWalk() {
@@ -1518,13 +1527,14 @@
                     `;
                 });
             } catch (err) {
-                console.error('Error al cargar perros:', err);
+                console.error('💥 [PASEO] Error al cargar perros:', err);
             }
         }
         document.getElementById('photo-upload')?.addEventListener('change', async (e) => {
             const files = Array.from(e.target.files);
             const preview = document.getElementById('photo-preview');
             uploadedPhotoUrls = [];
+            console.log(`📤 [FOTOS] Seleccionadas ${files.length} fotos`);
             for (const file of files) {
                 const reader = new FileReader();
                 reader.onload = () => preview.innerHTML += `<img src="${reader.result}" style="opacity:0.6;">`;
@@ -1533,6 +1543,7 @@
                     const url = await uploadPhoto(file, currentDog.id);
                     uploadedPhotoUrls.push(url);
                 } catch (err) {
+                    console.error('💥 [FOTOS] Error al subir:', err);
                     showToast('Error al subir foto', 'error');
                 }
             }
@@ -1558,9 +1569,11 @@
                 for (const cb of selected) {
                     await createWalk(walkData, cb.value);
                 }
+                console.log('✅ [PASEO] Paseo guardado con éxito');
                 showToast('✅ Paseo guardado con fotos reales', 'success');
                 window.showView('dog-selection-dashboard');
             } catch (err) {
+                console.error('💥 [PASEO] Error al guardar:', err);
                 showToast('❌ Error al guardar', 'error');
             } finally {
                 btn.innerHTML = orig;
@@ -1662,7 +1675,6 @@
                 carouselAudio.pause();
                 carouselAudio = null;
                 isPlaying = false;
-                // Actualizar estado visual
                 const playPauseBtn = document.getElementById('play-pause-btn');
                 const playLargeBtn = document.getElementById('carousel-play-large');
                 if (playPauseBtn) playPauseBtn.textContent = '▶';
@@ -1672,6 +1684,7 @@
 
         // === INIT ===
         window.onload = () => {
+            console.log('🚀 [APP] Iniciando aplicación...');
             window.showView('login-section');
             updateWhatsApp();
             document.querySelectorAll('.ripple').forEach(btn => {
