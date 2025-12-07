@@ -12,6 +12,8 @@
     <meta name="apple-mobile-web-app-title" content="PaseoDog">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjRDRBRjM3IiBkPSJNNDQ4IDI1NmEyNDIuNjcgMjQyLjY3IDAgMCAxLTI0MCAyNDIuNjdBMjQzLjIgMjQzLjIgMCAwIDEgOS4zMyAyNDhhMjQyLjY3IDI0Mi42NyAwIDAgMSAyNDAtMjQyLjY3QTI0My4yIDI0My4yIDAgMCAxIDQ0OCAyNTZ6bS0zMiA4YTMyIDIwNi42NyAwIDEgMC0zMiAwaDI1NnoiLz48cGF0aCBmaWxsPSIjRjBGMEYwIiBkPSJNMzUyIDMyYTIyNCAyMjQgMCAwIDAtNDE2IDE5MmEzMiAzMiAwIDEgMCA2NCAwbDgtMTI4aDEybDE2IDMyaDI0bDE2LTMyaDEybDgtMTI4YTMyIDMyIDAgMSAwLTY0IDBaIi8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTM4NCAxNjBhMzIgMzIgMCAxIDAgNjQgMGwtMTI4LTI4YTMyIDMyIDAgMSAwIDAtNjRsMjg4IDEyYTMyIDMyIDAgMSAwIDAtNjRsLTE2IDMyaC0yNGwxNi0zMnptLTEyOCA4YTMyIDMyIDAgMSAwIDY0IDBsLTgtMTI4YTMyIDMyIDAgMSAwLTY0IDBaIi8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTI1NiAzMmExMjggMTI4IDAgMCAwLTEyOCAxMjhhMzIgMzIgMCAxIDAgNjQgMGwxMDQtODBhMzIgMzIgMCAxIDAgMC02NGwtMjg4IDEyYTMyIDMyIDAgMSAwIDY0IDZsMTYtMzJoMjRsMTYgMzJoMTJ6Ii8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTE5MiAyMjRhMzIgMzIgMCAxIDAgNjQgMGwxMjgtMTZhMzIgMzIgMCAxIDAgMC02NGwtMTI4LTE2YTMyIDMyIDAgMSAwLTY0IDB6Ii8+PHBhdGggZmlsbD0iI0YwRjBGMCIgZD0iTTMyMCAzMjBhMzIgMzIgMCAxIDAgNjQgMGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgyNGwxNi0zMmgyNGwxNiAzMmgxMmwyODggMTJhMzIgMzIgMCAxIDAgMC02NGwtMTYtMzJoLTI0bC0xNiAzMiIvPjwvc3ZnPg==">
     <style>
+        /* === TODOS TUS ESTILOS EXISTENTES === */
+        /* (El bloque de CSS es idéntico al de tu versión mejorada, incluyendo el carrusel moderno) */
         /* VARIABLES CSS - TEMA OSCURO DORADO PREMIUM */
         :root {
             --primary: #10b981;
@@ -432,8 +434,7 @@
         .detail-value {
             color: var(--text-primary);
         }
-        .whatsapp-float,
-        .audio-float {
+        .whatsapp-float, .audio-float {
             position: fixed;
             bottom: 30px;
             border-radius: 50%;
@@ -496,8 +497,7 @@
             margin: 12px 0;
             border-left: 4px solid var(--secondary);
         }
-        #photo-preview img,
-        #edit-photo-preview img {
+        #photo-preview img, #edit-photo-preview img {
             width: 100px;
             height: 100px;
             object-fit: cover;
@@ -520,8 +520,7 @@
             border: none;
             font-size: 12px;
         }
-        #edit-walk-modal,
-        #lightbox {
+        #edit-walk-modal, #lightbox {
             display: none;
             position: fixed;
             top: 0;
@@ -710,29 +709,33 @@
             transition: opacity 0.5s ease;
         }
         .carousel-play-large {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: none;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.9;
-            transition: opacity 0.3s;
-            z-index: 10;
-            padding: 0;
-        }
-        .carousel-play-large:hover {
-            opacity: 1;
-            background: rgba(0, 0, 0, 0.8);
-        }
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+    transition: opacity 0.3s;
+    z-index: 10;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+}
+.carousel-play-large:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.8);
+    transform: translate(-50%, -50%); /* Asegurar que no se mueva */
+}
         .carousel-nav {
             position: absolute;
             top: 0;
@@ -1008,66 +1011,6 @@
     </div>
 
     <script>
-        // === CONFIGURACIÓN SEGURA (valores por defecto incluidos) ===
-        const DB_KEY = 'paseoDogDB_EXTERNAL';
-        const DB_URL = 'paseoDogDB.json';
-        // Valores por defecto robustos
-        let DATABASE = {
-            dogs: [],
-            trainer_phone: "5491100000000",
-            admin: { email: 'admin@paseos.com', password: 'admin123' },
-            photo_references: {
-                random: ['1581268694', '1581268695', '1581268696']
-            }
-        };
-        let TRAINER_PHONE = DATABASE.trainer_phone;
-        let ADMIN_USER = DATABASE.admin;
-        let MOCK_DOGS = DATABASE.dogs;
-
-        // === ESTADO GLOBAL ===
-        let currentUser = null, currentDog = null, currentView = 'login-section';
-        let simulatedPhotos = [], isEditing = false, tempPhotoId = null, backStack = [];
-        let editWalkIdx = null, editWalkPhotos = [];
-        let slideInterval = null, isPlaying = false;
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let isAudioEnabled = true;
-        let hasPlayedWelcome = false;
-        let userHasInteracted = false;
-
-        // === FUNCIONES DE BASE DE DATOS ===
-        async function loadExternalDB() {
-            try {
-                const response = await fetch(DB_URL);
-                if (!response.ok) throw new Error('Archivo no encontrado');
-                const externalData = await response.json();
-                // Fusionar datos externos con valores por defecto
-                DATABASE = {
-                    dogs: externalData.dogs || [],
-                    trainer_phone: externalData.trainer_phone || "5491100000000",
-                    admin: externalData.admin || { email: 'admin@paseos.com', password: 'admin123' },
-                    photo_references: externalData.photo_references || { random: ['1581268694', '1581268695', '1581268696'] }
-                };
-                TRAINER_PHONE = DATABASE.trainer_phone;
-                ADMIN_USER = DATABASE.admin;
-                MOCK_DOGS = DATABASE.dogs;
-                return true;
-            } catch (error) {
-                console.warn('⚠️ Usando datos de demostración (paseoDogDB.json no disponible)');
-                return false;
-            }
-        }
-        function getPhotoUrl(id, w = 400, h = 400) {
-            return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
-        }
-        function loadDB() {
-            const data = localStorage.getItem(DB_KEY);
-            return data ? JSON.parse(data) : [...MOCK_DOGS];
-        }
-        function saveDB(data) {
-            localStorage.setItem(DB_KEY, JSON.stringify(data));
-            MOCK_DOGS = data;
-        }
-
         // === UTILIDADES ===
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
@@ -1091,23 +1034,204 @@
             button.appendChild(circle);
         }
 
-        // === AUDIO ===
-        function playWelcomeSound() {
-            if (!isAudioEnabled || hasPlayedWelcome || !userHasInteracted) return;
-            hasPlayedWelcome = true;
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            oscillator.frequency.value = 660;
-            oscillator.type = 'sine';
-            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.6);
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.6);
+        // === CONFIGURACIÓN ===
+        const DB_KEY = 'paseoDogDB_EXTERNAL';
+        const DB_URL = 'paseoDogDB.json';
+        let DATABASE = {
+            dogs: [],
+            trainer_phone: "5491100000000",
+            admin: { email: 'admin@paseos.com', password: 'admin123' },
+            photo_references: { random: ['1581268694', '1581268695', '1581268696'] }
+        };
+        let TRAINER_PHONE = DATABASE.trainer_phone;
+        let ADMIN_USER = DATABASE.admin;
+        let MOCK_DOGS = DATABASE.dogs;
+
+        // === ESTADO GLOBAL ===
+        let currentUser = null, currentDog = null, currentView = 'login-section';
+        let simulatedPhotos = [], isEditing = false, tempPhotoId = null, backStack = [];
+        let editWalkIdx = null, editWalkPhotos = [];
+        let slideInterval = null, isPlaying = false;
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let isAudioEnabled = true;
+        let hasPlayedWelcome = false;
+        let userHasInteracted = false;
+        let lastPlayedTrack = null;
+        let carouselAudio = null;
+
+        // === FUNCIONES DE BASE DE DATOS ===
+        async function loadExternalDB() {
+            try {
+                const response = await fetch(DB_URL);
+                if (!response.ok) throw new Error('Archivo no encontrado');
+                const externalData = await response.json();
+                DATABASE = {
+                    dogs: externalData.dogs || [],
+                    trainer_phone: externalData.trainer_phone || "5491100000000",
+                    admin: externalData.admin || { email: 'admin@paseos.com', password: 'admin123' },
+                    photo_references: externalData.photo_references || { random: ['1581268694', '1581268695', '1581268696'] }
+                };
+                TRAINER_PHONE = DATABASE.trainer_phone;
+                ADMIN_USER = DATABASE.admin;
+                MOCK_DOGS = DATABASE.dogs;
+                return true;
+            } catch (error) {
+                console.warn('⚠️ Usando datos de demostración');
+                return false;
+            }
+        }
+        function getPhotoUrl(id, w = 400, h = 400) {
+            return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
+        }
+        function loadDB() {
+            const data = localStorage.getItem(DB_KEY);
+            return data ? JSON.parse(data) : [...MOCK_DOGS];
+        }
+        function saveDB(data) {
+            localStorage.setItem(DB_KEY, JSON.stringify(data));
+            MOCK_DOGS = data;
         }
 
-        // === TEMA ===
+        // === AUDIO DEL CARRUSEL ===
+        const CARRUSEL_TRACKS = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3', 'musica4.mp3'];
+
+        function playRandomCarouselTrack() {
+            if (!isAudioEnabled) return;
+            if (carouselAudio) {
+                carouselAudio.pause();
+                carouselAudio = null;
+            }
+            let randomTrack;
+            if (CARRUSEL_TRACKS.length > 1) {
+                do {
+                    randomTrack = CARRUSEL_TRACKS[Math.floor(Math.random() * CARRUSEL_TRACKS.length)];
+                } while (randomTrack === lastPlayedTrack && CARRUSEL_TRACKS.length > 1);
+            } else {
+                randomTrack = CARRUSEL_TRACKS[0];
+            }
+            lastPlayedTrack = randomTrack;
+            carouselAudio = new Audio(randomTrack);
+            carouselAudio.onended = () => {
+                carouselAudio = null;
+                isPlaying = false;
+                updatePlayButton();
+                hideControls();
+            };
+            carouselAudio.onerror = () => {
+                console.warn('No se pudo cargar el audio:', randomTrack);
+                carouselAudio = null;
+            };
+            carouselAudio.play().catch(e => {
+                console.warn('Reproducción bloqueada:', e);
+                carouselAudio = null;
+            });
+        }
+
+        function updatePlayButton() {
+            const btn = document.getElementById('play-pause-btn');
+            const largeBtn = document.getElementById('carousel-play-large');
+            if (btn) btn.textContent = isPlaying ? '⏸' : '▶';
+            if (largeBtn) largeBtn.textContent = isPlaying ? '⏸' : '▶';
+        }
+
+        function hideControls() {
+            if (!isPlaying) {
+                document.getElementById('carousel-play-large').style.display = 'none';
+                document.querySelector('.carousel-controls').classList.remove('visible');
+                document.querySelectorAll('.carousel-nav-btn').forEach(btn => {
+                    btn.style.opacity = '0';
+                    btn.style.transform = 'translateY(20px)';
+                });
+            }
+        }
+
+        function showControls() {
+            document.getElementById('carousel-play-large').style.display = 'flex';
+            document.querySelector('.carousel-controls').classList.add('visible');
+            document.querySelectorAll('.carousel-nav-btn').forEach(btn => {
+                btn.style.opacity = '1';
+                btn.style.transform = 'translateY(0)';
+            });
+            if (timeoutId) clearTimeout(timeoutId);
+            timeoutId = setTimeout(hideControls, 3000);
+        }
+
+        // === CAROUSEL MODERNO CON AUDIO ===
+        let timeoutId = null;
+        function initCarousel() {
+            const wrapper = document.getElementById('carousel-wrapper');
+            const container = document.getElementById('carousel-container');
+            const slides = [];
+            if (currentDog && currentDog.walks) {
+                currentDog.walks.forEach(wa => {
+                    if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
+                });
+            }
+            if (!slides.length) {
+                wrapper.style.display = 'none';
+                return;
+            }
+            wrapper.style.display = 'flex';
+            let idx = 0;
+            isPlaying = false;
+
+            const img = document.getElementById('carousel-img');
+            const counter = document.getElementById('carousel-counter');
+
+            const showSlide = () => {
+                img.style.opacity = 0;
+                setTimeout(() => {
+                    img.src = getPhotoUrl(slides[idx], 800, 500);
+                    img.onload = () => { img.style.opacity = 1; };
+                    counter.textContent = `${idx + 1} / ${slides.length}`;
+                }, 200);
+            };
+
+            container.addEventListener('mouseenter', showControls);
+            container.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                showControls();
+            }, { passive: false });
+            container.addEventListener('click', showControls);
+
+            window.prevSlide = () => {
+                idx = (idx - 1 + slides.length) % slides.length;
+                showSlide();
+                showControls();
+            };
+            window.nextSlide = () => {
+                idx = (idx + 1) % slides.length;
+                showSlide();
+                showControls();
+            };
+            window.togglePlay = () => {
+                isPlaying = !isPlaying;
+                updatePlayButton();
+                if (isPlaying) {
+                    showControls();
+                    playRandomCarouselTrack();
+                } else {
+                    if (carouselAudio) {
+                        carouselAudio.pause();
+                        carouselAudio = null;
+                    }
+                    hideControls();
+                }
+            };
+            window.toggleFullscreen = () => {
+                if (!document.fullscreenElement) {
+                    container.requestFullscreen().catch(console.warn);
+                } else {
+                    document.exitFullscreen();
+                }
+            };
+
+            showSlide();
+            showControls();
+        }
+
+        // === RESTO DE FUNCIONES (TEMAS, LOGIN, ADMIN, ETC.) ===
+        // --- (igual que en tu versión mejorada, sin cambios)
         const themeToggle = document.getElementById('theme-toggle');
         function updateThemeIcon() {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -1133,7 +1257,6 @@
             btn.href = `https://wa.me/${num}`;
         }
 
-        // === NAVEGACIÓN ===
         function showView(id, dogId = null) {
             MOCK_DOGS = loadDB();
             if(id !== currentView) backStack.push(currentView);
@@ -1165,9 +1288,26 @@
             updateWhatsApp();
             window.scrollTo(0,0);
         }
+
         function goBack(){
             if(backStack.length) showView(backStack.pop());
             else showView('login-section');
+        }
+
+        // === AUDIO DE BIENVENIDA ===
+        function playWelcomeSound() {
+            if (!isAudioEnabled || hasPlayedWelcome || !userHasInteracted) return;
+            hasPlayedWelcome = true;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = 660;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.6);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.6);
         }
 
         // === LOGIN ===
@@ -1389,156 +1529,6 @@
         }
         document.getElementById('close-lightbox').onclick = () =>
             document.getElementById('lightbox').style.display = 'none';
-
-        // === AUDIO DEL CARRUSEL ===
-let carouselAudio = null;
-const CARRUSEL_TRACKS = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3', 'musica4.mp3', 'musica5.mp3', 'musica6.mp3'];
-
-function playRandomCarouselTrack() {
-    if (!isAudioEnabled) return; // respeta el mute global
-
-    // Si ya hay un audio, detenerlo
-    if (carouselAudio) {
-        carouselAudio.pause();
-        carouselAudio = null;
-    }
-
-    // Elegir canción aleatoria
-    const randomTrack = CARRUSEL_TRACKS[Math.floor(Math.random() * CARRUSEL_TRACKS.length)];
-    carouselAudio = new Audio(randomTrack);
-
-    // Configurar eventos
-    carouselAudio.onended = () => {
-        carouselAudio = null;
-        isPlaying = false;
-        updatePlayButton();
-        hideControls();
-    };
-
-    carouselAudio.onerror = () => {
-        console.warn('No se pudo cargar el audio del carrusel:', randomTrack);
-        carouselAudio = null;
-    };
-
-    // Reproducir
-    carouselAudio.play().catch(e => {
-        console.warn('Reproducción de audio bloqueada:', e);
-        carouselAudio = null;
-    });
-}
-
-function updatePlayButton() {
-    const btn = document.getElementById('play-pause-btn');
-    const largeBtn = document.getElementById('carousel-play-large');
-    if (btn) btn.textContent = isPlaying ? '⏸' : '▶';
-    if (largeBtn) largeBtn.textContent = isPlaying ? '⏸' : '▶';
-}
-
-// === CAROUSEL MODERNO CON AUDIO ===
-function initCarousel() {
-    const wrapper = document.getElementById('carousel-wrapper');
-    const container = document.getElementById('carousel-container');
-    const playLargeBtn = document.getElementById('carousel-play-large');
-    const controls = document.querySelector('.carousel-controls');
-    const navBtns = document.querySelectorAll('.carousel-nav-btn');
-    const slides = [];
-
-    if (currentDog && currentDog.walks) {
-        currentDog.walks.forEach(wa => {
-            if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
-        });
-    }
-
-    if (!slides.length) {
-        wrapper.style.display = 'none';
-        return;
-    }
-
-    wrapper.style.display = 'flex';
-    let idx = 0;
-    let timeoutId = null;
-    isPlaying = false;
-
-    const img = document.getElementById('carousel-img');
-    const counter = document.getElementById('carousel-counter');
-
-    const showSlide = () => {
-        img.style.opacity = 0;
-        setTimeout(() => {
-            img.src = getPhotoUrl(slides[idx], 800, 500);
-            img.onload = () => { img.style.opacity = 1; };
-            counter.textContent = `${idx + 1} / ${slides.length}`;
-        }, 200);
-    };
-
-    const showControls = () => {
-        playLargeBtn.style.display = 'flex';
-        controls.classList.add('visible');
-        navBtns.forEach(btn => {
-            btn.style.opacity = '1';
-            btn.style.transform = 'translateY(0)';
-        });
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(hideControls, 3000);
-    };
-
-    const hideControls = () => {
-        if (!isPlaying) {
-            playLargeBtn.style.display = 'none';
-            controls.classList.remove('visible');
-            navBtns.forEach(btn => {
-                btn.style.opacity = '0';
-                btn.style.transform = 'translateY(20px)';
-            });
-        }
-    };
-
-    container.addEventListener('mouseenter', showControls);
-    container.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        showControls();
-    }, { passive: false });
-    container.addEventListener('click', showControls);
-
-    window.prevSlide = () => {
-        idx = (idx - 1 + slides.length) % slides.length;
-        showSlide();
-        showControls();
-    };
-
-    window.nextSlide = () => {
-        idx = (idx + 1) % slides.length;
-        showSlide();
-        showControls();
-    };
-
-    window.togglePlay = () => {
-        isPlaying = !isPlaying;
-        updatePlayButton();
-
-        if (isPlaying) {
-            showControls();
-            playRandomCarouselTrack();
-        } else {
-            if (carouselAudio) {
-                carouselAudio.pause();
-                carouselAudio = null;
-            }
-            hideControls();
-        }
-    };
-
-    window.toggleFullscreen = () => {
-        if (!document.fullscreenElement) {
-            container.requestFullscreen().catch(console.warn);
-        } else {
-            document.exitFullscreen();
-        }
-    };
-
-    showSlide();
-    showControls();
-}
 
         // === RESET DB ===
         document.getElementById('toggle-demo-btn').onclick = async () => {
