@@ -1582,26 +1582,65 @@
         });
 
         // === PROFILE ===
-        function loadProfile(dog) {
-            const view = document.getElementById('profile-details-view');
-            view.innerHTML = `
-                <h3>🐕 Datos Básicos</h3>
-                <div class="detail-row"><span class="detail-label">Nombre:</span> <span class="detail-value">${dog.nombre}</span></div>
-                <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${dog.raza}</span></div>
-                <div class="detail-row"><span class="detail-label">Sexo:</span> <span class="detail-value">${dog.sexo}</span></div>
-                <h3>💊 Contacto</h3>
-                <div class="detail-row"><span class="detail-label">Dueño:</span> <span class="detail-value">${dog.dueno}</span></div>
-                <div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${dog.telefono}</span></div>
-            `;
-            document.getElementById('profile-photo').src = dog.foto_url || 'https://via.placeholder.com/250';
-            document.getElementById('profile-dog-name-display').textContent = dog.nombre;
-            view.style.display = 'block';
-            document.getElementById('profile-details-edit').style.display = 'none';
-        }
+function loadProfile(dog) {
+    const view = document.getElementById('profile-details-view');
+    view.innerHTML = `
+        <h3>🐕 Datos Básicos</h3>
+        <div class="detail-row"><span class="detail-label">Nombre:</span> <span class="detail-value">${dog.nombre}</span></div>
+        <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${dog.raza}</span></div>
+        <div class="detail-row"><span class="detail-label">Sexo:</span> <span class="detail-value">${dog.sexo}</span></div>
+        <h3>💊 Contacto</h3>
+        <div class="detail-row"><span class="detail-label">Dueño:</span> <span class="detail-value">${dog.dueno}</span></div>
+        <div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${dog.telefono}</span></div>
+    `;
+    
+    const photoContainer = document.getElementById('profile-photo-container');
+    const profilePhoto = document.getElementById('profile-photo');
+    const uploadInput = document.getElementById('profile-photo-upload');
 
-        function toggleEditMode() {
-            alert('Edición de perfil no implementada en Supabase aún.');
+    // Establecer foto actual
+    const currentPhoto = dog.foto_url || 'https://via.placeholder.com/250/4B5563/FFFFFF?text=Sin+foto';
+    profilePhoto.src = currentPhoto;
+    document.getElementById('profile-dog-name-display').textContent = dog.nombre;
+    view.style.display = 'block';
+    document.getElementById('profile-details-edit').style.display = 'none';
+
+    // === MANEJAR CAMBIO DE FOTO ===
+    photoContainer.onclick = () => {
+        console.log('📸 [PERFIL] Abriendo selector de foto');
+        uploadInput.click();
+    };
+
+    uploadInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        console.log('📤 [PERFIL] Archivo seleccionado:', file.name);
+        const btn = document.querySelector('.nav-button'); // Guardar referencia al botón de "Volver"
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '🔄 Subiendo foto...';
+        btn.disabled = true;
+
+        try {
+            // Subir foto
+            const newUrl = await uploadProfilePhoto(file, dog.id);
+            // Guardar en DB
+            await updateDogProfilePhoto(dog.id, newUrl);
+            // Actualizar en pantalla
+            profilePhoto.src = newUrl;
+            // Actualizar en memoria
+            currentDog.foto_url = newUrl;
+            showToast('✅ Foto de perfil actualizada', 'success');
+        } catch (err) {
+            console.error('💥 [PERFIL] Error:', err);
+            showToast('❌ Error al subir foto', 'error');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            uploadInput.value = ''; // Reset input
         }
+    };
+}
 
         // === HISTORY ===
         async function loadHistory(dog) {
