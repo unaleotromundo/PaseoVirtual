@@ -1382,22 +1382,7 @@
                 }, 200);
             };
 
-            // Detectar si es móvil
-            isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-
-            const img = document.getElementById('carousel-img');
-            const counter = document.getElementById('carousel-counter');
-
-            const showSlide = () => {
-                img.style.opacity = 0;
-                setTimeout(() => {
-                    img.src = getPhotoUrl(slides[idx], 800, 500);
-                    img.onload = () => { img.style.opacity = 1; };
-                    counter.textContent = `${idx + 1} / ${slides.length}`;
-                }, 200);
-            };
-
-            // Comportamiento unificado: mostrar controles al pasar mouse o tocar
+                        // Comportamiento unificado: mostrar controles al pasar mouse o tocar
             container.addEventListener('mouseenter', showControls);
             container.addEventListener('mousemove', showControls);
             container.addEventListener('touchstart', (e) => {
