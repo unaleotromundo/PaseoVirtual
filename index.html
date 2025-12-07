@@ -1129,9 +1129,7 @@
         }
 
         function updatePlayButton() {
-            const btn = document.getElementById('play-pause-btn');
             const largeBtn = document.getElementById('carousel-play-large');
-            if (btn) btn.textContent = isPlaying ? '⏸' : '▶';
             if (largeBtn) largeBtn.textContent = isPlaying ? '⏸' : '▶';
         }
 
@@ -1195,12 +1193,20 @@
             }, { passive: false });
             container.addEventListener('click', showControls);
 
-            window.prevSlide = () => {
+            window.prevSlide = (e) => {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
                 idx = (idx - 1 + slides.length) % slides.length;
                 showSlide();
                 showControls();
             };
-            window.nextSlide = () => {
+            window.nextSlide = (e) => {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
                 idx = (idx + 1) % slides.length;
                 showSlide();
                 showControls();
