@@ -1183,12 +1183,21 @@
         <!-- DOG DASHBOARD -->
         <section id="dog-selection-dashboard" style="display:none;">
             <h2>🐕 Dashboard de <span class="dog-name-placeholder"></span></h2>
-            <div id="carousel-wrapper">
-    <div id="carousel-container">
-        <!-- Solo dejamos la imagen. Al hacer clic, pasa a la siguiente -->
-        <img id="carousel-img" src="" alt="Diapositiva" onclick="nextSlide()" style="cursor: pointer;">
-    </div>
-</div>
+            <div id="carousel-wrapper" style="display:none;">
+                <div id="carousel-container">
+                    <img id="carousel-img" src="" alt="Diapositiva">
+                    <button id="carousel-play-large" class="carousel-play-large" onclick="togglePlay()" style="display:none;">▶</button>
+                    <div class="carousel-nav">
+                        <button class="carousel-nav-btn" id="prev-btn" onclick="prevSlide()">‹</button>
+                        <button class="carousel-nav-btn" id="next-btn" onclick="nextSlide()">›</button>
+                    </div>
+                    <div class="carousel-controls">
+                        <span id="carousel-counter"></span>
+                        <div class="carousel-actions">
+                            <button class="carousel-action-btn" id="play-pause-btn" onclick="togglePlay()">▶</button>
+                            <button class="carousel-action-btn" onclick="toggleFullscreen()">⛶</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 24px;">
