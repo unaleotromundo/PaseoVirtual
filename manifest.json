@@ -1,19 +1,16 @@
 {
   "name": "PaseoDog",
   "short_name": "PaseoDog",
-  "description": "Gestión profesional de paseos para perros",
-  "start_url": "./",
+  "description": "Gestión Profesional de Paseos para Perros",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#0F0F1B",
+  "theme_color": "#D4AF37",
   "icons": [
     {
-      "src": "image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjI1NiIgZmlsbD0iIzAwMDAwMCIvPjxwYXRoIGZpbGw9IiNmZmZmZmYiIGQ9Ik0zMjAgMTYwaC02NGEyIDIgMCAwIDAtMiAydjMyYTU2IDU2IDAgMCAwIDU2IDU2aDhhNTYgNTYgMCAwIDAgNTYtNTZ2LTMyYT2IDIgMCAwIDAtMi0yaC02NHptLTI4OCAwaC02NGEyIDIgMCAwIDAtMiAydjMyYTU2IDU2IDAgMCAwIDU2IDU2aDdhNTYgNTYgMCAwIDAgNTctNTZ2LTMyYT2IDIgMCAwIDAtMi0yaC02NHptMzIgMTI4aC02NGEyIDIgMCAwIDAtMiAydjQ4YTU2IDU2IDAgMCAwIDU2IDU2aDhhNTYgNTYgMCAwIDAgNTYtNTZ2LTQ4YT2IDIgMCAwIDAtMi0yaC02NHptLTI4OCAwaC02NGEyIDIgMCAwIDAtMiAydjQ4YTU2IDU2IDAgMCAwIDU2IDU2aDdhNTYgNTYgMCAwIDAgNTctNTZ2LTQ4YT2IDIgMCAwIDAtMi0yaC02NHptMTQ0IDE5MmgtNjRhMiAyIDAgMCAwLTIgMnYzMmE1NiA1NiAwIDAgMCA1NiA1Nmg4YTU2IDU2IDAgMCAwIDU2LTU2di0zMmEyIDIgMCAwIDAtMi0yaC02NHoiLz48L3N2Zz4=",
+      "src": "https://unaleotromundo.github.io/PaseoVirtual/paseodog-logo.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
-  ],
-  "orientation": "portrait-primary",
-  "lang": "es"
+  ]
 }
