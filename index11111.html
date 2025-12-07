@@ -13,6 +13,7 @@
     <meta name="apple-mobile-web-app-title" content="PaseoDog">
     <link rel="apple-touch-icon" href="paseodog-logo.svg">
     <style>
+
         /* VARIABLES CSS - TEMA OSCURO DORADO PREMIUM */
         :root {
             --primary: #10b981;
@@ -627,11 +628,13 @@
             border-radius: 8px;
             border: 1px solid var(--border);
         }
+<<<<<<< HEAD
         /* TABLET Y MÓVIL HORIZONTAL */
         @media (max-width: 1024px) and (orientation: landscape) {
             body { padding: 15px; }
             #app-container { padding: 30px; }
         }
+
         /* MÓVIL VERTICAL - TODO MÁS GRANDE Y CERCA */
         @media (max-width: 768px) and (orientation: portrait) {
             body { 
@@ -803,6 +806,7 @@
                 padding: 16px 20px;
             }
         }
+
         /* MÓVILES MUY PEQUEÑOS */
         @media (max-width: 380px) and (orientation: portrait) {
             h1 { font-size: 2.4rem; }
@@ -817,6 +821,14 @@
                 height: 56px;
                 font-size: 32px;
             }
+=======
+        @media (max-width: 768px) {
+            #profile-content { grid-template-columns: 1fr; }
+            .detail-row { flex-direction: column; align-items: flex-start; }
+            #carousel-wrapper { height: 250px; }
+            .whatsapp-float { right: 20px; }
+            .audio-float { right: 80px; }
+>>>>>>> parent of c187dc7 (aaaa)
         }
         #loading-overlay {
             display: flex;
@@ -873,239 +885,224 @@
         @keyframes fadeOut {
             to { opacity: 0; transform: translateX(120%); }
         }
-
         /* === CARRUSEL MODERNO (ESTILO YOUTUBE) === */
-        #carousel-wrapper {
-            position: relative;
-            width: 100%;
-            height: 350px;
-            background: #000;
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow);
-        }
-        #carousel-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-        #carousel-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            transition: opacity 0.3s ease;
-        }
-        /* Botón PLAY grande en el centro */
-        .carousel-play-large {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border: none;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 200;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            padding-left: 6px;
-        }
-        #carousel-wrapper.active .carousel-play-large,
-        #carousel-wrapper:hover .carousel-play-large {
-            opacity: 1;
-        }
-        .carousel-play-large:hover {
-            background: rgba(212, 175, 55, 0.9);
-        }
-        .carousel-play-large.playing {
-            opacity: 0 !important;
-            pointer-events: none;
-        }
-        /* Botones de navegación (izquierda/derecha) */
-        .carousel-nav {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            pointer-events: none;
-            z-index: 150;
-        }
-        .carousel-nav-btn {
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            pointer-events: auto;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        #carousel-wrapper.active .carousel-nav-btn,
-        #carousel-wrapper:hover .carousel-nav-btn {
-            opacity: 1;
-        }
-        .carousel-nav-btn:hover {
-            background: rgba(212, 175, 55, 0.8);
-        }
-        .carousel-nav-btn.playing {
-            opacity: 0 !important;
-            pointer-events: none;
-        }
-        /* Controles inferiores (contador + botones) */
-        .carousel-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 16px;
-            border-radius: 20px;
-            z-index: 150;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        #carousel-wrapper.active .carousel-controls,
-        #carousel-wrapper:hover .carousel-controls {
-            opacity: 1;
-        }
-        .carousel-controls.playing {
-            opacity: 0 !important;
-            pointer-events: none;
-        }
-        #carousel-counter {
-            color: white;
-            font-size: 0.9rem;
-            font-weight: bold;
-            min-width: 50px;
-            text-align: center;
-        }
-        .carousel-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .carousel-action-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
-            pointer-events: auto;
-        }
-        .carousel-action-btn:hover {
-            background: var(--primary);
-        }
+#carousel-wrapper {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    background: #000;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+}
+#carousel-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+#carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: opacity 0.3s ease;
+}
 
-        /* FULLSCREEN - modo inmersivo verdadero */
-        #carousel-container:fullscreen,
-        #carousel-container:-webkit-full-screen,
-        #carousel-container:-moz-full-screen,
-        #carousel-container:-ms-fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw !important;
-            height: 100vh !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            background: #000;
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #carousel-container:fullscreen #carousel-img,
-        #carousel-container:-webkit-full-screen #carousel-img,
-        #carousel-container:-moz-full-screen #carousel-img,
-        #carousel-container:-ms-fullscreen #carousel-img {
-            width: 100vw !important;
-            height: 100vh !important;
-            object-fit: cover !important;
-            margin: 0 !important;
-        }
-        /* Controles en fullscreen: fijos */
-        #carousel-container:fullscreen .carousel-play-large,
-        #carousel-container:-webkit-full-screen .carousel-play-large,
-        #carousel-container:-moz-full-screen .carousel-play-large,
-        #carousel-container:-ms-fullscreen .carousel-play-large {
-            position: fixed !important;
-            z-index: 10001;
-        }
-        #carousel-container:fullscreen .carousel-nav,
-        #carousel-container:-webkit-full-screen .carousel-nav,
-        #carousel-container:-moz-full-screen .carousel-nav,
-        #carousel-container:-ms-fullscreen .carousel-nav {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 10001;
-            padding: 0 30px !important;
-        }
-        #carousel-container:fullscreen .carousel-controls,
-        #carousel-container:-webkit-full-screen .carousel-controls,
-        #carousel-container:-moz-full-screen .carousel-controls,
-        #carousel-container:-ms-fullscreen .carousel-controls {
-            position: fixed !important;
-            bottom: 30px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            z-index: 10001;
-            background: rgba(0, 0, 0, 0.75) !important;
-        }
+/* Botón PLAY grande en el centro */
+.carousel-play-large {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding-left: 6px;
+}
+#carousel-wrapper.active .carousel-play-large,
+#carousel-wrapper:hover .carousel-play-large {
+    opacity: 1;
+}
+.carousel-play-large:hover {
+    background: rgba(212, 175, 55, 0.9);
+}
+.carousel-play-large.playing {
+    opacity: 0 !important;
+    pointer-events: none;
+}
 
-        /* MÓVIL */
-        @media (max-width: 768px) {
-            #carousel-wrapper { height: 280px; }
-            .carousel-play-large {
-                width: 70px;
-                height: 70px;
-                font-size: 1.8rem;
-            }
-            .carousel-nav-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 1.5rem;
-            }
-            .carousel-controls {
-                padding: 6px 12px;
-                gap: 12px;
-            }
-        }
+/* Botones de navegación (izquierda/derecha) */
+.carousel-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    pointer-events: none;
+    z-index: 150;
+}
+.carousel-nav-btn {
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+#carousel-wrapper.active .carousel-nav-btn,
+#carousel-wrapper:hover .carousel-nav-btn {
+    opacity: 1;
+}
+.carousel-nav-btn:hover {
+    background: rgba(212, 175, 55, 0.8);
+}
+.carousel-nav-btn.playing {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+/* Controles inferiores (contador + botones) */
+.carousel-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 16px;
+    border-radius: 20px;
+    z-index: 150;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+#carousel-wrapper.active .carousel-controls,
+#carousel-wrapper:hover .carousel-controls {
+    opacity: 1;
+}
+.carousel-controls.playing {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+#carousel-counter {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: bold;
+    min-width: 50px;
+    text-align: center;
+}
+.carousel-actions {
+    display: flex;
+    gap: 8px;
+}
+.carousel-action-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    pointer-events: auto;
+}
+.carousel-action-btn:hover {
+    background: var(--primary);
+}
+
+/* FULLSCREEN */
+#carousel-container:fullscreen,
+#carousel-container:-webkit-full-screen,
+#carousel-container:-moz-full-screen,
+#carousel-container:-ms-fullscreen {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#carousel-container:fullscreen #carousel-img,
+#carousel-container:-webkit-full-screen #carousel-img,
+#carousel-container:-moz-full-screen #carousel-img,
+#carousel-container:-ms-fullscreen #carousel-img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+}
+
+/* Fullscreen: controles fijos */
+#carousel-container:fullscreen .carousel-play-large,
+#carousel-container:-webkit-full-screen .carousel-play-large,
+#carousel-container:-moz-full-screen .carousel-play-large {
+    position: fixed;
+}
+#carousel-container:fullscreen .carousel-nav,
+#carousel-container:-webkit-full-screen .carousel-nav,
+#carousel-container:-moz-full-screen .carousel-nav {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+}
+#carousel-container:fullscreen .carousel-controls,
+#carousel-container:-webkit-full-screen .carousel-controls,
+#carousel-container:-moz-full-screen .carousel-controls {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* MÓVIL */
+@media (max-width: 768px) {
+    #carousel-wrapper { height: 280px; }
+    .carousel-play-large {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
+    }
+    .carousel-nav-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.5rem;
+    }
+    .carousel-controls {
+        padding: 6px 12px;
+        gap: 12px;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -1186,21 +1183,12 @@
         <!-- DOG DASHBOARD -->
         <section id="dog-selection-dashboard" style="display:none;">
             <h2>🐕 Dashboard de <span class="dog-name-placeholder"></span></h2>
-            <div id="carousel-wrapper" style="display:none;">
-                <div id="carousel-container">
-                    <img id="carousel-img" src="" alt="Diapositiva">
-                    <button id="carousel-play-large" class="carousel-play-large" onclick="togglePlay()" style="display:none;">▶</button>
-                    <div class="carousel-nav">
-                        <button class="carousel-nav-btn" id="prev-btn" onclick="prevSlide()">‹</button>
-                        <button class="carousel-nav-btn" id="next-btn" onclick="nextSlide()">›</button>
-                    </div>
-                    <div class="carousel-controls">
-                        <span id="carousel-counter"></span>
-                        <div class="carousel-actions">
-                            <button class="carousel-action-btn" id="play-pause-btn" onclick="togglePlay()">▶</button>
-                            <button class="carousel-action-btn" onclick="toggleFullscreen()">⛶</button>
-                        </div>
-                    </div>
+            <div id="carousel-wrapper">
+    <div id="carousel-container">
+        <!-- Solo dejamos la imagen. Al hacer clic, pasa a la siguiente -->
+        <img id="carousel-img" src="" alt="Diapositiva" onclick="nextSlide()" style="cursor: pointer;">
+    </div>
+</div>
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 24px;">
@@ -1313,6 +1301,7 @@
             if (ripple) ripple.remove();
             button.appendChild(circle);
         }
+
         // === CONFIGURACIÓN ===
         const DB_KEY = 'paseoDogDB_EXTERNAL';
         const DB_URL = 'paseoDogDB.json';
@@ -1325,11 +1314,12 @@
         let TRAINER_PHONE = DATABASE.trainer_phone;
         let ADMIN_USER = DATABASE.admin;
         let MOCK_DOGS = DATABASE.dogs;
+
         // === ESTADO GLOBAL ===
         let currentUser = null, currentDog = null, currentView = 'login-section';
         let simulatedPhotos = [], isEditing = false, tempPhotoId = null, backStack = [];
         let editWalkIdx = null, editWalkPhotos = [];
-        let slideInterval = null, isPlaying = false, hideTimer = null;
+        let slideInterval = null, isPlaying = false;
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         let isAudioEnabled = true;
         let hasPlayedWelcome = false;
@@ -1372,6 +1362,7 @@
 
         // === AUDIO DEL CARRUSEL ===
         const CARRUSEL_TRACKS = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3', 'musica4.mp3'];
+
         function playRandomCarouselTrack() {
             if (!isAudioEnabled) return;
             if (carouselAudio) {
@@ -1391,7 +1382,8 @@
             carouselAudio.onended = () => {
                 carouselAudio = null;
                 isPlaying = false;
-                updatePlayState();
+                updatePlayButton();
+                hideControls();
             };
             carouselAudio.onerror = () => {
                 console.warn('No se pudo cargar el audio:', randomTrack);
@@ -1403,126 +1395,135 @@
             });
         }
 
+        
         // === CAROUSEL MODERNO CON AUDIO ===
+        let timeoutId = null;
         function initCarousel() {
-            const wrapper = document.getElementById('carousel-wrapper');
-            const container = document.getElementById('carousel-container');
-            const playLargeBtn = document.getElementById('carousel-play-large');
-            const slides = [];
-            if (currentDog && currentDog.walks) {
-                currentDog.walks.forEach(wa => {
-                    if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
-                });
-            }
-            if (!slides.length) {
-                wrapper.style.display = 'none';
-                return;
-            }
-            wrapper.style.display = 'flex';
-            let idx = 0;
-            isPlaying = false;
-            const img = document.getElementById('carousel-img');
-            const counter = document.getElementById('carousel-counter');
-            const controls = document.querySelector('.carousel-controls');
-            const navBtns = document.querySelectorAll('.carousel-nav-btn');
+    const wrapper = document.getElementById('carousel-wrapper');
+    const container = document.getElementById('carousel-container');
+    const playLargeBtn = document.getElementById('carousel-play-large');
+    const slides = [];
+    
+    if (currentDog && currentDog.walks) {
+        currentDog.walks.forEach(wa => {
+            if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
+        });
+    }
+    
+    if (!slides.length) {
+        wrapper.style.display = 'none';
+        return;
+    }
+    
+    wrapper.style.display = 'flex';
+    let idx = 0;
+    isPlaying = false;
+    const img = document.getElementById('carousel-img');
+    const counter = document.getElementById('carousel-counter');
+    const controls = document.querySelector('.carousel-controls');
+    const navBtns = document.querySelectorAll('.carousel-nav-btn');
+    let hideTimer = null;
 
-            const showSlide = () => {
-                img.style.opacity = 0;
-                setTimeout(() => {
-                    img.src = getPhotoUrl(slides[idx], 800, 500);
-                    img.onload = () => { img.style.opacity = 1; };
-                    counter.textContent = `${idx + 1} / ${slides.length}`;
-                }, 200);
-            };
+    const showSlide = () => {
+        img.style.opacity = 0;
+        setTimeout(() => {
+            img.src = getPhotoUrl(slides[idx], 800, 500);
+            img.onload = () => { img.style.opacity = 1; };
+            counter.textContent = `${idx + 1} / ${slides.length}`;
+        }, 200);
+    };
 
-            const updatePlayState = () => {
-                const playPauseBtn = document.getElementById('play-pause-btn');
-                playPauseBtn.textContent = isPlaying ? '⏸' : '▶';
-                playLargeBtn.textContent = isPlaying ? '⏸' : '▶';
-                if (isPlaying) {
-                    playLargeBtn.classList.add('playing');
-                    controls.classList.add('playing');
-                    navBtns.forEach(btn => btn.classList.add('playing'));
-                } else {
-                    playLargeBtn.classList.remove('playing');
-                    controls.classList.remove('playing');
-                    navBtns.forEach(btn => btn.classList.remove('playing'));
-                }
-            };
-
-            const showControls = () => {
-                wrapper.classList.add('active');
-                resetHideTimer();
-            };
-
-            const hideControls = () => {
-                wrapper.classList.remove('active');
-            };
-
-            const resetHideTimer = () => {
-                if (hideTimer) clearTimeout(hideTimer);
-                hideTimer = setTimeout(hideControls, 3000);
-            };
-
-            wrapper.addEventListener('mouseenter', showControls);
-            wrapper.addEventListener('mouseleave', resetHideTimer);
-            wrapper.addEventListener('touchstart', showControls, { passive: true });
-
-            window.nextSlide = () => {
-                idx = (idx + 1) % slides.length;
-                showSlide();
-                showControls();
-            };
-            window.prevSlide = () => {
-                idx = (idx - 1 + slides.length) % slides.length;
-                showSlide();
-                showControls();
-            };
-            window.togglePlay = () => {
-                if (!isPlaying) {
-                    playRandomCarouselTrack();
-                    isPlaying = true;
-                } else {
-                    if (carouselAudio) {
-                        carouselAudio.pause();
-                        carouselAudio = null;
-                    }
-                    isPlaying = false;
-                }
-                updatePlayState();
-                showControls();
-            };
-            window.toggleFullscreen = () => {
-                const elem = document.getElementById('carousel-container');
-                if (!document.fullscreenElement && !document.webkitFullscreenElement &&
-                    !document.mozFullScreenElement && !document.msFullscreenElement) {
-                    if (elem.requestFullscreen) elem.requestFullscreen();
-                    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-                    else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
-                    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-                } else {
-                    if (document.exitFullscreen) document.exitFullscreen();
-                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-                    else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
-                    else if (document.msExitFullscreen) document.msExitFullscreen();
-                }
-                setTimeout(() => {
-                    const img = document.getElementById('carousel-img');
-                    if (img) img.src = img.src;
-                }, 100);
-            };
-
-            showSlide();
-            updatePlayState();
-            hideControls();
-
-            if (slideInterval) clearInterval(slideInterval);
-            slideInterval = setInterval(() => {
-                if (!isPlaying) {
-                    window.nextSlide();
-                }
-            }, 3000);
+    const updatePlayState = () => {
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        playPauseBtn.textContent = isPlaying ? '⏸' : '▶';
+        playLargeBtn.textContent = isPlaying ? '⏸' : '▶';
+        if (isPlaying) {
+            playLargeBtn.classList.add('playing');
+            controls.classList.add('playing');
+            navBtns.forEach(btn => btn.classList.add('playing'));
+        } else {
+            playLargeBtn.classList.remove('playing');
+            controls.classList.remove('playing');
+            navBtns.forEach(btn => btn.classList.remove('playing'));
         }
+    };
+
+    const showControls = () => {
+        wrapper.classList.add('active');
+        resetHideTimer();
+    };
+
+    const hideControls = () => {
+        wrapper.classList.remove('active');
+    };
+
+    const resetHideTimer = () => {
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(hideControls, 3000);
+    };
+
+    // Eventos de interacción
+    wrapper.addEventListener('mouseenter', showControls);
+    wrapper.addEventListener('mouseleave', resetHideTimer);
+    wrapper.addEventListener('touchstart', showControls, { passive: true });
+    document.addEventListener('click', () => {
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+            showControls();
+        }
+    });
+
+    window.nextSlide = () => {
+        idx = (idx + 1) % slides.length;
+        showSlide();
+        showControls();
+    };
+    window.prevSlide = () => {
+        idx = (idx - 1 + slides.length) % slides.length;
+        showSlide();
+        showControls();
+    };
+    window.togglePlay = () => {
+        if (!isPlaying) {
+            playRandomCarouselTrack();
+            isPlaying = true;
+        } else {
+            if (carouselAudio) {
+                carouselAudio.pause();
+                carouselAudio = null;
+            }
+            isPlaying = false;
+        }
+        updatePlayState();
+        showControls();
+    };
+    window.toggleFullscreen = () => {
+        const elem = document.getElementById('carousel-container');
+        if (!document.fullscreenElement && !document.webkitFullscreenElement &&
+            !document.mozFullScreenElement && !document.msFullscreenElement) {
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+            else if (document.msExitFullscreen) document.msExitFullscreen();
+        }
+        showControls();
+    };
+
+    showSlide();
+    updatePlayState();
+    hideControls(); // ocultar al inicio
+
+    if (slideInterval) clearInterval(slideInterval);
+    slideInterval = setInterval(() => {
+        if (!isPlaying) {
+            window.nextSlide();
+        }
+    }, 3000);
+}
 
         // === TEMA ===
         const themeToggle = document.getElementById('theme-toggle');
@@ -1536,7 +1537,6 @@
             document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
             updateThemeIcon();
         };
-
         function updateWhatsApp() {
             const btn = document.getElementById('whatsapp-btn');
             if(currentView.includes('login') || currentView.includes('admin-dashboard')){
@@ -1555,6 +1555,8 @@
             MOCK_DOGS = loadDB();
             if(id !== currentView) backStack.push(currentView);
             currentView = id;
+            
+            // Detener carrusel si salimos del dashboard
             if (currentView !== 'dog-selection-dashboard' && slideInterval) {
                 clearInterval(slideInterval);
                 slideInterval = null;
@@ -1564,8 +1566,10 @@
                 }
                 isPlaying = false;
             }
+            
             document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
             document.getElementById(id).style.display = 'block';
+
             if(dogId) currentDog = MOCK_DOGS.find(d => d.id === dogId);
             if(currentDog) {
                 currentDog = MOCK_DOGS.find(d => d.id === currentDog.id);
@@ -1827,6 +1831,8 @@
                 `;
                 c.appendChild(session);
             });
+
+            // === VINCULAR EVENTOS DE EDICIÓN ===
             c.querySelectorAll('.edit-btn').forEach(btn => {
                 btn.onclick = (e) => {
                     const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
@@ -1939,6 +1945,7 @@
             document.getElementById('loading-overlay').style.display = 'none';
             showView('login-section');
             updateThemeIcon();
+
             const particlesContainer = document.getElementById('particles-container');
             if (document.documentElement.getAttribute('data-theme') === 'dark') {
                 for (let i = 0; i < 25; i++) {
@@ -1957,9 +1964,12 @@
                 particlesContainer.style.display = isDark ? 'block' : 'none';
             });
             observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
             document.querySelectorAll('.ripple').forEach(btn => {
                 btn.addEventListener('click', createRipple);
             });
+
+            // === CONFIGURAR CONTROL DE AUDIO GLOBAL ===
             const audioToggle = document.getElementById('audio-toggle');
             const savedAudio = localStorage.getItem('paseoDogAudio');
             if (savedAudio === 'off') {
@@ -1971,11 +1981,13 @@
                 isAudioEnabled = !isAudioEnabled;
                 audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
                 localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
+                // Si se silencia, detener cualquier audio del carrusel
                 if (!isAudioEnabled && carouselAudio) {
                     carouselAudio.pause();
                     carouselAudio = null;
                     isPlaying = false;
-                    updatePlayState();
+                    updatePlayButton();
+                    hideControls();
                 }
             };
             document.addEventListener('click', () => {
