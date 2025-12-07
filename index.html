@@ -913,8 +913,8 @@
                     <img id="carousel-img" src="" alt="Diapositiva">
                     <button id="carousel-play-large" class="carousel-play-large" onclick="togglePlay()" style="display:none;">▶</button>
                     <div class="carousel-nav">
-                        <button class="carousel-nav-btn" id="prev-btn" onclick="prevSlide()">‹</button>
-                        <button class="carousel-nav-btn" id="next-btn" onclick="nextSlide()">›</button>
+                        <button class="carousel-nav-btn" id="prev-btn" onclick="prevSlide(event)" ontouchend="prevSlide(event)">‹</button>
+                        <button class="carousel-nav-btn" id="next-btn" onclick="nextSlide(event)" ontouchend="nextSlide(event)">›</button>
                     </div>
                     <div class="carousel-controls">
                         <span id="carousel-counter"></span>
