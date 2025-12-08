@@ -541,20 +541,23 @@ function loadProfile(d) {
         v.appendChild(form);
         
         form.onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const updatedPerfil = {};
-            for (let [key, value] of formData.entries()) {
-                updatedPerfil[key] = value;
-            }
-            try {
-                await updateRealDogProfile(currentDog.id, updatedPerfil);
-                showToast('✅ Perfil actualizado en la nube', 'success');
-                toggleEditMode();
-            } catch (err) {
-                showToast('❌ Error al guardar: ' + err.message, 'error');
-            }
-        };
+    e.preventDefault();
+    const formData = new FormData(form);
+    const updatedPerfil = {};
+    for (let [key, value] of formData.entries()) {
+        updatedPerfil[key] = value;
+    }
+    try {
+        await updateRealDogProfile(currentDog.id, updatedPerfil);
+        // ✅ Aquí actualizamos currentDog y recargamos sin recargar página
+        currentDog.perfil = { ...currentDog.perfil, ...updatedPerfil };
+        REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? currentDog : d);
+        showToast('✅ Perfil actualizado en la nube', 'success');
+        toggleEditMode(); // esto llama a loadProfile()
+    } catch (err) {
+        showToast('❌ Error al guardar: ' + err.message, 'error');
+    }
+};
     }
 }
 function toggleEditMode(){ 
