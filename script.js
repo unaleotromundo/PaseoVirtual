@@ -426,7 +426,7 @@ async function loadAdminDashboard() {
 // === CREAR PERRO (solo reales van a Supabase) ===
 document.getElementById('create-dog-form').onsubmit = async (e) => {
     e.preventDefault();
-    const submitBtn = e.submitter;
+    const submitBtn = document.getElementById('save-dog-btn');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '🔄 Guardando...';
     submitBtn.disabled = true;
