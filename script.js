@@ -68,7 +68,7 @@ async function loadExampleDogs() {
 
 // === CARGAR PERROS REALES DESDE SUPABASE ===
 async function loadRealDogs() {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('dogs_real')
         .select('*')
         .order('nombre', { ascending: true });
@@ -87,7 +87,7 @@ async function loadAllDogs() {
 
 // === GUARDAR PERRO REAL EN SUPABASE ===
 async function saveRealDog(dogData) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('dogs_real')
         .insert([{
             nombre: dogData.nombre,
@@ -100,7 +100,7 @@ async function saveRealDog(dogData) {
 
 // === ACTUALIZAR PASEOS EN SUPABASE ===
 async function updateRealDogWalks(dogId, walks) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
         .from('dogs_real')
         .update({ walks })
         .eq('id', dogId);
@@ -691,7 +691,8 @@ window.onload = async () => {
             const p = document.createElement('div');
             p.classList.add('particle');
             const size = 4 + Math.random() * 14;
-            p.style.width = `${size}px`; p.style.height = `${size}px`;
+            p.style.width = `${size}px`;
+            p.style.height = `${size}px`;
             p.style.left = `${Math.random() * 100}vw`;
             p.style.top = `${Math.random() * 100}vh`;
             particlesContainer.appendChild(p);
