@@ -4,11 +4,23 @@ const SUPABASE_URL = 'https://asejbhohkbcoixiwdhcq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZWpiaG9oa2Jjb2l4aXdkaGNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjk0NzMsImV4cCI6MjA4MDYwNTQ3M30.kbRKO5PEljZ29_kn6GYKoyGfB_t8xalxtMiq1ovPo4w';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// === DATA DE RESPALDO (Por si falla la carga del JSON local) ===
+// === DATA DE RESPALDO (CORREGIDA CON IDs 995+) ===
 const FALLBACK_DB = {
   "dogs": [
-    { "id": 995, "nombre": "Fido (Ejemplo)", "dueno_email": "cliente@paseos.com", "perfil": { "raza": "Pastor Alemán", "foto_id": "1589941013453-ec89f33b5e95", "telefono": "5491155550000" }, "walks": [] },
-    { "id": 996, "nombre": "Luna (Ejemplo)", "dueno_email": "luna@paseos.com", "perfil": { "raza": "Bulldog", "foto_id": "1583511655857-d19b40a7a54e", "telefono": "5491155550000" }, "walks": [] }
+    { 
+        "id": 995, 
+        "nombre": "Fido (Ejemplo)", 
+        "dueno_email": "cliente@paseos.com", 
+        "perfil": { "raza": "Pastor Alemán", "foto_id": "1589941013453-ec89f33b5e95", "telefono": "5491155550000" }, 
+        "walks": [] 
+    },
+    { 
+        "id": 996, 
+        "nombre": "Luna (Ejemplo)", 
+        "dueno_email": "luna@paseos.com", 
+        "perfil": { "raza": "Bulldog", "foto_id": "1583511655857-d19b40a7a54e", "telefono": "5491155550000" }, 
+        "walks": [] 
+    }
   ],
   "admin": { "email": "admin@paseos.com", "password": "admin123" }
 };
@@ -85,12 +97,18 @@ async function loadExampleDogs() {
 }
 
 function processLoadedData(data) {
+    // IDs reservados para ejemplos para evitar colisiones con Supabase (IDs 1, 2, 3...)
     const exampleIds = [995, 996, 997, 998, 999];
+    
     EXAMPLE_DOGS = (data.dogs || []).map((d, index) => ({
         ...d,
-        id: d.id || exampleIds[index] || (995 + index),
+        // CORRECCIÓN CRÍTICA: 
+        // Forzamos el ID del array exampleIds según el orden (índice).
+        // Si hay más de 5 perros, sigue contando desde 1000.
+        id: exampleIds[index] || (1000 + index),
         isExample: true
     }));
+
     TRAINER_PHONE = data.trainer_phone || "5491100000000";
     if(data.admin) ADMIN_USER = data.admin;
     DATABASE = data;
