@@ -4,6 +4,15 @@ const SUPABASE_URL = 'https://asejbhohkbcoixiwdhcq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZWpiaG9oa2Jjb2l4aXdkaGNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjk0NzMsImV4cCI6MjA4MDYwNTQ3M30.kbRKO5PEljZ29_kn6GYKoyGfB_t8xalxtMiq1ovPo4w';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// === DATA DE RESPALDO (Por si falla la carga del JSON local) ===
+const FALLBACK_DB = {
+  "dogs": [
+    { "id": 995, "nombre": "Fido (Ejemplo)", "dueno_email": "cliente@paseos.com", "perfil": { "raza": "Pastor Alemán", "foto_id": "1589941013453-ec89f33b5e95", "telefono": "5491155550000" }, "walks": [] },
+    { "id": 996, "nombre": "Luna (Ejemplo)", "dueno_email": "luna@paseos.com", "perfil": { "raza": "Bulldog", "foto_id": "1583511655857-d19b40a7a54e", "telefono": "5491155550000" }, "walks": [] }
+  ],
+  "admin": { "email": "admin@paseos.com", "password": "admin123" }
+};
+
 // === UTILIDADES ===
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
@@ -13,6 +22,7 @@ function showToast(message, type = 'info') {
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
+
 function createRipple(event, element) {
     const button = element || event.currentTarget;
     const circle = document.createElement('span');
@@ -49,26 +59,41 @@ let carouselAudio = null;
 
 // === FUNCIONES DE IMÁGENES ===
 function getPhotoUrl(id, w = 400, h = 400) {
+    if(!id) return 'https://via.placeholder.com/400?text=No+Foto';
+    // Soporte para fotos subidas a Supabase o Unsplash
+    if (id.includes('perfil_') || id.includes('paseodog')) { 
+       // Si es solo el nombre del archivo, construimos la URL completa
+       if(!id.startsWith('http')) {
+           return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
+       }
+       return id;
+    }
     return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
 }
 
-// === CARGAR EJEMPLOS DESDE JSON (IDs 995–999) ===
+// === CARGAR DATOS ===
 async function loadExampleDogs() {
     try {
         const res = await fetch(DB_URL);
+        if (!res.ok) throw new Error("No se pudo cargar JSON local");
         const data = await res.json();
-        const exampleIds = [995, 996, 997, 998, 999];
-        EXAMPLE_DOGS = data.dogs.map((d, index) => ({
-            ...d,
-            id: exampleIds[index] || (995 + index),
-            isExample: true
-        }));
-        TRAINER_PHONE = data.trainer_phone || "5491100000000";
-        ADMIN_USER = data.admin || { email: 'admin@paseos.com', password: 'admin123' };
-        DATABASE = data;
+        processLoadedData(data);
     } catch (err) {
-        console.warn("No se pudo cargar paseoDogDB.json", err);
+        console.warn("⚠️ Usando base de datos de respaldo (Fallback) porque falló la carga local:", err);
+        processLoadedData(FALLBACK_DB); // Usar fallback si falla fetch (ej. file:// protocol)
     }
+}
+
+function processLoadedData(data) {
+    const exampleIds = [995, 996, 997, 998, 999];
+    EXAMPLE_DOGS = (data.dogs || []).map((d, index) => ({
+        ...d,
+        id: d.id || exampleIds[index] || (995 + index),
+        isExample: true
+    }));
+    TRAINER_PHONE = data.trainer_phone || "5491100000000";
+    if(data.admin) ADMIN_USER = data.admin;
+    DATABASE = data;
 }
 
 // === CARGAR PERROS REALES DESDE SUPABASE ===
@@ -86,16 +111,18 @@ async function loadRealDogs() {
 
 // === COMBINAR AMBOS ===
 async function loadAllDogs() {
-    REAL_DOGS = await loadRealDogs();
-    return [...EXAMPLE_DOGS, ...REAL_DOGS];
+    const reals = await loadRealDogs();
+    REAL_DOGS = reals; // Actualizar variable global
+    return [...EXAMPLE_DOGS, ...reals];
 }
 
-// === GUARDAR PERRO REAL EN SUPABASE ===
+// === GUARDAR PERRO REAL EN SUPABASE (CORREGIDO) ===
 async function saveRealDog(dogData) {
+    // CORRECCIÓN: dogData en vez de dogDato
     const { error } = await supabaseClient
         .from('dogs_real')
         .insert([{
-            nombre: dogDato.nombre,
+            nombre: dogData.nombre,
             dueno_email: dogData.dueno_email,
             perfil: dogData.perfil,
             walks: dogData.walks || []
@@ -136,7 +163,7 @@ async function uploadProfilePhoto(file) {
     }
 
     const fileName = `perfil_${currentDog.id}_${Date.now()}.${extension}`;
-    const filePath = `paseodog-photos/${fileName}`;
+    const filePath = fileName; // Subir directamente a la raíz o carpeta según config del bucket
 
     try {
         const { error: uploadError } = await supabaseClient
@@ -149,22 +176,15 @@ async function uploadProfilePhoto(file) {
         const newPerfil = { ...currentDog.perfil, foto_id: fileName };
         await updateRealDogProfile(currentDog.id, newPerfil);
 
-        // Actualizar en memoria
+        // Actualizar en memoria y vista
         REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
         currentDog = { ...currentDog, perfil: newPerfil };
-
-        // Forzar recarga de imagen con timestamp
-        const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
-        const imgEl = document.getElementById('profile-photo');
-        imgEl.src = photoUrl;
-        imgEl.onerror = () => {
-            imgEl.src = getPhotoUrl('1581268694', 300, 300); // fallback
-        };
-
-        showToast('✅ Foto de perfil actualizada en la nube', 'success');
+        loadProfile(currentDog); // Recargar vista
+        showToast('✅ Foto de perfil actualizada', 'success');
+        
     } catch (err) {
         console.error('Error al subir foto:', err);
-        showToast('❌ Error al subir la foto: ' + (err.message || 'Inténtalo de nuevo'), 'error');
+        showToast('❌ Error al subir: ' + (err.message || 'Inténtalo de nuevo'), 'error');
     }
 }
 
@@ -176,55 +196,64 @@ function playRandomCarouselTrack() {
         carouselAudio.pause();
         carouselAudio = null;
     }
-    let randomTrack;
-    if (CARRUSEL_TRACKS.length > 1) {
-        do {
-            randomTrack = CARRUSEL_TRACKS[Math.floor(Math.random() * CARRUSEL_TRACKS.length)];
-        } while (randomTrack === lastPlayedTrack && CARRUSEL_TRACKS.length > 1);
-    } else {
-        randomTrack = CARRUSEL_TRACKS[0];
-    }
-    lastPlayedTrack = randomTrack;
+    
+    // Selección aleatoria simple
+    const randomTrack = CARRUSEL_TRACKS[Math.floor(Math.random() * CARRUSEL_TRACKS.length)];
+    
     carouselAudio = new Audio(randomTrack);
-    carouselAudio.onended = () => {
-        carouselAudio = null;
-        isPlaying = false;
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        const playLargeBtn = document.getElementById('carousel-play-large');
-        if (playPauseBtn) playPauseBtn.textContent = '▶';
-        if (playLargeBtn) playLargeBtn.textContent = '▶';
-    };
+    carouselAudio.onended = () => { isPlaying = false; updatePlayBtnState(); };
+    
+    // Manejo silencioso de error (por si no existen los archivos)
     carouselAudio.onerror = () => {
-        console.warn('No se pudo cargar el audio:', randomTrack);
-        carouselAudio = null;
+        console.warn('🎵 Audio no encontrado, continuando sin música.');
+        isPlaying = false;
+        updatePlayBtnState();
     };
-    carouselAudio.play().catch(e => {
-        console.warn('Reproducción bloqueada:', e);
-        carouselAudio = null;
+    
+    carouselAudio.play().catch(() => {
+        // Bloqueado por el navegador o error de archivo
+        isPlaying = false;
+        updatePlayBtnState();
     });
 }
 
-// === CAROUSEL MODERNO CON AUDIO ===
+function updatePlayBtnState() {
+    const btn = document.getElementById('play-pause-btn');
+    const largeBtn = document.getElementById('carousel-play-large');
+    if(btn) btn.textContent = isPlaying ? '⏸' : '▶';
+    if(largeBtn) largeBtn.textContent = isPlaying ? '⏸' : '▶';
+}
+
+// === CAROUSEL (LÓGICA CORREGIDA) ===
 function initCarousel() {
     const wrapper = document.getElementById('carousel-wrapper');
     const slides = [];
+    
+    // Recopilar todas las fotos
     if (currentDog && currentDog.walks) {
         currentDog.walks.forEach(wa => {
             if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
         });
     }
+
+    // Si no hay fotos, ocultar carrusel
     if (!slides.length) {
         wrapper.style.display = 'none';
         return;
     }
+    
     wrapper.style.display = 'flex';
-    let idx = 0;
+    
+    // CAMBIO 1: Empezar en la última foto (slides.length - 1)
+    let idx = slides.length - 1; 
+    
+    // Aseguramos que empiece pausado
     isPlaying = false;
+    if (slideInterval) clearInterval(slideInterval);
+
     const img = document.getElementById('carousel-img');
     const counter = document.getElementById('carousel-counter');
-    const controls = document.querySelector('.carousel-controls');
-    const navBtns = document.querySelectorAll('.carousel-nav-btn');
-    let hideTimer = null;
+    
     const showSlide = () => {
         img.style.opacity = 0;
         setTimeout(() => {
@@ -233,102 +262,59 @@ function initCarousel() {
             counter.textContent = `${idx + 1} / ${slides.length}`;
         }, 200);
     };
-    const updatePlayState = () => {
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        playPauseBtn.textContent = isPlaying ? '⏸' : '▶';
-        const playLargeBtn = document.getElementById('carousel-play-large');
-        playLargeBtn.textContent = isPlaying ? '⏸' : '▶';
-        if (isPlaying) {
-            playLargeBtn.classList.add('playing');
-            controls.classList.add('playing');
-            navBtns.forEach(btn => btn.classList.add('playing'));
-        } else {
-            playLargeBtn.classList.remove('playing');
-            controls.classList.remove('playing');
-            navBtns.forEach(btn => btn.classList.remove('playing'));
-        }
-    };
-    const showControls = () => {
-        wrapper.classList.add('active');
-        resetHideTimer();
-    };
-    const hideControls = () => {
-        wrapper.classList.remove('active');
-    };
-    const resetHideTimer = () => {
-        if (hideTimer) clearTimeout(hideTimer);
-        hideTimer = setTimeout(hideControls, 3000);
-    };
-    wrapper.addEventListener('mouseenter', showControls);
-    wrapper.addEventListener('mouseleave', resetHideTimer);
-    wrapper.addEventListener('touchstart', showControls, { passive: true });
-    document.addEventListener('click', () => {
-        if (document.fullscreenElement || document.webkitFullscreenElement) {
-            showControls();
-        }
-    });
+
     window.nextSlide = () => {
         idx = (idx + 1) % slides.length;
         showSlide();
-        showControls();
     };
+
     window.prevSlide = () => {
         idx = (idx - 1 + slides.length) % slides.length;
         showSlide();
-        showControls();
     };
+
+    // CAMBIO 2: Lógica del botón Play sincronizada
     window.togglePlay = () => {
-        if (!isPlaying) {
-            playRandomCarouselTrack();
-            isPlaying = true;
+        isPlaying = !isPlaying;
+        updatePlayBtnState();
+
+        if(isPlaying) {
+            // 1. Arrancar Música
+            playRandomCarouselTrack(); 
+            
+            // 2. Arrancar el pase de fotos (5 segundos)
+            // Avanzamos inmediatamente a la siguiente foto o esperamos? 
+            // Lo normal es esperar el intervalo primero.
+            if (slideInterval) clearInterval(slideInterval);
+            slideInterval = setInterval(() => {
+                window.nextSlide();
+            }, 5000); // CAMBIO 3: 5000ms (5 segundos)
+            
         } else {
-            if (carouselAudio) {
-                carouselAudio.pause();
-                carouselAudio = null;
-            }
-            isPlaying = false;
+            // Pausa: Parar música y parar intervalo
+            if(carouselAudio) carouselAudio.pause();
+            if(slideInterval) clearInterval(slideInterval);
         }
-        updatePlayState();
-        showControls();
     };
+
     window.toggleFullscreen = () => {
         const elem = document.getElementById('carousel-container');
-        if (!document.fullscreenElement && !document.webkitFullscreenElement &&
-            !document.mozFullScreenElement && !document.msFullscreenElement) {
-            if (elem.requestFullscreen) elem.requestFullscreen();
-            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-            else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
-            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen();
-            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-            else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
-            else if (document.msExitFullscreen) document.msExitFullscreen();
-        }
-        showControls();
+        if (!document.fullscreenElement) elem.requestFullscreen().catch(err => {});
+        else document.exitFullscreen();
     };
+
+    // Mostrar la foto inicial (la última) estática
     showSlide();
-    updatePlayState();
-    hideControls();
-    if (slideInterval) clearInterval(slideInterval);
-    slideInterval = setInterval(() => {
-        if (!isPlaying) {
-            window.nextSlide();
-        }
-    }, 3000);
+    updatePlayBtnState();
 }
 
-// === TEMA Y WHATSAPP ===
+// === TEMA Y UI ===
 const themeToggle = document.getElementById('theme-toggle');
-function updateThemeIcon() {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    themeToggle.textContent = isDark ? '🐩' : '🐕‍🦺';
-}
 themeToggle.onclick = (e) => {
     createRipple(e, themeToggle);
-    const current = document.documentElement.getAttribute('data-theme');
-    document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
-    updateThemeIcon();
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    themeToggle.textContent = isDark ? '🐕‍🦺' : '🐩';
 };
 
 function updateWhatsApp() {
@@ -347,23 +333,27 @@ function updateWhatsApp() {
 
 // === NAVEGACIÓN ===
 async function showView(id, dogId = null) {
+    // Si estamos navegando, cargamos todo de nuevo para tener info fresca
     const allDogs = await loadAllDogs();
+    
     if(id !== currentView) backStack.push(currentView);
     currentView = id;
-    if (currentView !== 'dog-selection-dashboard' && slideInterval) {
-        clearInterval(slideInterval);
-        slideInterval = null;
-        if (carouselAudio) {
-            carouselAudio.pause();
-            carouselAudio = null;
-        }
-        isPlaying = false;
+
+    // Limpiar estados previos
+    if (currentView !== 'dog-selection-dashboard') {
+        if(slideInterval) clearInterval(slideInterval);
+        if(carouselAudio) { carouselAudio.pause(); isPlaying=false; }
     }
+
     document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
     document.getElementById(id).style.display = 'block';
+
+    // Establecer perro actual
     if(dogId) {
-        currentDog = REAL_DOGS.find(d => d.id === dogId) || EXAMPLE_DOGS.find(d => d.id === dogId);
+        // Importante: comparar IDs como strings o números de forma segura
+        currentDog = allDogs.find(d => String(d.id) === String(dogId));
     }
+
     if(currentDog) {
         document.querySelectorAll('.dog-name-placeholder').forEach(e => e.textContent = currentDog.nombre);
         if(id === 'dog-selection-dashboard') {
@@ -380,32 +370,35 @@ async function showView(id, dogId = null) {
             loadMultiDog();
         }
     }
+
     if(id === 'admin-dashboard-section') loadAdminDashboard();
+    
+    // Audio de bienvenida sutil
     if((id === 'dog-selection-dashboard' || id === 'admin-dashboard-section') && userHasInteracted) {
-        setTimeout(playWelcomeSound, 500);
+        playWelcomeSound();
     }
+    
     updateWhatsApp();
     window.scrollTo(0,0);
 }
+
 function goBack(){
     if(backStack.length) showView(backStack.pop());
     else showView('login-section');
 }
 
-// === AUDIO DE BIENVENIDA ===
 function playWelcomeSound() {
-    if (!isAudioEnabled || hasPlayedWelcome || !userHasInteracted) return;
+    if (!isAudioEnabled || hasPlayedWelcome) return;
     hasPlayedWelcome = true;
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    oscillator.frequency.value = 660;
-    oscillator.type = 'sine';
-    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.6);
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.6);
+    const o = audioContext.createOscillator();
+    const g = audioContext.createGain();
+    o.connect(g);
+    g.connect(audioContext.destination);
+    o.frequency.value = 660;
+    g.gain.setValueAtTime(0.05, audioContext.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+    o.start();
+    o.stop(audioContext.currentTime + 0.3);
 }
 
 // === LOGIN ===
@@ -417,7 +410,10 @@ document.getElementById('login-form').onsubmit = async (e) => {
     e.preventDefault();
     const em = document.getElementById('email').value.toLowerCase();
     const pw = document.getElementById('password').value;
+    
+    // Cargar datos frescos
     const allDogs = await loadAllDogs();
+
     if(em === ADMIN_USER.email && pw === ADMIN_USER.password){
         currentUser = { email: em, isAdmin: true };
         showView('admin-dashboard-section');
@@ -438,33 +434,35 @@ async function loadAdminDashboard() {
     const allDogs = await loadAllDogs();
     const c = document.getElementById('dog-list-container');
     c.innerHTML = '';
-    document.getElementById('demo-status-text').textContent = `${allDogs.length} perros (ejemplos + reales)`;
+    document.getElementById('demo-status-text').textContent = `${allDogs.length} perros en sistema`;
+    
     if(!allDogs.length) return c.innerHTML = '<p class="info-text">Sin perros.</p>';
+    
     allDogs.forEach((d, i) => {
         const suffix = d.isExample ? ' (ejemplo)' : '';
         const card = document.createElement('div');
         card.className = 'dog-card';
         card.style.setProperty('--i', i);
+        // CORRECCIÓN: Agregar comillas simples en '${d.id}' para soportar UUIDs
         card.innerHTML = `
             <span>🐶 <strong>${d.nombre}</strong> <small style="color:var(--text-secondary)">(${d.perfil.raza})${suffix}</small></span>
-            <button class="ripple" onclick="showView('dog-selection-dashboard',${d.id})">Gestionar</button>
+            <button class="ripple" onclick="showView('dog-selection-dashboard', '${d.id}')">Gestionar</button>
         `;
         c.appendChild(card);
         card.querySelector('button').addEventListener('click', (e) => createRipple(e));
     });
 }
 
-// === CREAR PERRO (solo reales van a Supabase) ===
+// === CREAR PERRO ===
 document.getElementById('create-dog-form').onsubmit = async (e) => {
     e.preventDefault();
     const submitBtn = document.querySelector('#create-dog-form .save-btn');
-    if (!submitBtn || submitBtn.disabled) return;
-    const originalText = submitBtn.innerHTML;
+    if(submitBtn.disabled) return;
+    
     submitBtn.innerHTML = '🔄 Guardando...';
     submitBtn.disabled = true;
     
     try {
-        const photoId = DATABASE?.photo_references?.random?.[0] || '1581268694';
         const nd = {
             nombre: document.getElementById('new-dog-name').value,
             dueno_email: document.getElementById('new-dog-email').value,
@@ -473,19 +471,19 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
                 sexo: document.getElementById('new-dog-sex').value,
                 dueno: document.getElementById('new-dog-owner').value,
                 telefono: document.getElementById('new-dog-phone').value,
-                foto_id: photoId,
-                edad: '?', peso: '?', alergias: 'Ninguna',
-                energia: 'Media', social: '?'
+                foto_id: '1581268694', // Foto default
+                edad: '?', peso: '?', alergias: 'Ninguna', energia: 'Media', social: '?'
             },
             walks: []
         };
         await saveRealDog(nd);
-        showToast('✅ Perro real registrado en la nube', 'success');
+        showToast('✅ Perro registrado con éxito', 'success');
+        document.getElementById('create-dog-form').reset();
         showView('admin-dashboard-section');
     } catch (err) {
-        showToast('❌ Error: ' + (err.message || 'No se pudo guardar'), 'error');
+        showToast('❌ Error: ' + (err.message || 'Error desconocido'), 'error');
     } finally {
-        submitBtn.innerHTML = originalText;
+        submitBtn.innerHTML = '💾 Guardar en Base de Datos';
         submitBtn.disabled = false;
     }
 };
@@ -493,68 +491,59 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
 // === PROFILE ===
 function loadProfile(d) {
     const p = d.perfil;
-    let photoSrc;
-    if (d.isExample) {
-        const id = tempPhotoId || p.foto_id || (DATABASE?.photo_references?.random?.[0] || '1581268694');
-        photoSrc = getPhotoUrl(id, 300, 300);
-    } else {
-        if (p.foto_id && p.foto_id.includes('perfil_')) {
-            photoSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${p.foto_id}`;
-        } else {
-            photoSrc = getPhotoUrl(p.foto_id || '1581268694', 300, 300);
-        }
-    }
+    let photoSrc = getPhotoUrl(p.foto_id, 300, 300);
+    
     document.getElementById('profile-photo').src = photoSrc;
     document.getElementById('profile-dog-name-display').textContent = d.nombre;
     document.getElementById('edit-photo-btn').style.display = isEditing && !d.isExample ? 'block' : 'none';
     document.getElementById('toggle-edit-btn').textContent = isEditing ? '❌ Cancelar' : '✏️ Editar Perfil';
     
     const v = document.getElementById('profile-details-view');
-    v.innerHTML = `
-        <h3>🐕 Datos Básicos</h3>
-        <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${p.raza}</span></div>
-        <div class="detail-row"><span class="detail-label">Edad:</span> <span class="detail-value">${p.edad}</span></div>
-        <div class="detail-row"><span class="detail-label">Sexo:</span> <span class="detail-value">${p.sexo}</span></div>
-        <h3>💊 Salud y Contacto</h3>
-        <div class="detail-row"><span class="detail-label">Peso:</span> <span class="detail-value">${p.peso}</span></div>
-        <div class="detail-row"><span class="detail-label">Alergias:</span> <span class="detail-value">${p.alergias}</span></div>
-        <div class="detail-row"><span class="detail-label">Dueño:</span> <span class="detail-value">${p.dueno}</span></div>
-        <div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${p.telefono}</span></div>
-        <h3>🎾 Comportamiento</h3>
-        <div class="detail-row"><span class="detail-label">Energía:</span> <span class="detail-value">${p.energia}</span></div>
-        <div class="detail-row"><span class="detail-label">Social:</span> <span class="detail-value">${p.social}</span></div>
-    `;
     
     if (isEditing && !d.isExample) {
-        const form = document.createElement('form');
-        form.id = 'profile-edit-form';
+        // VISTA EDICIÓN
+        v.innerHTML = `<form id="profile-edit-form"></form>`;
+        const form = document.getElementById('profile-edit-form');
         const fields = ['raza','edad','sexo','peso','alergias','dueno','telefono','energia','social'];
         fields.forEach(k => {
             form.innerHTML += `<label>${k.charAt(0).toUpperCase() + k.slice(1)}</label>
-                              <input type="text" name="${k}" value="${p[k]}">`;
+                              <input type="text" name="${k}" value="${p[k] || ''}">`;
         });
         form.innerHTML += '<button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>';
-        v.innerHTML = '';
-        v.appendChild(form);
         
         form.onsubmit = async (e) => {
             e.preventDefault();
             const formData = new FormData(form);
-            const updatedPerfil = {};
-            for (let [key, value] of formData.entries()) {
-                updatedPerfil[key] = value;
-            }
+            const updatedPerfil = { ...currentDog.perfil };
+            for (let [key, value] of formData.entries()) updatedPerfil[key] = value;
+            
             try {
                 await updateRealDogProfile(currentDog.id, updatedPerfil);
-                // ✅ Actualizar currentDog en memoria
-                currentDog.perfil = { ...currentDog.perfil, ...updatedPerfil };
-                REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? currentDog : d);
-                showToast('✅ Perfil actualizado en la nube', 'success');
-                toggleEditMode(); // recarga la vista
+                // Actualizar localmente para no tener que recargar todo
+                currentDog.perfil = updatedPerfil;
+                const idx = REAL_DOGS.findIndex(x => x.id === currentDog.id);
+                if(idx !== -1) REAL_DOGS[idx] = currentDog;
+                
+                showToast('✅ Perfil actualizado', 'success');
+                isEditing = false;
+                loadProfile(currentDog);
             } catch (err) {
-                showToast('❌ Error al guardar: ' + err.message, 'error');
+                showToast('❌ Error al guardar', 'error');
             }
         };
+    } else {
+        // VISTA LECTURA
+        v.innerHTML = `
+            <h3>🐕 Datos Básicos</h3>
+            <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${p.raza}</span></div>
+            <div class="detail-row"><span class="detail-label">Edad:</span> <span class="detail-value">${p.edad}</span></div>
+            <div class="detail-row"><span class="detail-label">Sexo:</span> <span class="detail-value">${p.sexo}</span></div>
+            <h3>💊 Salud y Contacto</h3>
+            <div class="detail-row"><span class="detail-label">Peso:</span> <span class="detail-value">${p.peso}</span></div>
+            <div class="detail-row"><span class="detail-label">Alergias:</span> <span class="detail-value">${p.alergias}</span></div>
+            <div class="detail-row"><span class="detail-label">Dueño:</span> <span class="detail-value">${p.dueno}</span></div>
+            <div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${p.telefono}</span></div>
+        `;
     }
 }
 function toggleEditMode(){ 
@@ -563,14 +552,9 @@ function toggleEditMode(){
         return;
     }
     isEditing = !isEditing; 
-    tempPhotoId = null; 
     loadProfile(currentDog); 
 }
 function randomizeProfilePhoto(){
-    if (!currentDog || currentDog.isExample) {
-        showToast('ℹ️ Los ejemplos no permiten cambiar foto', 'info');
-        return;
-    }
     document.getElementById('photo-upload-input').click();
 }
 
@@ -579,7 +563,7 @@ async function loadMultiDog(){
     const c = document.getElementById('multi-dog-container');
     c.innerHTML = '';
     const allDogs = await loadAllDogs();
-    allDogs.filter(d => d.id !== currentDog.id).forEach(d => {
+    allDogs.filter(d => String(d.id) !== String(currentDog.id)).forEach(d => {
         c.innerHTML += `<div class="dog-select-item"><input type="checkbox" value="${d.id}" id="md${d.id}"><label for="md${d.id}" style="margin:0">${d.nombre}</label></div>`;
     });
 }
@@ -588,24 +572,20 @@ document.getElementById('simulate-photos-btn').onclick = () => {
     simulatedPhotos = [];
     const c = document.getElementById('photo-preview');
     c.innerHTML = '';
-    const refs = DATABASE?.photo_references?.random || ['1581268694', '1581268695', '1581268696'];
-    for(let i = 0; i < Math.min(3, refs.length); i++){
-        const id = refs[i];
-        simulatedPhotos.push({id, comentario: `Foto ${i+1} del paseo`});
+    // Fotos fake para demo
+    const refs = ['1581268694', '1592194996308-7b43878e84a6', '1587300003388-5920dcc28193'];
+    refs.forEach((id, i) => {
+        simulatedPhotos.push({id, comentario: `Foto ${i+1}`});
         c.innerHTML += `<img src="${getPhotoUrl(id,100,100)}">`;
-    }
+    });
 };
 
 document.getElementById('walk-form').onsubmit = async (e) => {
     e.preventDefault();
-    if (currentDog?.isExample) {
-        showToast('ℹ️ Los perros de ejemplo no se pueden modificar', 'info');
-        return;
-    }
+    if (currentDog?.isExample) return showToast('ℹ️ Ejemplo: no editable', 'info');
+    
     const submitBtn = document.querySelector('#walk-form .save-btn');
-    if (!submitBtn || submitBtn.disabled) return;
-    submitBtn.innerHTML = '🔄 Guardando...';
-    submitBtn.disabled = true;
+    submitBtn.innerHTML = '🔄 Guardando...'; submitBtn.disabled = true;
     
     try {
         const w = {
@@ -615,19 +595,19 @@ document.getElementById('walk-form').onsubmit = async (e) => {
             resumen_diario: document.getElementById('walk-summary').value,
             comportamiento_problemas: document.getElementById('comportamiento-problemas').checked,
             incidentes_salud: document.getElementById('incidentes-salud').value,
-            fotos: simulatedPhotos
+            fotos: simulatedPhotos.length ? simulatedPhotos : [{id: '1581268694', comentario: 'Paseo'}]
         };
         const updatedWalks = [w, ...(currentDog.walks || [])];
         await updateRealDogWalks(currentDog.id, updatedWalks);
-        showToast('✅ Paseo guardado en la nube', 'success');
+        // Actualizar local
+        currentDog.walks = updatedWalks;
+        
+        showToast('✅ Paseo guardado', 'success');
         showView('dog-selection-dashboard');
     } catch (err) {
-        showToast('❌ Error al guardar paseo', 'error');
+        showToast('❌ Error: ' + err.message, 'error');
     } finally {
-        if (submitBtn) {
-            submitBtn.innerHTML = '💾 Guardar Paseo';
-            submitBtn.disabled = false;
-        }
+        submitBtn.innerHTML = '💾 Guardar Paseo'; submitBtn.disabled = false;
     }
 };
 
@@ -635,18 +615,21 @@ document.getElementById('walk-form').onsubmit = async (e) => {
 function loadHistory(d) {
     const c = document.getElementById('walks-history');
     c.innerHTML = '';
-    if(!d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
+    if(!d.walks || !d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
+    
     d.walks.forEach((w,i) => {
-        const imgs = w.fotos.map(f => 
+        const imgs = (w.fotos || []).map(f => 
             `<div class="photo-card" onclick="openLightbox('${f.id}')">
                 <img src="${getPhotoUrl(f.id,200,200)}">
             </div>`
         ).join('');
+        
         const adminBtns = (currentUser && currentUser.isAdmin && !d.isExample) ?
             `<div class="admin-walk-controls" data-index="${i}">
-                <button class="admin-walk-btn edit-btn">✏️ Editar</button>
-                <button class="admin-walk-btn delete-btn" style="border-color:var(--danger-light); color:#fca5a5;">🗑️ Borrar</button>
+                <button class="admin-walk-btn edit-btn" onclick="openEditWalk(${i})">✏️ Editar</button>
+                <button class="admin-walk-btn delete-btn" style="border-color:var(--danger-light); color:#fca5a5;" onclick="delWalk(${i})">🗑️ Borrar</button>
             </div>` : '';
+            
         const session = document.createElement('div');
         session.className = 'walk-session';
         session.style.setProperty('--i', i);
@@ -656,70 +639,76 @@ function loadHistory(d) {
                 <div class="walk-metrics">
                     <span>⏱️ ${w.duracion_minutos} min</span>
                     <span>📏 ${w.distancia_km} km</span>
-                    <span>📸 ${w.fotos.length} fotos</span>
+                    <span>📸 ${(w.fotos||[]).length} fotos</span>
                 </div>
                 <p><strong>Resumen:</strong> ${w.resumen_diario}</p>
-                ${w.comportamiento_problemas ? '<div class="incident-alert">⚠️ Hubo problemas de comportamiento</div>' : '<div class="success-notice">✅ Paseo tranquilo</div>'}
+                ${w.comportamiento_problemas ? '<div class="incident-alert">⚠️ Problemas de comportamiento</div>' : '<div class="success-notice">✅ Paseo tranquilo</div>'}
                 ${w.incidentes_salud ? `<div class="incident-alert">🩺 <strong>Salud:</strong> ${w.incidentes_salud}</div>` : ''}
                 <div class="gallery">${imgs}</div>
             </div>
         `;
         c.appendChild(session);
     });
-    c.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
-            openEditWalk(parseInt(walkIndex));
-        };
-    });
-    c.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
-            delWalk(parseInt(walkIndex));
-        };
-    });
 }
 
 // === LIGHTBOX ===
-function openLightbox(id){
+window.openLightbox = (id) => {
     document.getElementById('lightbox-img').src = getPhotoUrl(id,800,800);
     document.getElementById('lightbox').style.display = 'flex';
-}
-document.getElementById('close-lightbox').onclick = () =>
-    document.getElementById('lightbox').style.display = 'none';
+};
+document.getElementById('close-lightbox').onclick = () => document.getElementById('lightbox').style.display = 'none';
 
-// === FUNCIONES DE EDICIÓN (PASEOS) ===
-function openEditWalk(walkIndex) {
-    if (!currentDog || currentDog.isExample) {
-        showToast('ℹ️ Solo se pueden editar paseos de perros reales', 'info');
-        return;
-    }
+// === EDIT WALK LOGIC (CORREGIDO PARA NO BORRAR DATOS) ===
+window.openEditWalk = (walkIndex) => {
+    if (!currentDog || currentDog.isExample) return;
     editWalkIdx = walkIndex;
     const walk = currentDog.walks[walkIndex];
+    
+    // Llenar formulario solo la primera vez, no si ya estamos editando fotos
     document.getElementById('edit-walk-date').value = walk.fecha;
     document.getElementById('edit-walk-duration').value = walk.duracion_minutos;
     document.getElementById('edit-walk-distance').value = walk.distancia_km;
     document.getElementById('edit-walk-summary').value = walk.resumen_diario;
     document.getElementById('edit-walk-behavior').checked = walk.comportamiento_problemas;
     document.getElementById('edit-walk-health').value = walk.incidentes_salud || '';
+    
+    editWalkPhotos = [...(walk.fotos || [])];
+    renderEditPhotos();
+    
+    document.getElementById('edit-walk-modal').style.display = 'flex';
+};
 
+function renderEditPhotos() {
     const preview = document.getElementById('edit-photo-preview');
     preview.innerHTML = '';
-    editWalkPhotos = [...walk.fotos];
     editWalkPhotos.forEach((f, i) => {
+        const imgContainer = document.createElement('div');
+        imgContainer.style.position = 'relative';
+        imgContainer.style.display = 'inline-block';
+        
         const img = document.createElement('img');
         img.src = getPhotoUrl(f.id, 100, 100);
-        img.style.cursor = 'pointer';
-        img.title = 'Haz clic para eliminar';
-        img.onclick = () => {
+        
+        const btn = document.createElement('button');
+        btn.innerHTML = '×';
+        btn.className = 'delete-photo-btn';
+        btn.onclick = () => {
             editWalkPhotos.splice(i, 1);
-            openEditWalk(walkIndex);
+            renderEditPhotos(); // Re-render solo fotos, no todo el form
         };
-        preview.appendChild(img);
+        
+        imgContainer.appendChild(img);
+        imgContainer.appendChild(btn);
+        preview.appendChild(imgContainer);
     });
-
-    document.getElementById('edit-walk-modal').style.display = 'flex';
 }
+
+window.addPhotoEdit = () => {
+    // Agregar foto sin borrar el texto del formulario
+    const randomId = ['1581268694', '1581268695', '1581268696'][Math.floor(Math.random()*3)];
+    editWalkPhotos.push({ id: randomId, comentario: 'Foto agregada' });
+    renderEditPhotos(); // Solo actualizamos la sección de fotos
+};
 
 document.getElementById('edit-walk-form').onsubmit = async (e) => {
     e.preventDefault();
@@ -736,11 +725,10 @@ document.getElementById('edit-walk-form').onsubmit = async (e) => {
     };
 
     currentDog.walks[editWalkIdx] = updatedWalk;
-    REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? currentDog : d);
-
+    
     try {
         await updateRealDogWalks(currentDog.id, currentDog.walks);
-        showToast('✅ Paseo actualizado en la nube', 'success');
+        showToast('✅ Paseo actualizado', 'success');
         document.getElementById('edit-walk-modal').style.display = 'none';
         loadHistory(currentDog);
     } catch (err) {
@@ -748,82 +736,35 @@ document.getElementById('edit-walk-form').onsubmit = async (e) => {
     }
 };
 
-function delWalk(walkIndex) {
-    if (!confirm('¿Eliminar este paseo? Esta acción no se puede deshacer.')) return;
+window.delWalk = (walkIndex) => {
+    if (!confirm('¿Eliminar este paseo?')) return;
     if (!currentDog || currentDog.isExample) return;
 
-    currentDog.walks.splice(walkIndex, 1);
-    REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? currentDog : d);
+    const newWalks = [...currentDog.walks];
+    newWalks.splice(walkIndex, 1);
 
-    updateRealDogWalks(currentDog.id, currentDog.walks)
+    updateRealDogWalks(currentDog.id, newWalks)
         .then(() => {
+            currentDog.walks = newWalks;
             showToast('🗑️ Paseo eliminado', 'success');
             loadHistory(currentDog);
         })
-        .catch(err => {
-            showToast('❌ Error al eliminar', 'error');
-        });
-}
-
-function addPhotoEdit() {
-    const refs = DATABASE?.photo_references?.random || ['1581268694', '1581268695', '1581268696'];
-    const randomId = refs[Math.floor(Math.random() * refs.length)];
-    editWalkPhotos.push({ id: randomId, comentario: 'Foto agregada' });
-    const walkIndex = editWalkIdx;
-    openEditWalk(walkIndex);
-}
-
-// === BOTÓN: Recargar ejemplos ===
-document.getElementById('toggle-demo-btn').onclick = async () => {
-    if (confirm('¿Recargar datos de ejemplo desde paseoDogDB.json?')) {
-        await loadExampleDogs();
-        showToast('✅ Ejemplos recargados desde archivo local', 'info');
-        if (currentView === 'admin-dashboard-section') loadAdminDashboard();
-    }
+        .catch(err => showToast('❌ Error al eliminar', 'error'));
 };
 
-// === ESCUCHADOR DE SUBIDA DE FOTO ===
+// === CARGA INICIAL ===
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('photo-upload-input').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            uploadProfilePhoto(file);
-        }
-        e.target.value = '';
+        if(e.target.files[0]) uploadProfilePhoto(e.target.files[0]);
     });
 });
 
-// === INIT ===
 window.onload = async () => {
-    await loadExampleDogs();
+    await loadExampleDogs(); // Carga ejemplo o fallback
     document.getElementById('loading-overlay').style.display = 'none';
     showView('login-section');
-    updateThemeIcon();
-
-    const particlesContainer = document.getElementById('particles-container');
-    if (document.documentElement.getAttribute('data-theme') === 'dark') {
-        for (let i = 0; i < 25; i++) {
-            const p = document.createElement('div');
-            p.classList.add('particle');
-            const size = 4 + Math.random() * 14;
-            p.style.width = `${size}px`;
-            p.style.height = `${size}px`;
-            p.style.left = `${Math.random() * 100}vw`;
-            p.style.top = `${Math.random() * 100}vh`;
-            particlesContainer.appendChild(p);
-        }
-    }
-
-    const observer = new MutationObserver(() => {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        particlesContainer.style.display = isDark ? 'block' : 'none';
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
-    document.querySelectorAll('.ripple').forEach(btn => {
-        btn.addEventListener('click', createRipple);
-    });
-
+    
+    // Config de audio inicial
     const audioToggle = document.getElementById('audio-toggle');
     const savedAudio = localStorage.getItem('paseoDogAudio');
     if (savedAudio === 'off') {
@@ -831,21 +772,12 @@ window.onload = async () => {
         audioToggle.textContent = '🔇';
     }
     audioToggle.onclick = (e) => {
-        e.stopPropagation();
         isAudioEnabled = !isAudioEnabled;
         audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
         localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
-        if (!isAudioEnabled && carouselAudio) {
-            carouselAudio.pause();
-            carouselAudio = null;
-            isPlaying = false;
-            const playPauseBtn = document.getElementById('play-pause-btn');
-            const playLargeBtn = document.getElementById('carousel-play-large');
-            if (playPauseBtn) playPauseBtn.textContent = '▶';
-            if (playLargeBtn) playLargeBtn.textContent = '▶';
-        }
+        if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
     };
-
+    
     document.addEventListener('click', () => {
         if (!userHasInteracted) userHasInteracted = true;
     }, { once: true });
