@@ -401,11 +401,8 @@ async function showView(id, dogId = null) {
         if(id === 'create-walk-section') {
             document.getElementById('walk-form').reset();
             document.getElementById('walk-date').valueAsDate = new Date();
-            
-            // LIMPIEZA DE FOTOS REALES
-            currentWalkFiles = []; 
+            simulatedPhotos = [];
             document.getElementById('photo-preview').innerHTML = '';
-            
             loadMultiDog();
         }
     }
@@ -610,103 +607,25 @@ async function loadMultiDog(){
     });
 }
 
-// === LÓGICA DE SUBIDA DE FOTOS DEL PASEO (NUEVA) ===
-
-// 1. Configurar el botón para abrir el selector de archivos
-document.addEventListener('DOMContentLoaded', () => {
-    const addBtn = document.getElementById('add-walk-photo-btn');
-    const walkInput = document.getElementById('walk-photo-input');
-
-    if (addBtn && walkInput) {
-        addBtn.onclick = () => walkInput.click(); // El botón activa el input invisible
-
-        walkInput.onchange = (e) => {
-            if (e.target.files && e.target.files.length > 0) {
-                // Convertimos la lista de archivos a un Array y los sumamos
-                const newFiles = Array.from(e.target.files);
-                currentWalkFiles = [...currentWalkFiles, ...newFiles];
-                renderWalkPreview(); // Mostramos las miniaturas
-            }
-            e.target.value = ''; // Limpiar para poder seleccionar lo mismo si se quiere
-        };
-    }
-});
-
-// 2. Función para mostrar las miniaturas antes de subir
-function renderWalkPreview() {
-    const container = document.getElementById('photo-preview');
-    container.innerHTML = ''; // Limpiar visualmente
-
-    currentWalkFiles.forEach((file, index) => {
-        const div = document.createElement('div');
-        div.style.position = 'relative';
-        div.style.width = '80px';
-        div.style.height = '80px';
-        div.style.margin = '5px';
-
-        const img = document.createElement('img');
-        img.src = URL.createObjectURL(file); // Crear URL temporal
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
-        img.style.borderRadius = '8px';
-
-        // Botón rojo para eliminar foto de la lista
-        const delBtn = document.createElement('button');
-        delBtn.innerHTML = '×';
-        delBtn.className = 'delete-photo-btn'; 
-        delBtn.onclick = () => {
-            currentWalkFiles.splice(index, 1); // Quitar del array
-            renderWalkPreview(); // Volver a pintar
-        };
-
-        div.appendChild(img);
-        div.appendChild(delBtn);
-        container.appendChild(div);
+document.getElementById('simulate-photos-btn').onclick = () => {
+    simulatedPhotos = [];
+    const c = document.getElementById('photo-preview');
+    c.innerHTML = '';
+    const refs = ['1581268694', '1592194996308-7b43878e84a6', '1587300003388-5920dcc28193'];
+    refs.forEach((id, i) => {
+        simulatedPhotos.push({id, comentario: `Foto ${i+1}`});
+        c.innerHTML += `<img src="${getPhotoUrl(id,100,100)}">`;
     });
-}
+};
 
-// 3. Al enviar el formulario: SUBIR FOTOS -> LUEGO GUARDAR DATOS
 document.getElementById('walk-form').onsubmit = async (e) => {
     e.preventDefault();
     if (currentDog?.isExample) return showToast('ℹ️ Ejemplo: no editable', 'info');
     
     const submitBtn = document.querySelector('#walk-form .save-btn');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.disabled = true;
+    submitBtn.innerHTML = '🔄 Guardando...'; submitBtn.disabled = true;
     
     try {
-        const uploadedPhotos = [];
-
-        // PASO A: Subir las fotos a Supabase (si hay)
-        if (currentWalkFiles.length > 0) {
-            for (let i = 0; i < currentWalkFiles.length; i++) {
-                const file = currentWalkFiles[i];
-                const ext = file.name.split('.').pop().toLowerCase();
-                // Nombre único para cada foto
-                const fileName = `walk_${currentDog.id}_${Date.now()}_${i}.${ext}`;
-                
-                submitBtn.innerHTML = `☁️ Subiendo ${i+1} de ${currentWalkFiles.length}...`;
-
-                // Subida real
-                const { error } = await supabaseClient
-                    .storage
-                    .from('paseodog-photos')
-                    .upload(fileName, file);
-
-                if (error) throw error;
-                
-                // Guardar referencia
-                uploadedPhotos.push({
-                    id: fileName,
-                    comentario: 'Foto del paseo'
-                });
-            }
-        }
-
-        submitBtn.innerHTML = '💾 Guardando datos...';
-
-        // PASO B: Guardar el paseo en la base de datos con las referencias de las fotos
         const w = {
             fecha: document.getElementById('walk-date').value,
             duracion_minutos: parseInt(document.getElementById('walk-duration').value),
@@ -714,27 +633,8 @@ document.getElementById('walk-form').onsubmit = async (e) => {
             resumen_diario: document.getElementById('walk-summary').value,
             comportamiento_problemas: document.getElementById('comportamiento-problemas').checked,
             incidentes_salud: document.getElementById('incidentes-salud').value,
-            fotos: uploadedPhotos // Aquí van las fotos que acabamos de subir
+            fotos: simulatedPhotos.length ? simulatedPhotos : [{id: '1581268694', comentario: 'Paseo'}]
         };
-
-        const updatedWalks = [w, ...(currentDog.walks || [])];
-        await updateRealDogWalks(currentDog.id, updatedWalks);
-        currentDog.walks = updatedWalks;
-        
-        showToast('✅ Paseo y fotos guardados', 'success');
-        showView('dog-selection-dashboard');
-
-    } catch (err) {
-        console.error(err);
-        showToast('❌ Error: ' + err.message, 'error');
-    } finally {
-        submitBtn.innerHTML = originalText; 
-        submitBtn.disabled = false;
-        // Limpiamos las fotos pendientes para la próxima
-        currentWalkFiles = [];
-        renderWalkPreview();
-    }
-};
         const updatedWalks = [w, ...(currentDog.walks || [])];
         await updateRealDogWalks(currentDog.id, updatedWalks);
         currentDog.walks = updatedWalks;
