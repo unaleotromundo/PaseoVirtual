@@ -401,8 +401,11 @@ async function showView(id, dogId = null) {
         if(id === 'create-walk-section') {
             document.getElementById('walk-form').reset();
             document.getElementById('walk-date').valueAsDate = new Date();
-            simulatedPhotos = [];
+            
+            // LIMPIEZA DE FOTOS REALES
+            currentWalkFiles = []; 
             document.getElementById('photo-preview').innerHTML = '';
+            
             loadMultiDog();
         }
     }
