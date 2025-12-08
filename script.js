@@ -128,7 +128,13 @@ async function uploadProfilePhoto(file) {
         return;
     }
 
-    const extension = file.name.split('.').pop();
+    const extension = file.name.split('.').pop().toLowerCase();
+    const allowedTypes = ['jpg', 'jpeg', 'png', 'webp'];
+    if (!allowedTypes.includes(extension)) {
+        showToast('❌ Solo se permiten JPG, PNG o WebP', 'error');
+        return;
+    }
+
     const fileName = `perfil_${currentDog.id}_${Date.now()}.${extension}`;
     const filePath = `paseodog-photos/${fileName}`;
 
@@ -143,11 +149,18 @@ async function uploadProfilePhoto(file) {
         const newPerfil = { ...currentDog.perfil, foto_id: fileName };
         await updateRealDogProfile(currentDog.id, newPerfil);
 
+        // Actualizar en memoria
         REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
         currentDog = { ...currentDog, perfil: newPerfil };
 
-        const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}`;
-        document.getElementById('profile-photo').src = photoUrl + '?t=' + Date.now();
+        // Forzar recarga de imagen con timestamp para evitar caché
+        const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
+        const imgEl = document.getElementById('profile-photo');
+        imgEl.src = photoUrl;
+        imgEl.onerror = () => {
+            imgEl.src = getPhotoUrl('1581268694', 300, 300); // fallback
+        };
+
         showToast('✅ Foto de perfil actualizada en la nube', 'success');
     } catch (err) {
         console.error('Error al subir foto:', err);
