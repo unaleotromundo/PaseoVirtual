@@ -6,6 +6,7 @@
     <title>PaseoDog - Sistema Mejorado</title>
     <!-- FAVICON -->
     <link rel="icon" type="image/svg+xml" href="paseodog-logo.svg">
+    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -128,7 +129,7 @@
             </button>
         </section>
 
-        <!-- CREATE WALK -->
+        <!-- CREATE WALK (ACTUALIZADO CON INPUT DE FOTOS REALES) -->
         <section id="create-walk-section" style="display:none;">
             <h2>➕ Crear Nuevo Paseo</h2>
             <form id="walk-form">
@@ -149,6 +150,7 @@
                 
                 <label>🩺 Notas de Salud</label><textarea id="incidentes-salud"></textarea>
                 
+                <!-- SECCIÓN DE FOTOS ACTUALIZADA -->
                 <h3>📸 Fotos del Paseo</h3>
                 <div id="photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
                 
@@ -191,7 +193,7 @@
         <img id="lightbox-img" src="">
     </div>
 
-    <!-- MODAL EDIT WALK (ACTUALIZADO) -->
+    <!-- MODAL EDIT WALK -->
     <div id="edit-walk-modal" style="display:none;">
         <div class="modal-content">
             <h2>✏️ Editar Paseo</h2>
@@ -205,18 +207,9 @@
                     <label>Problemas de comportamiento</label>
                 </div>
                 <label>Notas de Salud</label><textarea id="edit-walk-health"></textarea>
-                
                 <h3>Gestionar Fotos</h3>
                 <div id="edit-photo-preview" style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;"></div>
-                
-                <!-- INPUT OCULTO PARA EDICIÓN -->
-                <input type="file" id="edit-walk-upload-input" accept="image/*" style="display:none;">
-                
-                <!-- BOTÓN SUBIDA REAL -->
-                <button type="button" id="btn-add-edit-photo" onclick="triggerEditUpload()" class="edit-btn ripple" style="background:var(--secondary); width:100%; margin-bottom:15px; display:flex; align-items:center; justify-content:center; gap:8px;">
-                    ➕ Subir Nueva Foto
-                </button>
-                
+                <button type="button" onclick="addPhotoEdit()" class="edit-btn ripple" style="background:var(--secondary); width:100%; margin-bottom:15px;">➕ Agregar Foto (Simulada)</button>
                 <div style="display:flex; gap:10px;">
                     <button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>
                     <button type="button" class="nav-button ripple" onclick="document.getElementById('edit-walk-modal').style.display='none'" style="background:var(--text-secondary);">Cancelar</button>

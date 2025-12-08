@@ -50,7 +50,7 @@ let DATABASE = null;
 
 // === ESTADO GLOBAL ===
 let currentUser = null, currentDog = null, currentView = 'login-section';
-let currentWalkFiles = []; // Fotos reales para nuevo paseo
+let currentWalkFiles = []; // Almacena fotos reales para subir en nuevo paseo
 let simulatedPhotos = [], isEditing = false, tempPhotoId = null, backStack = [];
 let editWalkIdx = null, editWalkPhotos = [];
 let slideInterval = null, isPlaying = false;
@@ -68,8 +68,6 @@ function getPhotoUrl(id, w = 400, h = 400) {
     // Soporte para fotos subidas a Supabase
     if (id.includes('perfil_') || id.includes('walk_') || id.includes('paseodog')) { 
        if(!id.startsWith('http')) {
-           // Usamos timestamp para evitar caché agresivo si es necesario, 
-           // pero aquí lo devolvemos limpio y manejamos el cache en la llamada
            return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
        }
        return id;
@@ -231,6 +229,7 @@ function playRandomCarouselTrack() {
     const randomTrack = CARRUSEL_TRACKS[Math.floor(Math.random() * CARRUSEL_TRACKS.length)];
     carouselAudio = new Audio(randomTrack);
     
+    // Si termina la canción, paran las fotos
     carouselAudio.onended = () => { 
         isPlaying = false; 
         updatePlayBtnState(); 
@@ -273,7 +272,9 @@ function initCarousel() {
     }
     
     wrapper.style.display = 'flex';
-    let idx = slides.length - 1; // Empezar en la última
+    
+    // EMPEZAR EN LA ÚLTIMA FOTO (Estático)
+    let idx = slides.length - 1; 
     
     isPlaying = false;
     if (slideInterval) clearInterval(slideInterval);
@@ -306,6 +307,7 @@ function initCarousel() {
 
         if(isPlaying) {
             playRandomCarouselTrack(); 
+            // INTERVALO DE 5 SEGUNDOS
             if (slideInterval) clearInterval(slideInterval);
             slideInterval = setInterval(() => {
                 window.nextSlide();
@@ -544,7 +546,7 @@ function loadProfile(d) {
             }
         };
     } else {
-        // VISTA LECTURA
+        // VISTA LECTURA (Incluye comportamiento)
         v.innerHTML = `
             <h3>🐕 Datos Básicos</h3>
             <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${p.raza}</span></div>
@@ -577,11 +579,11 @@ function randomizeProfilePhoto(){
 
 // === CREATE WALK (LOGICA SUBIDA FOTOS) ===
 
-// 1. Listeners para inputs de fotos (Crear y Editar)
+// 1. Listeners para input de fotos
 document.addEventListener('DOMContentLoaded', () => {
-    // A) CREAR PASEO
     const addBtn = document.getElementById('add-walk-photo-btn');
     const walkInput = document.getElementById('walk-photo-input');
+
     if (addBtn && walkInput) {
         addBtn.onclick = () => walkInput.click();
         walkInput.onchange = (e) => {
@@ -593,24 +595,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.value = '';
         };
     }
-    
-    // B) EDITAR PASEO
-    const editInput = document.getElementById('edit-walk-upload-input');
-    if (editInput) {
-        editInput.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (file) await uploadPhotoInEditMode(file);
-            e.target.value = '';
-        };
-    }
-    
-    // C) FOTO PERFIL
-    document.getElementById('photo-upload-input').addEventListener('change', (e) => {
-        if(e.target.files[0]) uploadProfilePhoto(e.target.files[0]);
-    });
 });
 
-// 2. Renderizar miniaturas crear paseo
+// 2. Renderizar miniaturas
 function renderWalkPreview() {
     const container = document.getElementById('photo-preview');
     container.innerHTML = '';
@@ -764,7 +751,7 @@ window.openLightbox = (id) => {
 };
 document.getElementById('close-lightbox').onclick = () => document.getElementById('lightbox').style.display = 'none';
 
-// === EDIT WALK (CON SUBIDA REAL) ===
+// === EDIT WALK ===
 window.openEditWalk = (walkIndex) => {
     if (!currentDog || currentDog.isExample) return;
     editWalkIdx = walkIndex;
@@ -782,44 +769,6 @@ window.openEditWalk = (walkIndex) => {
     
     document.getElementById('edit-walk-modal').style.display = 'flex';
 };
-
-window.triggerEditUpload = () => {
-    document.getElementById('edit-walk-upload-input').click();
-};
-
-async function uploadPhotoInEditMode(file) {
-    const btn = document.getElementById('btn-add-edit-photo');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '⏳ Subiendo...';
-    btn.disabled = true;
-
-    try {
-        const ext = file.name.split('.').pop().toLowerCase();
-        const fileName = `walk_edit_${currentDog.id}_${Date.now()}.${ext}`;
-
-        const { error } = await supabaseClient
-            .storage
-            .from('paseodog-photos')
-            .upload(fileName, file);
-
-        if (error) throw error;
-
-        // Agregar foto REAL a la lista visual
-        editWalkPhotos.push({ 
-            id: fileName, 
-            comentario: 'Agregada en edición' 
-        });
-        
-        renderEditPhotos();
-        showToast('✅ Foto subida', 'success');
-    } catch (err) {
-        console.error(err);
-        showToast('❌ Error al subir: ' + err.message, 'error');
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-}
 
 function renderEditPhotos() {
     const preview = document.getElementById('edit-photo-preview');
@@ -839,7 +788,6 @@ function renderEditPhotos() {
         btn.className = 'delete-photo-btn';
         btn.onclick = (e) => {
             e.preventDefault(); 
-            // ELIMINAR SOLO DE LA LISTA (NO DE SUPABASE)
             editWalkPhotos.splice(i, 1);
             renderEditPhotos();
         };
@@ -849,6 +797,12 @@ function renderEditPhotos() {
         preview.appendChild(imgContainer);
     });
 }
+
+window.addPhotoEdit = () => {
+    const randomId = ['1581268694', '1581268695', '1581268696'][Math.floor(Math.random()*3)];
+    editWalkPhotos.push({ id: randomId, comentario: 'Foto agregada' });
+    renderEditPhotos();
+};
 
 document.getElementById('edit-walk-form').onsubmit = async (e) => {
     e.preventDefault();
@@ -893,6 +847,12 @@ window.delWalk = (walkIndex) => {
 };
 
 // === INIT ===
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('photo-upload-input').addEventListener('change', (e) => {
+        if(e.target.files[0]) uploadProfilePhoto(e.target.files[0]);
+    });
+});
+
 window.onload = async () => {
     await loadExampleDogs();
     document.getElementById('loading-overlay').style.display = 'none';
