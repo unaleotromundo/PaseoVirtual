@@ -492,14 +492,48 @@ function loadProfile(d) {
         };
     }
 }
-function toggleEditMode(){ 
+// === PROFILE: guardar cambios (versión corregida para Supabase) ===
+function toggleEditMode() {
     if (currentDog?.isExample) {
         showToast('ℹ️ Los ejemplos no se pueden editar', 'info');
         return;
     }
-    isEditing = !isEditing; 
-    tempPhotoId = null; 
-    loadProfile(currentDog); 
+    isEditing = !isEditing;
+    tempPhotoId = null;
+    loadProfile(currentDog);
+    
+    if (isEditing) {
+        // Activar formulario editable
+        const form = document.getElementById('profile-details-edit');
+        form.innerHTML = '';
+        const fields = ['raza','edad','sexo','peso','alergias','dueno','telefono','energia','social'];
+        const p = currentDog.perfil;
+        
+        fields.forEach(k => {
+            form.innerHTML += `<label>${k.charAt(0).toUpperCase() + k.slice(1)}</label>
+                              <input type="text" name="${k}" value="${p[k]}" required>`;
+        });
+        
+        form.innerHTML += '<button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>';
+        
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const updatedPerfil = {};
+            for (let [key, value] of formData.entries()) {
+                updatedPerfil[key] = value;
+            }
+            
+            try {
+                // ✅ Guardar en Supabase
+                await updateRealDogProfile(currentDog.id, updatedPerfil);
+                showToast('✅ Perfil actualizado en la nube', 'success');
+                toggleEditMode(); // salir del modo edición
+            } catch (err) {
+                showToast('❌ Error al guardar: ' + err.message, 'error');
+            }
+        };
+    }
 }
 function randomizeProfilePhoto(){
     if (currentDog?.isExample) return;
