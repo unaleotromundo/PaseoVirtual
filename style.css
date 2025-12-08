@@ -1065,3 +1065,51 @@ button:hover {
         gap: 12px;
     }
 }
+/* === ESTILOS ADICIONALES NECESARIOS === */
+
+/* Botón para agregar foto en modal de edición */
+#edit-walk-form .edit-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 1rem;
+}
+
+/* Asegurar que el modal se muestre correctamente cuando se activa */
+#edit-walk-modal.show {
+    display: flex;
+}
+
+/* Estilo consistente para inputs en modal */
+#edit-walk-form input,
+#edit-walk-form textarea {
+    background: var(--bg-input);
+    border: 2px solid var(--border);
+    color: var(--text-primary);
+}
+
+/* Estilo para el contenedor de preview de fotos en el modal */
+#edit-photo-preview {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+}
+
+/* Cursor pointer en fotos editables */
+#edit-photo-preview img {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#edit-photo-preview img:hover {
+    transform: scale(1.1);
+}
+
+/* Asegurar que los botones dentro del modal tengan margen adecuado */
+#edit-walk-form .save-btn,
+#edit-walk-form .nav-button {
+    margin-top: 16px;
+    width: auto;
+    padding: 12px 24px;
+}
