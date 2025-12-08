@@ -52,23 +52,17 @@ function getPhotoUrl(id, w = 400, h = 400) {
     return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
 }
 
-// === CARGAR EJEMPLOS DESDE JSON ===
+// === CARGAR EJEMPLOS DESDE JSON (con IDs 995–999) ===
 async function loadExampleDogs() {
     try {
         const res = await fetch(DB_URL);
         const data = await res.json();
-        
-        // ✅ Asignar nuevos IDs a los ejemplos: 995, 996, 997, 998, 999
         const exampleIds = [995, 996, 997, 998, 999];
-        EXAMPLE_DOGS = data.dogs.map((d, index) => {
-            const newId = exampleIds[index] || (995 + index); // fallback seguro
-            return {
-                ...d,
-                id: newId,        // ✅ Sobrescribe el id original
-                isExample: true   // marca como ejemplo
-            };
-        });
-
+        EXAMPLE_DOGS = data.dogs.map((d, index) => ({
+            ...d,
+            id: exampleIds[index] || (995 + index),
+            isExample: true
+        }));
         TRAINER_PHONE = data.trainer_phone || "5491100000000";
         ADMIN_USER = data.admin || { email: 'admin@paseos.com', password: 'admin123' };
         DATABASE = data;
@@ -297,13 +291,9 @@ function updateWhatsApp() {
 
 // === NAVEGACIÓN ===
 async function showView(id, dogId = null) {
-    // Cargar todos los perros (ejemplos + reales) para la lista general
     const allDogs = await loadAllDogs();
-    
-    if (id !== currentView) backStack.push(currentView);
+    if(id !== currentView) backStack.push(currentView);
     currentView = id;
-
-    // Detener carrusel si salimos del dashboard
     if (currentView !== 'dog-selection-dashboard' && slideInterval) {
         clearInterval(slideInterval);
         slideInterval = null;
@@ -313,30 +303,20 @@ async function showView(id, dogId = null) {
         }
         isPlaying = false;
     }
-
-    // Ocultar todas las secciones
     document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
     document.getElementById(id).style.display = 'block';
-
-    // ✅ CORRECCIÓN CLAVE: Buscar primero en perros reales, luego en ejemplos
-    if (dogId) {
+    if(dogId) {
         currentDog = REAL_DOGS.find(d => d.id === dogId) || EXAMPLE_DOGS.find(d => d.id === dogId);
     }
-
-    if (currentDog) {
+    if(currentDog) {
         document.querySelectorAll('.dog-name-placeholder').forEach(e => e.textContent = currentDog.nombre);
-        if (id === 'dog-selection-dashboard') {
+        if(id === 'dog-selection-dashboard') {
             document.getElementById('admin-create-walk-btn').style.display = currentUser?.isAdmin ? 'block' : 'none';
             initCarousel();
         }
-        if (id === 'profile-section') {
-            isEditing = false;
-            loadProfile(currentDog);
-        }
-        if (id === 'walks-history-section') {
-            loadHistory(currentDog);
-        }
-        if (id === 'create-walk-section') {
+        if(id === 'profile-section') { isEditing = false; loadProfile(currentDog); }
+        if(id === 'walks-history-section') loadHistory(currentDog);
+        if(id === 'create-walk-section') {
             document.getElementById('walk-form').reset();
             document.getElementById('walk-date').valueAsDate = new Date();
             simulatedPhotos = [];
@@ -344,17 +324,12 @@ async function showView(id, dogId = null) {
             loadMultiDog();
         }
     }
-
-    if (id === 'admin-dashboard-section') {
-        loadAdminDashboard();
-    }
-
-    if ((id === 'dog-selection-dashboard' || id === 'admin-dashboard-section') && userHasInteracted) {
+    if(id === 'admin-dashboard-section') loadAdminDashboard();
+    if((id === 'dog-selection-dashboard' || id === 'admin-dashboard-section') && userHasInteracted) {
         setTimeout(playWelcomeSound, 500);
     }
-
     updateWhatsApp();
-    window.scrollTo(0, 0);
+    window.scrollTo(0,0);
 }
 function goBack(){
     if(backStack.length) showView(backStack.pop());
@@ -426,7 +401,8 @@ async function loadAdminDashboard() {
 // === CREAR PERRO (solo reales van a Supabase) ===
 document.getElementById('create-dog-form').onsubmit = async (e) => {
     e.preventDefault();
-    const submitBtn = e.submitter;
+    const submitBtn = document.querySelector('#create-dog-form .save-btn');
+    if (!submitBtn || submitBtn.disabled) return;
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '🔄 Guardando...';
     submitBtn.disabled = true;
@@ -491,8 +467,10 @@ function loadProfile(d) {
     v.style.display = isEditing ? 'none' : 'block';
     e.style.display = isEditing ? 'block' : 'none';
     if (isEditing) {
-        e.querySelector('button').addEventListener('click', (ev) => {
-            const btn = ev.submitter;
+        e.onsubmit = (ev) => {
+            ev.preventDefault();
+            const btn = e.querySelector('.save-btn');
+            if (!btn || btn.disabled) return;
             const txt = btn.innerHTML;
             btn.innerHTML = '🔄 Guardando...';
             btn.disabled = true;
@@ -500,8 +478,9 @@ function loadProfile(d) {
                 btn.innerHTML = txt;
                 btn.disabled = false;
                 showToast('✅ Perfil actualizado', 'success');
+                toggleEditMode();
             }, 600);
-        });
+        };
     }
 }
 function toggleEditMode(){ 
@@ -550,7 +529,8 @@ document.getElementById('walk-form').onsubmit = async (e) => {
         showToast('ℹ️ Los perros de ejemplo no se pueden modificar', 'info');
         return;
     }
-    const submitBtn = document.getElementById('save-dog-btn');
+    const submitBtn = document.querySelector('#walk-form .save-btn');
+    if (!submitBtn || submitBtn.disabled) return;
     submitBtn.innerHTML = '🔄 Guardando...';
     submitBtn.disabled = true;
     
@@ -571,8 +551,10 @@ document.getElementById('walk-form').onsubmit = async (e) => {
     } catch (err) {
         showToast('❌ Error al guardar paseo', 'error');
     } finally {
-        submitBtn.innerHTML = '💾 Guardar Paseo';
-        submitBtn.disabled = false;
+        if (submitBtn) {
+            submitBtn.innerHTML = '💾 Guardar Paseo';
+            submitBtn.disabled = false;
+        }
     }
 };
 
