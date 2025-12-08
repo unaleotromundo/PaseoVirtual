@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaseoDog - Sistema con Supabase</title>
+    <link rel="icon" type="image/svg+xml" href="paseodog-logo.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PaseoDog">
+    <link rel="apple-touch-icon" href="paseodog-logo.svg">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="./supabase.js"></script>
+    <style>
+        /* VARIABLES CSS - TEMA OSCURO DORADO PREMIUM */
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #d1fae5;
+            --secondary: #3b82f6;
+            --secondary-dark: #2563eb;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-body: #f9fafb;
+            --bg-card: #ffffff;
+            --bg-input: #f9fafb;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --gold: #ffc107;
+        }
+
+        [data-theme="dark"] {
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --bg-body: #111827;
+            --bg-card: #1f2937;
+            --bg-input: #374151;
+            --border: #374151;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --primary: #ffc107; /* Dorado para Premium */
+            --primary-dark: #e0a800;
+            --primary-light: #4b3d17;
+        }
+
+        /* RESET & BASE */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* LAYOUT */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* HEADINGS */
+        h1, h2, h3 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 2rem; }
+        h3 { font-size: 1.5rem; }
+
+        /* CARDS */
+        .card {
+            background-color: var(--bg-card);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* FORMS & INPUTS */
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+
+        input[type="text"], 
+        input[type="email"], 
+        input[type="password"], 
+        input[type="number"], 
+        input[type="tel"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, opacity 0.3s;
+            margin-right: 10px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn.primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn.primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn.secondary {
+            background-color: var(--text-secondary);
+            color: white;
+        }
+
+        .btn.secondary:hover {
+            opacity: 0.8;
+        }
+
+        .btn.danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn.danger:hover {
+            background-color: var(--danger-light);
+            color: var(--danger);
+        }
+
+        /* UTILITIES */
+        .text-center { text-align: center; }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; }
+        .flex-start { justify-content: flex-start; }
+        .mt-20 { margin-top: 20px; }
+
+        /* LOADING & MESSAGES */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            z-index: 10000;
+            display: none; /* Inicia oculto */
+        }
+
+        #message-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: var(--shadow-lg);
+            color: white;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .toast.success { background-color: var(--primary-dark); }
+        .toast.error { background-color: var(--danger); }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        /* HEADER */
+        header {
+            background-color: var(--bg-card);
+            padding: 15px 20px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        header .logo img {
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        /* PROFILE SECTION */
+        #dog-profile-section .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        #dog-profile-section .profile-img-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            flex-shrink: 0;
+        }
+
+        #dog-profile-section .profile-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #dog-profile-section .profile-name {
+            font-size: 3rem;
+            margin: 0;
+        }
+        
+        #dog-profile-section .profile-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        #dog-profile-section .info-item {
+            flex: 1 1 200px;
+            background-color: var(--bg-input);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        #dog-profile-section .info-item strong {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 3px;
+        }
+
+
+        /* WALK DETAIL */
+        #walk-detail-section {
+            padding-top: 20px;
+        }
+
+        #walk-carousel-section {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .carousel-slide {
+            width: 100%;
+            height: auto;
+            display: none;
+            cursor: pointer;
+        }
+
+        .carousel-slide:first-child {
+            display: block;
+        }
+
+        /* === CORRECCIÓN CARRUSEL CSS === */
+        .carousel-controls {
+            position: absolute;
+            top: 50%;
+            /* Centrar verticalmente */
+            transform: translateY(-50%); 
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 10;
+            /* Iniciar oculto y transicionar la visibilidad */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out; 
+            pointer-events: none; /* Permite hacer clic en el perro/paseo si los controles están ocultos */
+        }
+
+        .carousel-controls button {
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+            /* FIX: Estabilizar el tamaño del botón */
+            box-sizing: border-box; 
+            transition: background 0.2s, transform 0.2s;
+            pointer-events: auto; /* Permite hacer clic en los botones */
+        }
+
+        .carousel-controls button:hover {
+            background: rgba(0, 0, 0, 0.7);
+            /* Escala para el efecto hover sin mover el botón */
+            transform: scale(1.1) translateY(0); 
+        }
+
+        /* Estilo para el botón de Play/Pause central */
+        #carousel-play-pause {
+            /* Mantiene el botón centralizado */
+            margin: 0 auto;
+            display: block; 
+        }
+
+        /* FOOTER & ACCIONES FIJAS */
+        #whatsapp-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--shadow-lg);
+            text-decoration: none;
+            z-index: 100;
+        }
+
+        #audio-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        /* MODAL (GENERAL) */
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--bg-card);
+            margin: auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-btn {
+            color: var(--text-secondary);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: var(--text-primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* Lightbox */
+        #lightbox {
+            z-index: 2000;
+        }
+
+        #lightbox-content {
+            padding: 0;
+            width: auto;
+            max-width: 90%;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        #lightbox-img {
+            display: block;
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay">Cargando...</div>
+
+    <div id="message-container"></div>
+
+    <header id="main-header" style="display: none;">
+        <div class="logo">
+            <img src="paseodog-logo.svg" alt="PaseoDog Logo">
+            <span>PaseoDog</span>
+        </div>
+        <nav>
+            <button id="logout-btn" class="btn secondary">Cerrar Sesión</button>
+            <button id="theme-toggle" class="btn secondary">🌞</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        
+        <section id="login-section" class="card" style="display: block;">
+            <h2 class="text-center">Bienvenido a PaseoDog</h2>
+            <form id="auth-form">
+                <h3>Iniciar Sesión / Registrarse</h3>
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+                
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" required>
+                
+                <div class="flex-row mt-20">
+                    <button type="button" class="btn primary" onclick="handleAuth('login')">Iniciar Sesión</button>
+                    <button type="button" class="btn secondary" onclick="handleAuth('signup')">Registrarse</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="admin-dashboard-section" style="display: none;">
+            <h2>Panel de Control <span id="dashboard-title"></span></h2>
+            <div id="dog-list-container">
+                </div>
+            
+            <button id="register-dog-btn" class="btn primary mt-20" style="display: none;">Registrar Nuevo Perro</button>
+        </section>
+
+        <section id="dog-profile-section" class="card" style="display: none;">
+            <div class="profile-header">
+                <div class="profile-img-container">
+                    <img id="profile-photo" class="profile-img" src="placeholder.jpg" alt="Foto del perro">
+                    <input type="file" id="photo-upload-input" accept="image/*" style="display: none;">
+                    <button id="change-photo-btn" class="btn primary" style="position: absolute; bottom: 5px; right: 5px; opacity: 0.8;">&#x270E;</button>
+                </div>
+                <div>
+                    <h1 id="dog-name" class="profile-name">Nombre</h1>
+                    <p id="owner-info">Dueño: <span id="dog-owner"></span> - Teléfono: <span id="dog-phone"></span></p>
+                    <button id="edit-profile-btn" class="btn secondary mt-20" style="display: none;">Editar datos del perfil</button>
+                </div>
+            </div>
+
+            <h3>Información Detallada</h3>
+            <div class="profile-info">
+                <div class="info-item"><strong>Raza</strong> <span id="dog-raza"></span></div>
+                <div class="info-item"><strong>Sexo</strong> <span id="dog-sexo"></span></div>
+                <div class="info-item"><strong>Edad</strong> <span id="dog-edad"></span> años</div>
+                <div class="info-item"><strong>Peso</strong> <span id="dog-peso"></span> kg</div>
+                <div class="info-item"><strong>Energía</strong> <span id="dog-energia"></span></div>
+                <div class="info-item"><strong>Socialización</strong> <span id="dog-social"></span></div>
+                <div class="info-item full-width"><strong>Alergias</strong> <span id="dog-alergias"></span></div>
+            </div>
+
+            <h3 class="mt-20">Historial de Paseos (<span id="walk-count">0</span>)</h3>
+            <button id="add-walk-btn" class="btn primary" style="display: none;">Registrar Nuevo Paseo</button>
+            <div id="walk-history-list" class="mt-20">
+                </div>
+            
+            <button id="back-to-dashboard-btn" class="btn secondary mt-20">Volver al Dashboard</button>
+        </section>
+
+        <section id="walk-detail-section" class="card" style="display: none;">
+            <h2 id="walk-date">Detalle del Paseo</h2>
+            <div id="walk-carousel-section">
+                <div id="carousel-container">
+                    </div>
+                <div id="carousel-controls" class="carousel-controls">
+                    <button id="carousel-prev" onclick="window.prevSlide()">&#10094;</button>
+                    <button id="carousel-play-pause" onclick="window.togglePlayPause()">▶</button>
+                    <button id="carousel-next" onclick="window.nextSlide()">&#10095;</button>
+                </div>
+            </div>
+
+            <div id="walk-info">
+                <p><strong>Duración:</strong> <span id="walk-duration"></span> minutos</p>
+                <p><strong>Distancia:</strong> <span id="walk-distance"></span> km</p>
+                <p><strong>Resumen:</strong> <span id="walk-summary"></span></p>
+                <p><strong>Comportamiento:</strong> <span id="walk-behavior"></span></p>
+                <p><strong>Salud:</strong> <span id="walk-health"></span></p>
+            </div>
+
+            <div class="flex-row flex-start mt-20">
+                <button id="edit-walk-btn" class="btn primary" style="display: none;">Editar Paseo</button>
+                <button id="delete-walk-btn" class="btn danger" style="display: none;">Eliminar Paseo</button>
+            </div>
+            
+            <button id="back-to-profile-btn" class="btn secondary mt-20">Volver al Perfil</button>
+        </section>
+
+        <section id="walk-form-section" class="card" style="display: none;">
+            <h2 id="walk-form-title">Registrar Nuevo Paseo</h2>
+            <form id="walk-form">
+                <input type="hidden" id="walk-id">
+                
+                <label for="walk-form-date">Fecha</label>
+                <input type="date" id="walk-form-date" required>
+
+                <label for="walk-form-duration">Duración (minutos)</label>
+                <input type="number" id="walk-form-duration" min="1" required>
+
+                <label for="walk-form-distance">Distancia (km)</label>
+                <input type="number" id="walk-form-distance" step="0.1" min="0" required>
+                
+                <label for="walk-form-summary">Resumen Diario</label>
+                <textarea id="walk-form-summary"></textarea>
+
+                <label for="walk-form-behavior">Comportamiento o Problemas</label>
+                <textarea id="walk-form-behavior"></textarea>
+                
+                <label for="walk-form-health">Incidentes de Salud</label>
+                <textarea id="walk-form-health"></textarea>
+
+                <h3 class="mt-20">Fotos del Paseo</h3>
+                <input type="file" id="walk-photo-input" accept="image/*" multiple>
+                <div id="walk-photo-preview" class="mt-10">
+                    </div>
+                
+                <div class="flex-row mt-20">
+                    <button type="submit" class="btn primary">Guardar Paseo</button>
+                    <button type="button" class="btn secondary" onclick="window.showDogProfileView(window.currentDog)">Cancelar</button>
+                </div>
+            </form>
+        </section>
+        
+        <section id="new-dog-section" class="card" style="display: none;">
+            <h2>Registrar Nuevo Perro/Dueño</h2>
+            <form id="new-dog-form">
+                <h3>Datos del Perro</h3>
+                <label for="new-dog-name">Nombre del Perro</label>
+                <input type="text" id="new-dog-name" required>
+                
+                <label for="new-dog-raza">Raza</label>
+                <input type="text" id="new-dog-raza" required>
+                
+                <label for="new-dog-sexo">Sexo</label>
+                <select id="new-dog-sexo" required>
+                    <option value="Macho">Macho</option>
+                    <option value="Hembra">Hembra</option>
+                </select>
+                
+                <label for="new-dog-edad">Edad (años):</label>
+                <input type="number" id="new-dog-edad" min="0">
+                
+                <label for="new-dog-peso">Peso (kg):</label>
+                <input type="number" id="new-dog-peso" step="0.1" min="0">
+                
+                <label for="new-dog-alergias">Alergias:</label>
+                <textarea id="new-dog-alergias"></textarea>
+                
+                <label for="new-dog-energia">Nivel de Energía:</label>
+                <select id="new-dog-energia">
+                    <option value="Bajo">Bajo</option>
+                    <option value="Medio">Medio</option>
+                    <option value="Alto">Alto</option>
+                </select>
+                
+                <label for="new-dog-social">Socialización:</label>
+                <select id="new-dog-social">
+                    <option value="Excelente">Excelente</option>
+                    <option value="Buena">Buena</option>
+                    <option value="Necesita Mejorar">Necesita Mejorar</option>
+                </select>
+                
+                <h3 class="mt-20">Datos del Dueño</h3>
+                <label for="new-dog-owner">Nombre del Dueño</label>
+                <input type="text" id="new-dog-owner" required>
+                
+                <label for="new-dog-email">Email (Usuario)</label>
+                <input type="email" id="new-dog-email" required>
+                
+                <label for="new-dog-phone">Teléfono</label>
+                <input type="tel" id="new-dog-phone" required>
+                
+                <div class="flex-row mt-20">
+                    <button type="submit" class="btn primary">Registrar y Crear Cuenta</button>
+                    <button type="button" class="btn secondary" onclick="window.showView('admin-dashboard-section')">Cancelar</button>
+                </div>
+            </form>
+        </section>
+
+    </div> <div id="edit-profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="document.getElementById('edit-profile-modal').style.display='none';">&times;</span>
+            <h2>Editar Perfil de <span id="modal-dog-name"></span></h2>
+            <form id="edit-dog-form">
+                <input type="hidden" id="edit-dog-id">
+                
+                <label for="edit-nombre">Nombre:</label>
+                <input type="text" id="edit-nombre" required>
+
+                <label for="edit-raza">Raza:</label>
+                <input type="text" id="edit-raza" required>
+
+                <label for="edit-sexo">Sexo:</label>
+                <select id="edit-sexo" required>
+                    <option value="Macho">Macho</option>
+                    <option value="Hembra">Hembra</option>
+                </select>
+                
+                <label for="edit-dueno">Dueño:</label>
+                <input type="text" id="edit-dueno" required>
+                
+                <label for="edit-telefono">Teléfono:</label>
+                <input type="tel" id="edit-telefono" required>
+                
+                <label for="edit-edad">Edad (años):</label>
+                <input type="number" id="edit-edad" min="0">
+                
+                <label for="edit-peso">Peso (kg):</label>
+                <input type="number" id="edit-peso" step="0.1" min="0">
+                
+                <label for="edit-alergias">Alergias:</label>
+                <textarea id="edit-alergias"></textarea>
+                
+                <label for="edit-energia">Nivel de Energía:</label>
+                <select id="edit-energia">
+                    <option value="Bajo">Bajo</option>
+                    <option value="Medio">Medio</option>
+                    <option value="Alto">Alto</option>
+                </select>
+                
+                <label for="edit-social">Socialización:</label>
+                <select id="edit-social">
+                    <option value="Excelente">Excelente</option>
+                    <option value="Buena">Buena</option>
+                    <option value="Necesita Mejorar">Necesita Mejorar</option>
+                </select>
+
+                <button type="submit" class="btn primary">Guardar Cambios</button>
+                <button type="button" class="btn secondary" onclick="document.getElementById('edit-profile-modal').style.display='none';">Cancelar</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="lightbox" class="modal" onclick="document.getElementById('lightbox').style.display='none';">
+        <div id="lightbox-content">
+            <span class="close-btn" id="close-lightbox">&times;</span>
+            <img id="lightbox-img" src="" alt="Foto del paseo">
+        </div>
+    </div>
+
+
+    <a id="whatsapp-btn" href="#" target="_blank" style="display: none;">&#x1F4AC;</a>
+    <div id="audio-toggle">🔊</div>
+
+
+    <script type="module">
+        import { loadDogs, loadWalks, createWalk, uploadWalkPhoto, updateWalk, deleteWalk, uploadProfilePhoto, updateDogProfilePhoto, updateDogProfile, supabase } from './supabase.js';
+
+        // === ESTADO GLOBAL ===
+        let currentUser = null;
+        let dogs = [];
+        window.currentDog = null;
+        let currentWalk = null;
+        let currentView = 'login-section';
+        let isAudioEnabled = localStorage.getItem('paseoDogAudio') !== 'off';
+
+        // --- VARIABLES GLOBALES DEL CARRUSEL (CORRECCIÓN DE ÁMBITO) ---
+        let slides = [];
+        let currentSlideIndex = 0;
+        let carouselIntervalId = null;
+        let controlsTimeout = null; // Para gestionar el temporizador de ocultar/mostrar controles
+        const HIDE_CONTROLS_DELAY = 3000; // 3 segundos
+
+        // === FUNCIONES DE UTILIDAD ===
+
+        function showLoading(message = 'Cargando...') {
+            document.getElementById('loading-overlay').textContent = message;
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function showToast(message, type = 'success', duration = 3000) {
+            const container = document.getElementById('message-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 300);
+            }, duration);
+        }
+
+        function showSuccess(message) { showToast(message, 'success'); }
+        function showError(message) { showToast(message, 'error', 5000); }
+
+        window.showView = (viewId) => {
+            document.querySelectorAll('section').forEach(section => {
+                section.style.display = 'none';
+            });
+            const header = document.getElementById('main-header');
+            if (viewId === 'login-section') {
+                header.style.display = 'none';
+            } else {
+                header.style.display = 'flex';
+            }
+            document.getElementById(viewId).style.display = 'block';
+            currentView = viewId;
+            updateWhatsApp();
+        };
+
+        // === AUTENTICACIÓN ===
+
+        async function handleAuth(type) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (!email || !password) {
+                showError('Por favor, ingresa email y contraseña.');
+                return;
+            }
+
+            showLoading('Autenticando...');
+            try {
+                let session;
+                if (type === 'login') {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    session = data.session;
+                } else { // signup
+                    const { data, error } = await supabase.auth.signUp({ email, password });
+                    if (error) throw error;
+                    session = data.session;
+                }
+
+                if (session) {
+                    await checkUserSession(session);
+                }
+            } catch (error) {
+                console.error('Error de autenticación:', error.message);
+                showError(error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function checkUserSession(session) {
+            if (!session) {
+                window.showView('login-section');
+                return;
+            }
+
+            const email = session.user.email;
+            
+            // Asumiendo que el admin es un email específico
+            const isAdmin = email === 'admin@paseodog.com'; 
+            
+            currentUser = { email, isAdmin };
+
+            await loadDogData(isAdmin, email);
+            
+            if (isAdmin) {
+                setupAdminDashboard();
+            } else {
+                setupOwnerProfile();
+            }
+        }
+
+        async function loadDogData(isAdmin, email) {
+            showLoading('Cargando datos de perros...');
+            try {
+                dogs = await loadDogs(email, isAdmin);
+                hideLoading();
+            } catch (error) {
+                showError('Error al cargar datos: ' + error.message);
+                hideLoading();
+            }
+        }
+
+        async function setupAdminDashboard() {
+            document.getElementById('dashboard-title').textContent = 'Admin';
+            document.getElementById('register-dog-btn').style.display = 'block';
+            document.getElementById('register-dog-btn').onclick = () => window.showView('new-dog-section');
+            renderDogList(dogs, true);
+            window.showView('admin-dashboard-section');
+        }
+
+        async function setupOwnerProfile() {
+            document.getElementById('dashboard-title').textContent = 'Mi Perfil';
+            document.getElementById('register-dog-btn').style.display = 'none';
+            if (dogs.length > 0) {
+                window.currentDog = dogs[0];
+                await window.showDogProfileView(dogs[0]);
+            } else {
+                // Si el dueño no tiene perro asignado, se le podría mostrar un formulario o mensaje
+                showError('No tienes un perro registrado. Contacta al administrador.');
+                window.showView('admin-dashboard-section'); // O una vista de bienvenida/error
+            }
+        }
+
+        function renderDogList(dogList, isAdmin) {
+            const container = document.getElementById('dog-list-container');
+            container.innerHTML = '';
+            
+            if (dogList.length === 0) {
+                container.innerHTML = '<p class="text-center">No hay perros registrados.</p>';
+                return;
+            }
+
+            dogList.forEach(dog => {
+                const div = document.createElement('div');
+                div.className = 'card flex-row';
+                div.innerHTML = `
+                    <div style="flex-grow: 1;">
+                        <h3>${dog.nombre}</h3>
+                        <p>Dueño: ${dog.dueno}</p>
+                        <p>Raza: ${dog.raza}</p>
+                    </div>
+                    <button class="btn primary" data-dog-id="${dog.id}">Ver Perfil</button>
+                `;
+                div.querySelector('button').onclick = async (e) => {
+                    window.currentDog = dog;
+                    await window.showDogProfileView(dog);
+                };
+                container.appendChild(div);
+            });
+        }
+
+        // === VISTAS DE PERFIL Y PASEO ===
+        
+        window.showDogProfileView = async (dog) => {
+            showLoading('Cargando perfil...');
+            window.currentDog = dog; // Asegurar que sea global
+
+            // 1. Cargar datos del perfil
+            document.getElementById('dog-name').textContent = dog.nombre;
+            document.getElementById('dog-owner').textContent = dog.dueno;
+            document.getElementById('dog-phone').textContent = dog.telefono;
+            document.getElementById('dog-raza').textContent = dog.raza;
+            document.getElementById('dog-sexo').textContent = dog.sexo;
+            
+            // Cargar nuevos campos
+            document.getElementById('dog-edad').textContent = dog.edad || 'N/A';
+            document.getElementById('dog-peso').textContent = dog.peso ? `${dog.peso}` : 'N/A';
+            document.getElementById('dog-alergias').textContent = dog.alergias || 'Ninguna';
+            document.getElementById('dog-energia').textContent = dog.energia || 'N/A';
+            document.getElementById('dog-social').textContent = dog.social || 'N/A';
+            
+            const profilePhoto = document.getElementById('profile-photo');
+            profilePhoto.src = dog.foto_url || 'placeholder.jpg';
+            profilePhoto.alt = `Foto de ${dog.nombre}`;
+
+            // 2. Configurar botones de edición
+            const isAdminOrOwner = currentUser.isAdmin || (currentUser.email === dog.dueno_email);
+            
+            document.getElementById('add-walk-btn').style.display = isAdminOrOwner ? 'block' : 'none';
+            document.getElementById('edit-profile-btn').style.display = isAdminOrOwner ? 'block' : 'none';
+            document.getElementById('change-photo-btn').style.display = isAdminOrOwner ? 'block' : 'none';
+            document.getElementById('back-to-dashboard-btn').style.display = currentUser.isAdmin ? 'block' : 'none';
+            
+            // Asignar handlers
+            document.getElementById('add-walk-btn').onclick = () => window.showWalkForm(dog.id);
+            document.getElementById('edit-profile-btn').onclick = () => window.openEditProfileModal(dog);
+
+            // 3. Cargar historial de paseos
+            const walks = await loadWalks(dog.id);
+            renderWalkHistory(walks, dog.id);
+            document.getElementById('walk-count').textContent = walks.length;
+
+            window.showView('dog-profile-section');
+            hideLoading();
+        };
+
+        function renderWalkHistory(walks, dogId) {
+            const list = document.getElementById('walk-history-list');
+            list.innerHTML = '';
+            
+            if (walks.length === 0) {
+                list.innerHTML = '<p>Aún no hay paseos registrados.</p>';
+                return;
+            }
+
+            walks.forEach(walk => {
+                const div = document.createElement('div');
+                div.className = 'card flex-row mt-10';
+                div.innerHTML = `
+                    <div style="flex-grow: 1;">
+                        <p><strong>Fecha:</strong> ${walk.fecha}</p>
+                        <p>Duración: ${walk.duracion_minutos} min</p>
+                    </div>
+                    <button class="btn secondary" data-walk-id="${walk.id}">Ver Detalles</button>
+                `;
+                div.querySelector('button').onclick = () => window.showWalkDetail(walk);
+                list.appendChild(div);
+            });
+        }
+
+        window.showWalkDetail = (walk) => {
+            window.currentWalk = walk;
+            
+            document.getElementById('walk-date').textContent = `Paseo del ${walk.fecha}`;
+            document.getElementById('walk-duration').textContent = walk.duracion_minutos;
+            document.getElementById('walk-distance').textContent = walk.distancia_km;
+            document.getElementById('walk-summary').textContent = walk.resumen_diario || 'N/A';
+            document.getElementById('walk-behavior').textContent = walk.comportamiento_problemas || 'N/A';
+            document.getElementById('walk-health').textContent = walk.incidentes_salud || 'N/A';
+
+            // Configurar botones de edición/eliminación
+            const isAdminOrOwner = currentUser.isAdmin || (currentUser.email === window.currentDog.dueno_email);
+            document.getElementById('edit-walk-btn').style.display = isAdminOrOwner ? 'block' : 'none';
+            document.getElementById('delete-walk-btn').style.display = isAdminOrOwner ? 'block' : 'none';
+            
+            document.getElementById('edit-walk-btn').onclick = () => window.showWalkForm(window.currentDog.id, walk);
+
+            // Inicializar Carrusel
+            window.initCarousel(walk);
+
+            window.showView('walk-detail-section');
+        };
+
+        window.showWalkForm = (dogId, walk = null) => {
+            document.getElementById('walk-form').reset();
+            document.getElementById('walk-photo-preview').innerHTML = '';
+            document.getElementById('walk-id').value = '';
+            
+            if (walk) {
+                document.getElementById('walk-form-title').textContent = 'Editar Paseo';
+                document.getElementById('walk-id').value = walk.id;
+                document.getElementById('walk-form-date').value = walk.fecha;
+                document.getElementById('walk-form-duration').value = walk.duracion_minutos;
+                document.getElementById('walk-form-distance').value = walk.distancia_km;
+                document.getElementById('walk-form-summary').value = walk.resumen_diario;
+                document.getElementById('walk-form-behavior').value = walk.comportamiento_problemas;
+                document.getElementById('walk-form-health').value = walk.incidentes_salud;
+                // Mostrar fotos existentes (si es edición)
+                if (walk.fotos_urls) {
+                    window.walkPhotosUrls = [...walk.fotos_urls];
+                    walk.fotos_urls.forEach(url => addPhotoPreview(url));
+                } else {
+                    window.walkPhotosUrls = [];
+                }
+            } else {
+                document.getElementById('walk-form-title').textContent = 'Registrar Nuevo Paseo';
+                window.walkPhotosUrls = [];
+                document.getElementById('walk-form-date').value = new Date().toISOString().substring(0, 10);
+            }
+            
+            window.showView('walk-form-section');
+        };
+
+        // === LÓGICA DE PASEOS (GUARDAR, ELIMINAR, FOTOS) ===
+
+        async function handleWalkSubmit(event) {
+            event.preventDefault();
+            const dogId = window.currentDog.id;
+            const isEdit = !!document.getElementById('walk-id').value;
+
+            showLoading(isEdit ? 'Guardando edición del paseo...' : 'Registrando paseo...');
+
+            const walkData = {
+                id: document.getElementById('walk-id').value,
+                fecha: document.getElementById('walk-form-date').value,
+                duracion_minutos: parseInt(document.getElementById('walk-form-duration').value),
+                distancia_km: parseFloat(document.getElementById('walk-form-distance').value),
+                resumen_diario: document.getElementById('walk-form-summary').value,
+                comportamiento_problemas: document.getElementById('walk-form-behavior').value,
+                incidentes_salud: document.getElementById('walk-form-health').value,
+                fotos_urls: window.walkPhotosUrls
+            };
+            
+            const photoFiles = Array.from(document.getElementById('walk-photo-input').files);
+            
+            try {
+                // 1. Subir fotos nuevas
+                const newPhotoUrls = [];
+                for (const file of photoFiles) {
+                    const url = await uploadWalkPhoto(file, dogId);
+                    newPhotoUrls.push(url);
+                }
+                
+                walkData.fotos_urls = [...window.walkPhotosUrls, ...newPhotoUrls];
+
+                // 2. Guardar/Actualizar el paseo en DB
+                let result;
+                if (isEdit) {
+                    await updateWalk(walkData);
+                    result = { id: walkData.id, ...walkData };
+                } else {
+                    result = await createWalk(walkData, dogId);
+                }
+
+                showSuccess(`Paseo ${isEdit ? 'actualizado' : 'registrado'} con éxito.`);
+                await window.showDogProfileView(window.currentDog);
+                
+            } catch (error) {
+                showError('Error al guardar el paseo: ' + error.message);
+                console.error(error);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function handleDeleteWalk() {
+            if (!confirm("¿Estás seguro de que quieres eliminar este paseo? Esta acción es irreversible.")) return;
+
+            showLoading('Eliminando paseo...');
+            try {
+                await deleteWalk(window.currentWalk.id);
+                showSuccess('Paseo eliminado con éxito.');
+                await window.showDogProfileView(window.currentDog);
+            } catch (error) {
+                showError('Error al eliminar paseo: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // === FOTOS Y PREVIEWS ===
+
+        function addPhotoPreview(url) {
+            const container = document.getElementById('walk-photo-preview');
+            const div = document.createElement('div');
+            div.className = 'photo-preview-item';
+            div.style.display = 'inline-block';
+            div.style.marginRight = '10px';
+            div.style.position = 'relative';
+            div.innerHTML = `
+                <img src="${url}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">
+                <button data-url="${url}" class="remove-photo-btn btn danger" style="position: absolute; top: -5px; right: -5px; padding: 3px 6px; line-height: 1;">&times;</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function handlePhotoPreviewChange(event) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+
+            for (const file of files) {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        // Temporalmente mostramos el blob/url local, el URL final se obtendrá en handleWalkSubmit
+                        addPhotoPreview(e.target.result); 
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        function handleRemovePhoto(event) {
+            const btn = event.target.closest('.remove-photo-btn');
+            if (!btn) return;
+            
+            const urlToRemove = btn.dataset.url;
+            
+            // Si la URL es una URL pública (ya guardada), la quitamos del array que se guardará
+            window.walkPhotosUrls = window.walkPhotosUrls.filter(url => url !== urlToRemove);
+            
+            // Quitar del DOM
+            btn.parentElement.remove();
+            
+            // Si era una foto nueva (URL de blob), no necesitamos hacer nada más que quitarla del DOM,
+            // ya que no está en el array window.walkPhotosUrls.
+            
+            // Nota: Para simplificar, asumimos que el usuario no está eliminando fotos nuevas cargadas
+            // que aún no tienen URL de Supabase. La lógica en handleWalkSubmit es la que se encarga de
+            // tomar las nuevas de input.files y las viejas de window.walkPhotosUrls.
+        }
+
+        // === EDICIÓN DE FOTO DE PERFIL ===
+
+        async function handleProfilePhotoChange() {
+            const input = document.getElementById('photo-upload-input');
+            input.click();
+
+            input.onchange = async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                showLoading('Subiendo foto de perfil...');
+                try {
+                    const dogId = window.currentDog.id;
+                    const publicUrl = await uploadProfilePhoto(dogId, file);
+                    await updateDogProfilePhoto(dogId, publicUrl);
+                    
+                    window.currentDog.foto_url = publicUrl;
+                    document.getElementById('profile-photo').src = publicUrl;
+                    
+                    showSuccess('Foto de perfil actualizada.');
+
+                } catch (error) {
+                    showError('Error al cambiar foto: ' + error.message);
+                } finally {
+                    hideLoading();
+                }
+            };
+        }
+
+        // === LÓGICA DE EDICIÓN DE PERFIL (MODAL) ===
+
+        window.openEditProfileModal = (dog) => {
+            if (!dog) {
+                showError('No hay perfil de perro cargado para editar.');
+                return;
+            }
+
+            // Cargar datos actuales del perro en el formulario del modal
+            document.getElementById('modal-dog-name').textContent = dog.nombre;
+            document.getElementById('edit-dog-id').value = dog.id;
+            document.getElementById('edit-nombre').value = dog.nombre;
+            document.getElementById('edit-raza').value = dog.raza || '';
+            document.getElementById('edit-sexo').value = dog.sexo || 'Macho';
+            document.getElementById('edit-dueno').value = dog.dueno || '';
+            document.getElementById('edit-telefono').value = dog.telefono || '';
+            
+            // Nuevos campos
+            document.getElementById('edit-edad').value = dog.edad || '';
+            document.getElementById('edit-peso').value = dog.peso || '';
+            document.getElementById('edit-alergias').value = dog.alergias || '';
+            document.getElementById('edit-energia').value = dog.energia || 'Bajo';
+            document.getElementById('edit-social').value = dog.social || 'Buena';
+
+            // Mostrar el modal
+            document.getElementById('edit-profile-modal').style.display = 'flex';
+        };
+
+        async function saveDogProfileChanges(event) {
+            event.preventDefault();
+            showLoading('Guardando cambios del perfil...');
+
+            const dogId = document.getElementById('edit-dog-id').value;
+            
+            const updatedDogData = {
+                id: dogId,
+                nombre: document.getElementById('edit-nombre').value,
+                raza: document.getElementById('edit-raza').value,
+                sexo: document.getElementById('edit-sexo').value,
+                dueno: document.getElementById('edit-dueno').value,
+                telefono: document.getElementById('edit-telefono').value,
+                
+                // Nuevos campos
+                edad: document.getElementById('edit-edad').value ? parseInt(document.getElementById('edit-edad').value) : null,
+                peso: document.getElementById('edit-peso').value ? parseFloat(document.getElementById('edit-peso').value) : null,
+                alergias: document.getElementById('edit-alergias').value,
+                energia: document.getElementById('edit-energia').value,
+                social: document.getElementById('edit-social').value,
+            };
+
+            try {
+                await updateDogProfile(updatedDogData); // Llama a la función de supabase.js
+
+                // 1. Actualizar el objeto global del perro
+                window.currentDog = { ...window.currentDog, ...updatedDogData };
+                
+                // 2. Cerrar modal
+                document.getElementById('edit-profile-modal').style.display = 'none';
+                
+                // 3. Recargar la vista del perfil para reflejar los cambios
+                await window.showDogProfileView(window.currentDog); 
+
+                showSuccess('Perfil de ' + updatedDogData.nombre + ' actualizado con éxito!');
+
+            } catch (error) {
+                showError('Error al guardar el perfil: ' + error.message);
+                console.error('Error al guardar perfil:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // === LÓGICA DEL CARRUSEL (COMPLETA Y CORREGIDA) ===
+
+        function showSlide(index) {
+            if (slides.length === 0) return;
+
+            // Ocultar todos
+            slides.forEach(slide => slide.style.display = 'none');
+
+            // Calcular el índice (loop infinito)
+            currentSlideIndex = (index + slides.length) % slides.length;
+
+            // Mostrar el actual
+            slides[currentSlideIndex].style.display = 'block';
+        }
+
+        function startCarousel() {
+            if (slides.length > 1 && !carouselIntervalId) {
+                console.log('⚙️ [CAROUSEL] Iniciando temporizador...');
+                carouselIntervalId = setInterval(window.nextSlide, 5000); // 5 segundos
+                document.getElementById('carousel-play-pause').textContent = '⏸';
+            }
+        }
+
+        function stopCarousel() {
+            if (carouselIntervalId) {
+                console.log('⚙️ [CAROUSEL] Deteniendo temporizador...');
+                clearInterval(carouselIntervalId);
+                carouselIntervalId = null;
+                document.getElementById('carousel-play-pause').textContent = '▶';
+            }
+        }
+
+        window.togglePlayPause = () => {
+            // Reiniciar el temporizador de ocultar al interactuar
+            resetControlsTimeout(); 
+            if (carouselIntervalId) {
+                stopCarousel();
+            } else {
+                startCarousel();
+            }
+        };
+
+        window.nextSlide = () => {
+            showSlide(currentSlideIndex + 1);
+        };
+
+        window.prevSlide = () => {
+            showSlide(currentSlideIndex - 1);
+            // Detener/Reiniciar el autoplay y reiniciar el temporizador de ocultar
+            stopCarousel(); 
+            startCarousel(); 
+            resetControlsTimeout();
+        };
+
+        // --- LÓGICA DE VISIBILIDAD DE CONTROLES ---
+
+        function showControls() {
+            document.getElementById('carousel-controls').style.opacity = '1';
+            document.getElementById('carousel-controls').style.pointerEvents = 'auto';
+        }
+
+        function hideControls() {
+            document.getElementById('carousel-controls').style.opacity = '0';
+            document.getElementById('carousel-controls').style.pointerEvents = 'none';
+        }
+
+        function resetControlsTimeout() {
+            // 1. Cancelar el temporizador de ocultar anterior
+            if (controlsTimeout) {
+                clearTimeout(controlsTimeout);
+            }
+            // 2. Mostrar controles inmediatamente
+            showControls(); 
+            
+            // 3. Establecer un nuevo temporizador para ocultar
+            controlsTimeout = setTimeout(hideControls, HIDE_CONTROLS_DELAY);
+        }
+
+        function setupCarouselControls(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            // Desvincular listeners viejos si existen
+            container.removeEventListener('mousemove', resetControlsTimeout);
+            container.removeEventListener('mouseleave', handleCarouselMouseLeave);
+
+            // 💡 ASIGNAR ESCUCHAS DE EVENTOS AL CONTENEDOR PRINCIPAL
+            container.addEventListener('mousemove', resetControlsTimeout);
+            container.addEventListener('mouseleave', handleCarouselMouseLeave);
+
+            // Iniciar con controles ocultos
+            hideControls(); 
+        }
+        
+        function handleCarouselMouseLeave() {
+            // Ocultar inmediatamente si está pausado, o iniciar el timeout si está reproduciéndose
+            if (carouselIntervalId) {
+                 resetControlsTimeout();
+            } else {
+                 hideControls();
+            }
+        }
+
+        // === INICIALIZACIÓN PRINCIPAL DEL CARRUSEL (INTEGRADA) ===
+
+        window.initCarousel = (walk) => {
+            console.log('🖼️ [CAROUSEL] Inicializando carrusel...');
+            const carouselContainer = document.getElementById('carousel-container');
+            const walkCarouselSection = document.getElementById('walk-carousel-section'); 
+            
+            // Limpiar el carrusel y detener cualquier intervalo anterior
+            carouselContainer.innerHTML = '';
+            stopCarousel(); 
+            hideControls(); // Asegurarse que se ocultan si no hay fotos
+
+            if (walk && walk.fotos && walk.fotos.length > 0) {
+                walk.fotos.forEach((foto, index) => {
+                    const img = document.createElement('img');
+                    img.className = 'carousel-slide';
+                    img.src = foto.id;
+                    img.alt = `Foto del paseo ${index + 1}`;
+                    img.style.display = 'none';
+                    img.onclick = () => window.openLightbox(foto.id);
+                    carouselContainer.appendChild(img);
+                });
+
+                // 💡 RECARGAR VARIABLE GLOBAL 'slides'
+                slides = document.querySelectorAll('#carousel-container .carousel-slide');
+                currentSlideIndex = 0;
+
+                if (slides.length > 0) {
+                    showSlide(currentSlideIndex);
+
+                    if (slides.length > 1) {
+                        // Iniciar la reproducción automática
+                        startCarousel(); 
+                        // Configurar los listeners para ocultar/mostrar controles
+                        setupCarouselControls('walk-carousel-section'); 
+                    } else {
+                        hideControls(); // Ocultar si solo hay 1 foto
+                    }
+                }
+            } else {
+                console.log('ℹ️ [CAROUSEL] No hay fotos para este paseo.');
+                slides = [];
+            }
+        };
+        
+        // === LIGHTBOX ===
+        window.openLightbox = function(url) {
+            document.getElementById('lightbox-img').src = url;
+            document.getElementById('lightbox').style.display = 'flex';
+        }
+
+        // === WHATSAPP ===
+        function updateWhatsApp() {
+            const btn = document.getElementById('whatsapp-btn');
+            if (currentView.includes('login') || currentView.includes('admin-dashboard')) {
+                btn.style.display = 'none';
+                return;
+            }
+            btn.style.display = 'flex';
+            // Número predeterminado (ejemplo)
+            let num = "5491100000000"; 
+            if (currentUser?.isAdmin && window.currentDog?.telefono) {
+                num = window.currentDog.telefono.replace(/[^0-9]/g, '');
+            } else if (!currentUser?.isAdmin && currentUser?.email === window.currentDog?.dueno_email && window.currentDog?.telefono) {
+                // Si es el dueño, podría apuntar al número del admin/paseador (aquí se requeriría ese número)
+                // Por defecto, apuntamos al dueño si es admin, o al número ejemplo si no lo es.
+                // Para este ejemplo, si es dueño, el botón sigue siendo para el paseador (ejemplo)
+            }
+            btn.href = `https://wa.me/${num}`;
+        }
+
+        // === AUDIO ===
+        const audioToggle = document.getElementById('audio-toggle');
+        audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
+        audioToggle.onclick = (e) => {
+            e.stopPropagation();
+            isAudioEnabled = !isAudioEnabled;
+            audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
+            localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
+        };
+
+        // === INIT & EVENT LISTENERS ===
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Asignar listeners de formularios y botones
+            document.getElementById('walk-form').addEventListener('submit', handleWalkSubmit);
+            document.getElementById('delete-walk-btn').addEventListener('click', handleDeleteWalk);
+            document.getElementById('new-dog-form').addEventListener('submit', handleNewDogSubmit);
+            document.getElementById('edit-dog-form').addEventListener('submit', saveDogProfileChanges); // Listener para el modal de edición
+            
+            document.getElementById('walk-photo-input').addEventListener('change', handlePhotoPreviewChange);
+            document.getElementById('walk-photo-preview').addEventListener('click', handleRemovePhoto);
+            
+            document.getElementById('change-photo-btn').addEventListener('click', handleProfilePhotoChange);
+
+            document.getElementById('logout-btn').onclick = async () => {
+                showLoading('Cerrando sesión...');
+                const { error } = await supabase.auth.signOut();
+                currentUser = null;
+                window.currentDog = null;
+                dogs = [];
+                if (error) {
+                    showError('Error al cerrar sesión: ' + error.message);
+                }
+                window.showView('login-section');
+                hideLoading();
+            };
+            
+            document.getElementById('back-to-profile-btn').onclick = () => window.showDogProfileView(window.currentDog);
+            
+            document.getElementById('back-to-dashboard-btn').onclick = () => window.showView('admin-dashboard-section');
+
+            // Iniciar sesión persistente
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                checkUserSession(session);
+            });
+            
+            document.getElementById('theme-toggle').onclick = toggleTheme;
+            document.getElementById('close-lightbox').onclick = () =>
+            document.getElementById('lightbox').style.display = 'none';
+        });
+        
+        async function handleNewDogSubmit(event) {
+            event.preventDefault();
+            showLoading('Registrando nuevo perro...');
+
+            const dogData = {
+                nombre: document.getElementById('new-dog-name').value,
+                dueno_email: document.getElementById('new-dog-email').value,
+                perfil: {
+                    raza: document.getElementById('new-dog-raza').value,
+                    sexo: document.getElementById('new-dog-sexo').value,
+                    dueno: document.getElementById('new-dog-owner').value,
+                    telefono: document.getElementById('new-dog-phone').value,
+                    // Nuevos campos
+                    edad: document.getElementById('new-dog-edad').value,
+                    peso: document.getElementById('new-dog-peso').value,
+                    alergias: document.getElementById('new-dog-alergias').value,
+                    energia: document.getElementById('new-dog-energia').value,
+                    social: document.getElementById('new-dog-social').value,
+                }
+            };
+            
+            // Crear usuario para el nuevo dueño (usando un password temporal)
+            const tempPassword = dogData.dueno_email.split('@')[0] + '123'; // Password temporal simple
+            try {
+                const { data: userData, error: userError } = await supabase.auth.signUp({ 
+                    email: dogData.dueno_email, 
+                    password: tempPassword 
+                });
+                
+                if (userError && userError.message !== 'User already registered') {
+                    // Ignoramos el error si el usuario ya existe, continuamos con el upsert del perro
+                    throw userError;
+                }
+                
+                await createDog(dogData);
+                
+                showSuccess(`Perro ${dogData.nombre} registrado. Dueño: ${dogData.dueno_email}. Contraseña temporal: ${tempPassword}`);
+                document.getElementById('new-dog-form').reset();
+                await loadDogData(true, currentUser.email);
+                setupAdminDashboard();
+                
+            } catch (error) {
+                showError('Error al registrar: ' + error.message);
+                console.error(error);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            document.getElementById('theme-toggle').textContent = newTheme === 'dark' ? '🌞' : '🌙';
+        }
+
+        function updateThemeIcon() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            document.getElementById('theme-toggle').textContent = currentTheme === 'dark' ? '🌞' : '🌙';
+        }
+        
+        // === INIT FINAL ===
+        window.onload = () => {
+            // El resto de la inicialización se hace en DOMContentLoaded y checkUserSession
+            updateThemeIcon(); 
+        };
+    </script>
+</body>
+</html>

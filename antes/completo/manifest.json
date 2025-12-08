@@ -1,0 +1,19 @@
+{
+  "name": "PaseoDog",
+  "short_name": "PaseoDog",
+  "description": "Gestión profesional de paseos para perros",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0F0F1B",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "paseodog-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "orientation": "any",
+  "lang": "es"
+}
