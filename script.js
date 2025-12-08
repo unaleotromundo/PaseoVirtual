@@ -224,33 +224,22 @@ function updatePlayBtnState() {
     if(largeBtn) largeBtn.textContent = isPlaying ? '⏸' : '▶';
 }
 
-// === CAROUSEL (LÓGICA CORREGIDA) ===
+// === CAROUSEL ===
 function initCarousel() {
     const wrapper = document.getElementById('carousel-wrapper');
     const slides = [];
-    
-    // Recopilar todas las fotos
     if (currentDog && currentDog.walks) {
         currentDog.walks.forEach(wa => {
             if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
         });
     }
-
-    // Si no hay fotos, ocultar carrusel
     if (!slides.length) {
         wrapper.style.display = 'none';
         return;
     }
-    
     wrapper.style.display = 'flex';
-    
-    // CAMBIO 1: Empezar en la última foto (slides.length - 1)
-    let idx = slides.length - 1; 
-    
-    // Aseguramos que empiece pausado
+    let idx = 0;
     isPlaying = false;
-    if (slideInterval) clearInterval(slideInterval);
-
     const img = document.getElementById('carousel-img');
     const counter = document.getElementById('carousel-counter');
     
@@ -267,45 +256,29 @@ function initCarousel() {
         idx = (idx + 1) % slides.length;
         showSlide();
     };
-
     window.prevSlide = () => {
         idx = (idx - 1 + slides.length) % slides.length;
         showSlide();
     };
-
-    // CAMBIO 2: Lógica del botón Play sincronizada
     window.togglePlay = () => {
         isPlaying = !isPlaying;
         updatePlayBtnState();
-
-        if(isPlaying) {
-            // 1. Arrancar Música
-            playRandomCarouselTrack(); 
-            
-            // 2. Arrancar el pase de fotos (5 segundos)
-            // Avanzamos inmediatamente a la siguiente foto o esperamos? 
-            // Lo normal es esperar el intervalo primero.
-            if (slideInterval) clearInterval(slideInterval);
-            slideInterval = setInterval(() => {
-                window.nextSlide();
-            }, 5000); // CAMBIO 3: 5000ms (5 segundos)
-            
-        } else {
-            // Pausa: Parar música y parar intervalo
-            if(carouselAudio) carouselAudio.pause();
-            if(slideInterval) clearInterval(slideInterval);
-        }
+        if(isPlaying) playRandomCarouselTrack();
+        else if(carouselAudio) carouselAudio.pause();
     };
-
     window.toggleFullscreen = () => {
         const elem = document.getElementById('carousel-container');
         if (!document.fullscreenElement) elem.requestFullscreen().catch(err => {});
         else document.exitFullscreen();
     };
 
-    // Mostrar la foto inicial (la última) estática
     showSlide();
     updatePlayBtnState();
+
+    if (slideInterval) clearInterval(slideInterval);
+    slideInterval = setInterval(() => {
+        if (isPlaying) window.nextSlide();
+    }, 3000);
 }
 
 // === TEMA Y UI ===
