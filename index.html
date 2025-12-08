@@ -6,6 +6,7 @@
     <title>PaseoDog - Sistema Mejorado</title>
     <!-- FAVICON -->
     <link rel="icon" type="image/svg+xml" href="paseodog-logo.svg">
+    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,6 +26,7 @@
         <div class="spinner"></div>
         <p>Cargando base de datos...</p>
     </div>
+    
     <!-- BOTONES FLOTANTES -->
     <a href="#" id="whatsapp-btn" class="whatsapp-float" target="_blank" style="display:none;">
         <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24" fill="currentColor">
@@ -32,11 +34,13 @@
         </svg>
     </a>
     <button id="audio-toggle" class="audio-float" title="Silenciar sonido">🔊</button>
+
     <header>
         <button id="theme-toggle" title="Cambiar Tema">🐩</button>
         <h1>🐾 PaseoDog</h1>
         <p id="saludo-usuario">Gestión Profesional de Paseos</p>
     </header>
+
     <main id="app-container">
         <!-- LOGIN -->
         <section id="login-section">
@@ -56,17 +60,14 @@
                     👨‍💼 <strong>Admin:</strong> <code>admin@paseos.com</code> / <code>admin123</code><br><br>
                     👤 <strong>Clientes (pass: 123456):</strong><br>
                     • <code>cliente@paseos.com</code> (Fido)<br>
-                    • <code>luna@paseos.com</code> (Luna)<br>
-                    • <code>max@paseos.com</code> (Max)
+                    • <code>luna@paseos.com</code> (Luna)
                 </div>
-                <button type="button" id="toggle-demo-btn" style="background: var(--warning); margin-top: 16px;">
-                    📥 Cargar Datos de Ejemplo
-                </button>
                 <p id="demo-status" style="text-align: center; margin-top: 12px; color: var(--text-secondary); font-size: 0.9rem;">
-                    Estado: <strong id="demo-status-text">Base de datos cargada</strong>
+                    Estado: <strong id="demo-status-text">Cargando...</strong>
                 </p>
             </form>
         </section>
+
         <!-- ADMIN DASHBOARD -->
         <section id="admin-dashboard-section" style="display:none;">
             <h2>👨‍💼 Panel de Administrador</h2>
@@ -74,6 +75,7 @@
             <p style="color: var(--text-secondary); margin-bottom: 24px;">Lista de perros registrados:</p>
             <div id="dog-list-container"></div>
         </section>
+
         <!-- CREATE DOG -->
         <section id="create-dog-section" style="display:none;">
             <h2>🐶 Registrar Nuevo Mimoso</h2>
@@ -90,6 +92,7 @@
             </form>
             <button class="nav-button ripple" onclick="goBack()" style="background:var(--text-secondary);">Cancelar</button>
         </section>
+
         <!-- DOG DASHBOARD -->
         <section id="dog-selection-dashboard" style="display:none;">
             <h2>🐕 Dashboard de <span class="dog-name-placeholder"></span></h2>
@@ -125,7 +128,8 @@
                 ⬅️ Volver
             </button>
         </section>
-        <!-- CREATE WALK -->
+
+        <!-- CREATE WALK (ACTUALIZADO CON INPUT DE FOTOS REALES) -->
         <section id="create-walk-section" style="display:none;">
             <h2>➕ Crear Nuevo Paseo</h2>
             <form id="walk-form">
@@ -133,27 +137,33 @@
                     <label style="color: var(--secondary);">🐶 ¿Quién más vino al paseo?</label>
                     <div id="multi-dog-container"></div>
                 </div>
+                
                 <label>📅 Fecha</label><input type="date" id="walk-date" required>
                 <label>⏱️ Duración (min)</label><input type="number" id="walk-duration" value="60" required>
                 <label>📏 Distancia (km)</label><input type="number" id="walk-distance" step="0.1" value="3.5">
                 <label>📝 Resumen</label><textarea id="walk-summary" required></textarea>
+                
                 <div class="checkbox-group">
                     <input type="checkbox" id="comportamiento-problemas">
                     <label>⚠️ Problemas de comportamiento</label>
                 </div>
+                
                 <label>🩺 Notas de Salud</label><textarea id="incidentes-salud"></textarea>
+                
+                <!-- SECCIÓN DE FOTOS ACTUALIZADA -->
                 <h3>📸 Fotos del Paseo</h3>
-            <div id="photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
-            
-            <!-- INPUT OCULTO Y BOTÓN NUEVO -->
-            <input type="file" id="walk-photo-input" accept="image/*" multiple style="display:none;">
-            <button type="button" id="add-walk-photo-btn" class="nav-button ripple" style="background: var(--secondary); display: flex; align-items: center; justify-content: center; gap: 8px;">
-                ➕ Subir Fotos Reales
-            </button>
+                <div id="photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
+                
+                <input type="file" id="walk-photo-input" accept="image/*" multiple style="display:none;">
+                <button type="button" id="add-walk-photo-btn" class="nav-button ripple" style="background: var(--secondary); display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px;">
+                    ➕ Subir Fotos Reales
+                </button>
+                
                 <button type="submit" class="save-btn ripple">💾 Guardar Paseo</button>
             </form>
             <button class="nav-button ripple" onclick="goBack()" style="background: var(--text-secondary);">Cancelar</button>
         </section>
+
         <!-- PROFILE -->
         <section id="profile-section" style="display:none;">
             <h2>📋 Perfil Completo</h2>
@@ -168,6 +178,7 @@
             </div>
             <button class="nav-button ripple" onclick="goBack()" style="background: var(--text-secondary); margin-top: 24px;">⬅️ Volver</button>
         </section>
+
         <!-- HISTORY -->
         <section id="walks-history-section" style="display:none;">
             <h2>📜 Historial de Paseos</h2>
@@ -175,11 +186,13 @@
             <button class="nav-button ripple" onclick="goBack()" style="background: var(--text-secondary); margin-top: 16px;">⬅️ Volver</button>
         </section>
     </main>
+
     <!-- LIGHTBOX -->
     <div id="lightbox">
         <span class="lightbox-close" id="close-lightbox">&times;</span>
         <img id="lightbox-img" src="">
     </div>
+
     <!-- MODAL EDIT WALK -->
     <div id="edit-walk-modal" style="display:none;">
         <div class="modal-content">
@@ -196,7 +209,7 @@
                 <label>Notas de Salud</label><textarea id="edit-walk-health"></textarea>
                 <h3>Gestionar Fotos</h3>
                 <div id="edit-photo-preview" style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;"></div>
-                <button type="button" onclick="addPhotoEdit()" class="edit-btn ripple" style="background:var(--secondary); width:100%; margin-bottom:15px;">➕ Agregar Foto</button>
+                <button type="button" onclick="addPhotoEdit()" class="edit-btn ripple" style="background:var(--secondary); width:100%; margin-bottom:15px;">➕ Agregar Foto (Simulada)</button>
                 <div style="display:flex; gap:10px;">
                     <button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>
                     <button type="button" class="nav-button ripple" onclick="document.getElementById('edit-walk-modal').style.display='none'" style="background:var(--text-secondary);">Cancelar</button>
@@ -204,11 +217,13 @@
             </form>
         </div>
     </div>
-    <!-- INPUT OCULTO PARA SUBIR FOTOS -->
+
+    <!-- INPUT OCULTO PARA SUBIR FOTO DE PERFIL -->
     <input type="file" id="photo-upload-input" accept="image/*" style="display:none;">
-    <!-- SUPABASE SDK (CORREGIDO: sin espacios al final) -->
+
+    <!-- SUPABASE SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- SCRIPT -->
+    <!-- SCRIPT PRINCIPAL -->
     <script src="script.js"></script>
 </body>
 </html>
