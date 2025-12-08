@@ -143,8 +143,13 @@
                 </div>
                 <label>🩺 Notas de Salud</label><textarea id="incidentes-salud"></textarea>
                 <h3>📸 Fotos del Paseo</h3>
-                <div id="photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
-                <button type="button" id="simulate-photos-btn" class="nav-button ripple" style="background: var(--secondary);">📷 Simular Fotos</button>
+            <div id="photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
+            
+            <!-- INPUT OCULTO Y BOTÓN NUEVO -->
+            <input type="file" id="walk-photo-input" accept="image/*" multiple style="display:none;">
+            <button type="button" id="add-walk-photo-btn" class="nav-button ripple" style="background: var(--secondary); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                ➕ Subir Fotos Reales
+            </button>
                 <button type="submit" class="save-btn ripple">💾 Guardar Paseo</button>
             </form>
             <button class="nav-button ripple" onclick="goBack()" style="background: var(--text-secondary);">Cancelar</button>
