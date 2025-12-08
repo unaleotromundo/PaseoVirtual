@@ -150,6 +150,7 @@ async function updateRealDogProfile(dogId, newPerfil) {
 
 // === SUBIR FOTO DE PERFIL A SUPABASE ===
 async function uploadProfilePhoto(file) {
+  async function uploadProfilePhoto(file) {
     if (!currentDog || currentDog.isExample) {
         showToast('ℹ️ Solo se pueden subir fotos de perros reales', 'info');
         return;
@@ -162,13 +163,16 @@ async function uploadProfilePhoto(file) {
         return;
     }
 
+    // Nombre único
     const fileName = `perfil_${currentDog.id}_${Date.now()}.${extension}`;
-    const filePath = fileName; // Subir directamente a la raíz o carpeta según config del bucket
+    
+    // CORRECCIÓN AQUÍ: filePath es solo el nombre, sin la carpeta del bucket
+    const filePath = fileName; 
 
     try {
         const { error: uploadError } = await supabaseClient
             .storage
-            .from('paseodog-photos')
+            .from('paseodog-photos') // Aquí ya especificas el bucket
             .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
         if (uploadError) throw uploadError;
