@@ -57,7 +57,18 @@ async function loadExampleDogs() {
     try {
         const res = await fetch(DB_URL);
         const data = await res.json();
-        EXAMPLE_DOGS = data.dogs.map(d => ({ ...d, isExample: true }));
+        
+        // ✅ Asignar nuevos IDs a los ejemplos: 995, 996, 997, 998, 999
+        const exampleIds = [995, 996, 997, 998, 999];
+        EXAMPLE_DOGS = data.dogs.map((d, index) => {
+            const newId = exampleIds[index] || (995 + index); // fallback seguro
+            return {
+                ...d,
+                id: newId,        // ✅ Sobrescribe el id original
+                isExample: true   // marca como ejemplo
+            };
+        });
+
         TRAINER_PHONE = data.trainer_phone || "5491100000000";
         ADMIN_USER = data.admin || { email: 'admin@paseos.com', password: 'admin123' };
         DATABASE = data;
