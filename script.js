@@ -1,3 +1,8 @@
+// === SUPABASE CONFIG ===
+const SUPABASE_URL = 'https://asejbhohkbcoixiwdhcq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZWpiaG9oa2Jjb2l4aXdkaGNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjk0NzMsImV4cCI6MjA4MDYwNTQ3M30.kbRKO5PEljZ29_kn6GYKoyGfB_t8xalxtMiq1ovPo4w';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // === UTILIDADES ===
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
@@ -22,8 +27,12 @@ function createRipple(event, element) {
 }
 
 // === CONFIGURACIÓN ===
-const DB_KEY = 'paseoDogDB_EXTERNAL';
 const DB_URL = 'paseoDogDB.json';
+let TRAINER_PHONE = "5491100000000";
+let ADMIN_USER = { email: 'admin@paseos.com', password: 'admin123' };
+let EXAMPLE_DOGS = [];
+let REAL_DOGS = [];
+let DATABASE = null;
 
 // === ESTADO GLOBAL ===
 let currentUser = null, currentDog = null, currentView = 'login-section';
@@ -37,23 +46,64 @@ let userHasInteracted = false;
 let lastPlayedTrack = null;
 let carouselAudio = null;
 
-// Variables globales que se inicializarán desde el JSON
-let TRAINER_PHONE = "5491100000000";
-let ADMIN_USER = { email: 'admin@paseos.com', password: 'admin123' };
-let MOCK_DOGS = [];
-
-// === FUNCIONES DE BASE DE DATOS ===
+// === FUNCIONES DE IMÁGENES ===
 function getPhotoUrl(id, w = 400, h = 400) {
-    // Corregido: elimina el espacio extra en la URL
     return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
 }
-function loadDB() {
-    const data = localStorage.getItem(DB_KEY);
-    return data ? JSON.parse(data) : [...MOCK_DOGS];
+
+// === CARGAR EJEMPLOS DESDE JSON ===
+async function loadExampleDogs() {
+    try {
+        const res = await fetch(DB_URL);
+        const data = await res.json();
+        EXAMPLE_DOGS = data.dogs.map(d => ({ ...d, isExample: true }));
+        TRAINER_PHONE = data.trainer_phone || "5491100000000";
+        ADMIN_USER = data.admin || { email: 'admin@paseos.com', password: 'admin123' };
+        DATABASE = data;
+    } catch (err) {
+        console.warn("No se pudo cargar paseoDogDB.json", err);
+    }
 }
-function saveDB(data) {
-    localStorage.setItem(DB_KEY, JSON.stringify(data));
-    MOCK_DOGS = data;
+
+// === CARGAR PERROS REALES DESDE SUPABASE ===
+async function loadRealDogs() {
+    const { data, error } = await supabase
+        .from('dogs_real')
+        .select('*')
+        .order('nombre', { ascending: true });
+    if (error) {
+        console.error('Error Supabase:', error);
+        return [];
+    }
+    return data.map(d => ({ ...d, isReal: true }));
+}
+
+// === COMBINAR AMBOS ===
+async function loadAllDogs() {
+    REAL_DOGS = await loadRealDogs();
+    return [...EXAMPLE_DOGS, ...REAL_DOGS];
+}
+
+// === GUARDAR PERRO REAL EN SUPABASE ===
+async function saveRealDog(dogData) {
+    const { error } = await supabase
+        .from('dogs_real')
+        .insert([{
+            nombre: dogData.nombre,
+            dueno_email: dogData.dueno_email,
+            perfil: dogData.perfil,
+            walks: dogData.walks || []
+        }]);
+    if (error) throw error;
+}
+
+// === ACTUALIZAR PASEOS EN SUPABASE ===
+async function updateRealDogWalks(dogId, walks) {
+    const { error } = await supabase
+        .from('dogs_real')
+        .update({ walks })
+        .eq('id', dogId);
+    if (error) throw error;
 }
 
 // === AUDIO DEL CARRUSEL ===
@@ -77,8 +127,10 @@ function playRandomCarouselTrack() {
     carouselAudio.onended = () => {
         carouselAudio = null;
         isPlaying = false;
-        updatePlayButton();
-        hideControls();
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const playLargeBtn = document.getElementById('carousel-play-large');
+        if (playPauseBtn) playPauseBtn.textContent = '▶';
+        if (playLargeBtn) playLargeBtn.textContent = '▶';
     };
     carouselAudio.onerror = () => {
         console.warn('No se pudo cargar el audio:', randomTrack);
@@ -91,11 +143,8 @@ function playRandomCarouselTrack() {
 }
 
 // === CAROUSEL MODERNO CON AUDIO ===
-let timeoutId = null;
 function initCarousel() {
     const wrapper = document.getElementById('carousel-wrapper');
-    const container = document.getElementById('carousel-container');
-    const playLargeBtn = document.getElementById('carousel-play-large');
     const slides = [];
     if (currentDog && currentDog.walks) {
         currentDog.walks.forEach(wa => {
@@ -125,6 +174,7 @@ function initCarousel() {
     const updatePlayState = () => {
         const playPauseBtn = document.getElementById('play-pause-btn');
         playPauseBtn.textContent = isPlaying ? '⏸' : '▶';
+        const playLargeBtn = document.getElementById('carousel-play-large');
         playLargeBtn.textContent = isPlaying ? '⏸' : '▶';
         if (isPlaying) {
             playLargeBtn.classList.add('playing');
@@ -206,7 +256,7 @@ function initCarousel() {
     }, 3000);
 }
 
-// === TEMA ===
+// === TEMA Y WHATSAPP ===
 const themeToggle = document.getElementById('theme-toggle');
 function updateThemeIcon() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -227,15 +277,15 @@ function updateWhatsApp() {
     }
     btn.style.display='flex';
     let num = TRAINER_PHONE;
-    if(currentUser && currentUser.isAdmin && currentDog) {
+    if(currentUser && currentUser.isAdmin && currentDog && !currentDog.isExample) {
         num = currentDog.perfil.telefono.replace(/[^0-9]/g, '');
     }
-    // Corregido: elimina el espacio extra en la URL
     btn.href = `https://wa.me/${num}`;
 }
 
-function showView(id, dogId = null) {
-    MOCK_DOGS = loadDB();
+// === NAVEGACIÓN ===
+async function showView(id, dogId = null) {
+    const allDogs = await loadAllDogs();
     if(id !== currentView) backStack.push(currentView);
     currentView = id;
     if (currentView !== 'dog-selection-dashboard' && slideInterval) {
@@ -249,12 +299,11 @@ function showView(id, dogId = null) {
     }
     document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
     document.getElementById(id).style.display = 'block';
-    if(dogId) currentDog = MOCK_DOGS.find(d => d.id === dogId);
+    if(dogId) currentDog = allDogs.find(d => d.id === dogId);
     if(currentDog) {
-        currentDog = MOCK_DOGS.find(d => d.id === currentDog.id);
         document.querySelectorAll('.dog-name-placeholder').forEach(e => e.textContent = currentDog.nombre);
         if(id === 'dog-selection-dashboard') {
-            document.getElementById('admin-create-walk-btn').style.display = currentUser.isAdmin ? 'block' : 'none';
+            document.getElementById('admin-create-walk-btn').style.display = currentUser?.isAdmin ? 'block' : 'none';
             initCarousel();
         }
         if(id === 'profile-section') { isEditing = false; loadProfile(currentDog); }
@@ -300,16 +349,16 @@ document.getElementById('toggle-password').onclick = () => {
     const p = document.getElementById('password');
     p.type = p.type === 'password' ? 'text' : 'password';
 };
-document.getElementById('login-form').onsubmit = (e) => {
+document.getElementById('login-form').onsubmit = async (e) => {
     e.preventDefault();
     const em = document.getElementById('email').value.toLowerCase();
     const pw = document.getElementById('password').value;
-    MOCK_DOGS = loadDB();
+    const allDogs = await loadAllDogs();
     if(em === ADMIN_USER.email && pw === ADMIN_USER.password){
         currentUser = { email: em, isAdmin: true };
         showView('admin-dashboard-section');
     } else {
-        const d = MOCK_DOGS.find(x => x.dueno_email === em);
+        const d = allDogs.find(x => x.dueno_email === em);
         if(d && pw === '123456'){
             currentUser = { email: em, isAdmin: false };
             currentDog = d;
@@ -320,18 +369,20 @@ document.getElementById('login-form').onsubmit = (e) => {
     }
 };
 
-// === ADMIN ===
-function loadAdminDashboard() {
+// === ADMIN DASHBOARD ===
+async function loadAdminDashboard() {
+    const allDogs = await loadAllDogs();
     const c = document.getElementById('dog-list-container');
     c.innerHTML = '';
-    document.getElementById('demo-status-text').textContent = `${MOCK_DOGS.length} perros en BD`;
-    if(!MOCK_DOGS.length) return c.innerHTML = '<p class="info-text">Sin perros.</p>';
-    MOCK_DOGS.forEach((d, i) => {
+    document.getElementById('demo-status-text').textContent = `${allDogs.length} perros (ejemplos + reales)`;
+    if(!allDogs.length) return c.innerHTML = '<p class="info-text">Sin perros.</p>';
+    allDogs.forEach((d, i) => {
+        const suffix = d.isExample ? ' (ejemplo)' : '';
         const card = document.createElement('div');
         card.className = 'dog-card';
         card.style.setProperty('--i', i);
         card.innerHTML = `
-            <span>🐶 <strong>${d.nombre}</strong> <small style="color:var(--text-secondary)">(${d.perfil.raza})</small></span>
+            <span>🐶 <strong>${d.nombre}</strong> <small style="color:var(--text-secondary)">(${d.perfil.raza})${suffix}</small></span>
             <button class="ripple" onclick="showView('dog-selection-dashboard',${d.id})">Gestionar</button>
         `;
         c.appendChild(card);
@@ -339,21 +390,17 @@ function loadAdminDashboard() {
     });
 }
 
-// === CREATE DOG ===
-document.getElementById('create-dog-form').onsubmit = (e) => {
+// === CREAR PERRO (solo reales van a Supabase) ===
+document.getElementById('create-dog-form').onsubmit = async (e) => {
     e.preventDefault();
     const submitBtn = e.submitter;
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '🔄 Guardando...';
     submitBtn.disabled = true;
-    setTimeout(() => {
-        const newId = MOCK_DOGS.length ? Math.max(...MOCK_DOGS.map(d => d.id)) + 1 : 1;
-        // Usar photo_references desde DATABASE si está disponible, o un valor por defecto
-        const photoId = (typeof DATABASE !== 'undefined' && DATABASE.photo_references?.random?.[0]) 
-            ? DATABASE.photo_references.random[0] 
-            : '1581268694';
+    
+    try {
+        const photoId = DATABASE?.photo_references?.random?.[0] || '1581268694';
         const nd = {
-            id: newId,
             nombre: document.getElementById('new-dog-name').value,
             dueno_email: document.getElementById('new-dog-email').value,
             perfil: {
@@ -362,31 +409,29 @@ document.getElementById('create-dog-form').onsubmit = (e) => {
                 dueno: document.getElementById('new-dog-owner').value,
                 telefono: document.getElementById('new-dog-phone').value,
                 foto_id: photoId,
-                edad: '?',
-                peso: '?',
-                alergias: 'Ninguna',
-                energia: 'Media',
-                social: '?'
+                edad: '?', peso: '?', alergias: 'Ninguna',
+                energia: 'Media', social: '?'
             },
             walks: []
         };
-        MOCK_DOGS.push(nd);
-        saveDB(MOCK_DOGS);
-        showToast('✅ Perro registrado con éxito', 'success');
+        await saveRealDog(nd);
+        showToast('✅ Perro real registrado en la nube', 'success');
         showView('admin-dashboard-section');
+    } catch (err) {
+        showToast('❌ Error: ' + (err.message || 'No se pudo guardar'), 'error');
+    } finally {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
-    }, 600);
+    }
 };
 
 // === PROFILE ===
 function loadProfile(d) {
     const p = d.perfil;
-    // Determinar foto_id con fallback
-    const photoId = tempPhotoId || p.foto_id || (typeof DATABASE !== 'undefined' ? DATABASE.photo_references?.random?.[0] : '1581268694');
+    const photoId = tempPhotoId || p.foto_id || (DATABASE?.photo_references?.random?.[0] || '1581268694');
     document.getElementById('profile-photo').src = getPhotoUrl(photoId, 300, 300);
     document.getElementById('profile-dog-name-display').textContent = d.nombre;
-    document.getElementById('edit-photo-btn').style.display = isEditing ? 'block' : 'none';
+    document.getElementById('edit-photo-btn').style.display = isEditing && !d.isExample ? 'block' : 'none';
     document.getElementById('toggle-edit-btn').textContent = isEditing ? '❌ Cancelar' : '✏️ Editar Perfil';
     const v = document.getElementById('profile-details-view');
     const e = document.getElementById('profile-details-edit');
@@ -426,43 +471,57 @@ function loadProfile(d) {
         });
     }
 }
-function toggleEditMode(){ isEditing = !isEditing; tempPhotoId = null; loadProfile(currentDog); }
+function toggleEditMode(){ 
+    if (currentDog?.isExample) {
+        showToast('ℹ️ Los ejemplos no se pueden editar', 'info');
+        return;
+    }
+    isEditing = !isEditing; 
+    tempPhotoId = null; 
+    loadProfile(currentDog); 
+}
 function randomizeProfilePhoto(){
-    const randomId = (typeof DATABASE !== 'undefined' && DATABASE.photo_references?.random)
-        ? DATABASE.photo_references.random[Math.floor(Math.random() * DATABASE.photo_references.random.length)]
-        : '1581268694';
+    if (currentDog?.isExample) return;
+    const randomId = DATABASE?.photo_references?.random ?
+        DATABASE.photo_references.random[Math.floor(Math.random() * DATABASE.photo_references.random.length)] :
+        '1581268694';
     tempPhotoId = randomId;
     document.getElementById('profile-photo').src = getPhotoUrl(tempPhotoId,300,300);
 }
 
 // === CREATE WALK ===
-function loadMultiDog(){
+async function loadMultiDog(){
     const c = document.getElementById('multi-dog-container');
     c.innerHTML = '';
-    MOCK_DOGS.filter(d => d.id !== currentDog.id).forEach(d => {
+    const allDogs = await loadAllDogs();
+    allDogs.filter(d => d.id !== currentDog.id).forEach(d => {
         c.innerHTML += `<div class="dog-select-item"><input type="checkbox" value="${d.id}" id="md${d.id}"><label for="md${d.id}" style="margin:0">${d.nombre}</label></div>`;
     });
 }
+
 document.getElementById('simulate-photos-btn').onclick = () => {
     simulatedPhotos = [];
     const c = document.getElementById('photo-preview');
     c.innerHTML = '';
-    const refs = (typeof DATABASE !== 'undefined' && DATABASE.photo_references?.random) 
-        ? DATABASE.photo_references.random 
-        : ['1581268694', '1581268695', '1581268696'];
+    const refs = DATABASE?.photo_references?.random || ['1581268694', '1581268695', '1581268696'];
     for(let i = 0; i < Math.min(3, refs.length); i++){
         const id = refs[i];
         simulatedPhotos.push({id, comentario: `Foto ${i+1} del paseo`});
         c.innerHTML += `<img src="${getPhotoUrl(id,100,100)}">`;
     }
 };
-document.getElementById('walk-form').onsubmit = (e) => {
+
+document.getElementById('walk-form').onsubmit = async (e) => {
     e.preventDefault();
+    if (currentDog?.isExample) {
+        showToast('ℹ️ Los perros de ejemplo no se pueden modificar', 'info');
+        return;
+    }
     const submitBtn = e.submitter;
-    const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '🔄 Guardando...';
     submitBtn.disabled = true;
-    setTimeout(() => {
+    
+    try {
         const w = {
             fecha: document.getElementById('walk-date').value,
             duracion_minutos: parseInt(document.getElementById('walk-duration').value),
@@ -472,22 +531,20 @@ document.getElementById('walk-form').onsubmit = (e) => {
             incidentes_salud: document.getElementById('incidentes-salud').value,
             fotos: simulatedPhotos
         };
-        const idx = MOCK_DOGS.findIndex(d => d.id === currentDog.id);
-        MOCK_DOGS[idx].walks.unshift(JSON.parse(JSON.stringify(w)));
-        document.querySelectorAll('#multi-dog-container input:checked').forEach(cb => {
-            const pIdx = MOCK_DOGS.findIndex(d => d.id == cb.value);
-            if(pIdx > -1) MOCK_DOGS[pIdx].walks.unshift(JSON.parse(JSON.stringify(w)));
-        });
-        saveDB(MOCK_DOGS);
-        showToast('✅ Paseo guardado con éxito', 'success');
+        const updatedWalks = [w, ...(currentDog.walks || [])];
+        await updateRealDogWalks(currentDog.id, updatedWalks);
+        showToast('✅ Paseo guardado en la nube', 'success');
         showView('dog-selection-dashboard');
-        submitBtn.innerHTML = originalText;
+    } catch (err) {
+        showToast('❌ Error al guardar paseo', 'error');
+    } finally {
+        submitBtn.innerHTML = '💾 Guardar Paseo';
         submitBtn.disabled = false;
-    }, 600);
+    }
 };
 
 // === HISTORY & EDIT ===
-function loadHistory(d){
+function loadHistory(d) {
     const c = document.getElementById('walks-history');
     c.innerHTML = '';
     if(!d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
@@ -497,7 +554,7 @@ function loadHistory(d){
                 <img src="${getPhotoUrl(f.id,200,200)}">
             </div>`
         ).join('');
-        const adminBtns = (currentUser && currentUser.isAdmin) ?
+        const adminBtns = (currentUser && currentUser.isAdmin && !d.isExample) ?
             `<div class="admin-walk-controls" data-index="${i}">
                 <button class="admin-walk-btn edit-btn">✏️ Editar</button>
                 <button class="admin-walk-btn delete-btn" style="border-color:var(--danger-light); color:#fca5a5;">🗑️ Borrar</button>
@@ -545,6 +602,7 @@ document.getElementById('close-lightbox').onclick = () =>
 
 // === FUNCIONES DE EDICIÓN ===
 function openEditWalk(i){
+    if (currentDog?.isExample) return;
     editWalkIdx=i; 
     editWalkPhotos=[...currentDog.walks[i].fotos];
     const w=currentDog.walks[i];
@@ -572,114 +630,83 @@ function delEditPhoto(i){
     renderEditPhotos(); 
 }
 function addPhotoEdit(){ 
-    const newId = (typeof DATABASE !== 'undefined' && DATABASE.photo_references?.random?.[0])
-        ? DATABASE.photo_references.random[0]
-        : '1581268694';
+    const newId = DATABASE?.photo_references?.random?.[0] || '1581268694';
     editWalkPhotos.push({
         id: newId, 
         comentario: 'Nueva foto'
     }); 
     renderEditPhotos(); 
 }
-document.getElementById('edit-walk-form').onsubmit=(e)=>{
+document.getElementById('edit-walk-form').onsubmit = async (e) => {
     e.preventDefault();
-    const idx = MOCK_DOGS.findIndex(d=>d.id===currentDog.id);
-    MOCK_DOGS[idx].walks[editWalkIdx] = {
-        fecha: document.getElementById('edit-walk-date').value,
-        duracion_minutos: parseInt(document.getElementById('edit-walk-duration').value),
-        distancia_km: parseFloat(document.getElementById('edit-walk-distance').value),
-        resumen_diario: document.getElementById('edit-walk-summary').value,
-        comportamiento_problemas: document.getElementById('edit-walk-behavior').checked,
-        incidentes_salud: document.getElementById('edit-walk-health').value,
-        fotos: editWalkPhotos
-    };
-    saveDB(MOCK_DOGS); 
-    document.getElementById('edit-walk-modal').style.display='none'; 
-    loadHistory(MOCK_DOGS[idx]);
+    if (currentDog?.isExample) return;
+    try {
+        const updatedWalks = [...currentDog.walks];
+        updatedWalks[editWalkIdx] = {
+            fecha: document.getElementById('edit-walk-date').value,
+            duracion_minutos: parseInt(document.getElementById('edit-walk-duration').value),
+            distancia_km: parseFloat(document.getElementById('edit-walk-distance').value),
+            resumen_diario: document.getElementById('edit-walk-summary').value,
+            comportamiento_problemas: document.getElementById('edit-walk-behavior').checked,
+            incidentes_salud: document.getElementById('edit-walk-health').value,
+            fotos: editWalkPhotos
+        };
+        await updateRealDogWalks(currentDog.id, updatedWalks);
+        document.getElementById('edit-walk-modal').style.display = 'none';
+        loadHistory(currentDog);
+        showToast('✅ Paseo actualizado', 'success');
+    } catch (err) {
+        showToast('❌ Error al actualizar', 'error');
+    }
 };
-function delWalk(i){ 
-    if(confirm('¿Borrar este paseo?')){ 
-        const idx=MOCK_DOGS.findIndex(d=>d.id===currentDog.id); 
-        MOCK_DOGS[idx].walks.splice(i,1); 
-        saveDB(MOCK_DOGS); 
-        loadHistory(MOCK_DOGS[idx]); 
-    } 
+
+function delWalk(i) {
+    if (!confirm('¿Borrar este paseo?') || currentDog?.isExample) return;
+    const updatedWalks = currentDog.walks.filter((_, idx) => idx !== i);
+    updateRealDogWalks(currentDog.id, updatedWalks)
+        .then(() => loadHistory(currentDog))
+        .catch(() => showToast('❌ Error al borrar', 'error'));
 }
 
-// === CARGAR DATOS DE EJEMPLO DESDE ARCHIVO EXTERNO ===
+// === BOTÓN: Recargar ejemplos (sin tocar Supabase) ===
 document.getElementById('toggle-demo-btn').onclick = async () => {
-    if (confirm('¿Cargar datos de ejemplo desde paseoDogDB.json?\nEsto reemplazará todos los datos existentes.')) {
-        document.getElementById('loading-overlay').style.display = 'flex';
-        
-        try {
-            const response = await fetch(DB_URL);
-            if (!response.ok) throw new Error('Archivo paseoDogDB.json no encontrado');
-            const exampleData = await response.json();
-
-            // Validar estructura mínima
-            if (!exampleData.dogs || !Array.isArray(exampleData.dogs)) {
-                throw new Error('El archivo no tiene la estructura esperada (falta "dogs")');
-            }
-
-            // Guardar en localStorage
-            localStorage.setItem(DB_KEY, JSON.stringify(exampleData.dogs));
-            
-            // Actualizar variables globales
-            MOCK_DOGS = [...exampleData.dogs];
-            ADMIN_USER = exampleData.admin || { email: 'admin@paseos.com', password: 'admin123' };
-            TRAINER_PHONE = exampleData.trainer_phone || "5491100000000";
-            
-            // Hacer DATABASE globalmente accesible para photo_references
-            window.DATABASE = exampleData;
-
-            document.getElementById('loading-overlay').style.display = 'none';
-            document.getElementById('demo-status-text').textContent = `${MOCK_DOGS.length} perros en BD`;
-            showToast('✅ Datos de ejemplo cargados desde archivo externo', 'success');
-
-            // Si estás en el panel de admin, refrescar
-            if (currentView === 'admin-dashboard-section') {
-                loadAdminDashboard();
-            }
-        } catch (err) {
-            document.getElementById('loading-overlay').style.display = 'none';
-            console.error('Error al cargar datos de ejemplo:', err);
-            showToast('❌ Error: ' + err.message, 'error');
-        }
+    if (confirm('¿Recargar datos de ejemplo desde paseoDogDB.json?')) {
+        await loadExampleDogs();
+        showToast('✅ Ejemplos recargados desde archivo local', 'info');
+        if (currentView === 'admin-dashboard-section') loadAdminDashboard();
     }
 };
 
 // === INIT ===
-window.onload = () => {
-    // No cargar DB externa al inicio; solo mostrar login
+window.onload = async () => {
+    await loadExampleDogs();
     document.getElementById('loading-overlay').style.display = 'none';
     showView('login-section');
     updateThemeIcon();
-    
+
     const particlesContainer = document.getElementById('particles-container');
     if (document.documentElement.getAttribute('data-theme') === 'dark') {
         for (let i = 0; i < 25; i++) {
             const p = document.createElement('div');
             p.classList.add('particle');
             const size = 4 + Math.random() * 14;
-            p.style.width = `${size}px`;
-            p.style.height = `${size}px`;
+            p.style.width = `${size}px`; p.style.height = `${size}px`;
             p.style.left = `${Math.random() * 100}vw`;
             p.style.top = `${Math.random() * 100}vh`;
             particlesContainer.appendChild(p);
         }
     }
-    
+
     const observer = new MutationObserver(() => {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         particlesContainer.style.display = isDark ? 'block' : 'none';
     });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    
+
     document.querySelectorAll('.ripple').forEach(btn => {
         btn.addEventListener('click', createRipple);
     });
-    
-    // === CONFIGURAR CONTROL DE AUDIO GLOBAL ===
+
     const audioToggle = document.getElementById('audio-toggle');
     const savedAudio = localStorage.getItem('paseoDogAudio');
     if (savedAudio === 'off') {
@@ -695,17 +722,14 @@ window.onload = () => {
             carouselAudio.pause();
             carouselAudio = null;
             isPlaying = false;
-            // Nota: updatePlayButton() no está definida, así que lo manejamos aquí
             const playPauseBtn = document.getElementById('play-pause-btn');
             const playLargeBtn = document.getElementById('carousel-play-large');
             if (playPauseBtn) playPauseBtn.textContent = '▶';
             if (playLargeBtn) playLargeBtn.textContent = '▶';
         }
     };
-    
+
     document.addEventListener('click', () => {
-        if (!userHasInteracted) {
-            userHasInteracted = true;
-        }
+        if (!userHasInteracted) userHasInteracted = true;
     }, { once: true });
 };
