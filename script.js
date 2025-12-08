@@ -157,44 +157,69 @@ async function updateRealDogProfile(dogId, newPerfil) {
 
 async function uploadProfilePhoto(file) {
     if (!currentDog || currentDog.isExample) {
-        showToast('ℹ️ Solo perros reales', 'info');
+        showToast('ℹ️ Solo se pueden subir fotos de perros reales', 'info');
         return;
     }
 
     const extension = file.name.split('.').pop().toLowerCase();
     const allowedTypes = ['jpg', 'jpeg', 'png', 'webp'];
     if (!allowedTypes.includes(extension)) {
-        showToast('❌ Solo JPG/PNG/WEBP', 'error');
+        showToast('❌ Solo se permiten JPG, PNG o WebP', 'error');
         return;
     }
 
+    // 1. CREAR Y MOSTRAR EFECTO DE CARGA (FILL)
+    const container = document.getElementById('profile-photo-container');
+    // Verificamos si ya existe para no duplicar
+    if (container.querySelector('.uploading-fill')) return;
+    
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'uploading-fill';
+    container.appendChild(loadingOverlay);
+
+    // Bloquear input
+    const uploadInput = document.getElementById('photo-upload-input');
+    uploadInput.disabled = true;
+
     const fileName = `perfil_${currentDog.id}_${Date.now()}.${extension}`;
-    // CORREGIDO: filePath es solo el nombre, no incluir nombre del bucket
-    const filePath = fileName; 
+    const filePath = fileName;
 
     try {
+        // 2. SUBIR A SUPABASE
         const { error: uploadError } = await supabaseClient
             .storage
             .from('paseodog-photos')
-            .upload(filePath, file, { cacheControl: '3600', upsert: false });
+            .upload(filePath, file, { cacheControl: '0', upsert: false });
 
         if (uploadError) throw uploadError;
 
+        // 3. ACTUALIZAR DB
         const newPerfil = { ...currentDog.perfil, foto_id: fileName };
         await updateRealDogProfile(currentDog.id, newPerfil);
 
-        // Actualizar UI
+        // 4. ACTUALIZAR UI
         REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
         currentDog = { ...currentDog, perfil: newPerfil };
         
-        // Forzar recarga de imagen
+        // Forzar recarga con timestamp
         const img = document.getElementById('profile-photo');
-        img.src = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
+        const newSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
         
-        showToast('✅ Foto actualizada', 'success');
+        // Precargar imagen
+        const tempImg = new Image();
+        tempImg.src = newSrc;
+        tempImg.onload = () => {
+            img.src = newSrc;
+            showToast('✅ Foto actualizada con éxito', 'success');
+            loadingOverlay.remove(); 
+            uploadInput.disabled = false;
+        };
+
     } catch (err) {
         console.error('Error subida:', err);
         showToast('❌ Error al subir: ' + err.message, 'error');
+        loadingOverlay.remove();
+        uploadInput.disabled = false;
     }
 }
 
