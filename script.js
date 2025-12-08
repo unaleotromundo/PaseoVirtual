@@ -564,19 +564,25 @@ function loadProfile(d) {
             }
         };
     } else {
+        // VISTA LECTURA (Aquí faltaban los datos de comportamiento)
         v.innerHTML = `
             <h3>🐕 Datos Básicos</h3>
             <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${p.raza}</span></div>
             <div class="detail-row"><span class="detail-label">Edad:</span> <span class="detail-value">${p.edad}</span></div>
             <div class="detail-row"><span class="detail-label">Sexo:</span> <span class="detail-value">${p.sexo}</span></div>
+            
             <h3>💊 Salud y Contacto</h3>
             <div class="detail-row"><span class="detail-label">Peso:</span> <span class="detail-value">${p.peso}</span></div>
             <div class="detail-row"><span class="detail-label">Alergias:</span> <span class="detail-value">${p.alergias}</span></div>
             <div class="detail-row"><span class="detail-label">Dueño:</span> <span class="detail-value">${p.dueno}</span></div>
             <div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${p.telefono}</span></div>
+            
+            <h3>🎾 Comportamiento</h3>
+            <div class="detail-row"><span class="detail-label">Energía:</span> <span class="detail-value">${p.energia || '?'}</span></div>
+            <div class="detail-row"><span class="detail-label">Social:</span> <span class="detail-value">${p.social || '?'}</span></div>
         `;
     }
-}
+} // <--- Cierre de la función loadProfile
 function toggleEditMode(){ 
     if (currentDog?.isExample) {
         showToast('ℹ️ Los ejemplos no se pueden editar', 'info');
