@@ -121,6 +121,40 @@ async function updateRealDogProfile(dogId, newPerfil) {
     if (error) throw error;
 }
 
+// === SUBIR FOTO DE PERFIL A SUPABASE ===
+async function uploadProfilePhoto(file) {
+    if (!currentDog || currentDog.isExample) {
+        showToast('ℹ️ Solo se pueden subir fotos de perros reales', 'info');
+        return;
+    }
+
+    const extension = file.name.split('.').pop();
+    const fileName = `perfil_${currentDog.id}_${Date.now()}.${extension}`;
+    const filePath = `paseodog-photos/${fileName}`;
+
+    try {
+        const { error: uploadError } = await supabaseClient
+            .storage
+            .from('paseodog-photos')
+            .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+        if (uploadError) throw uploadError;
+
+        const newPerfil = { ...currentDog.perfil, foto_id: fileName };
+        await updateRealDogProfile(currentDog.id, newPerfil);
+
+        REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
+        currentDog = { ...currentDog, perfil: newPerfil };
+
+        const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}`;
+        document.getElementById('profile-photo').src = photoUrl + '?t=' + Date.now();
+        showToast('✅ Foto de perfil actualizada en la nube', 'success');
+    } catch (err) {
+        console.error('Error al subir foto:', err);
+        showToast('❌ Error al subir la foto: ' + (err.message || 'Inténtalo de nuevo'), 'error');
+    }
+}
+
 // === AUDIO DEL CARRUSEL ===
 const CARRUSEL_TRACKS = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3', 'musica4.mp3'];
 function playRandomCarouselTrack() {
@@ -446,11 +480,25 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
 // === PROFILE ===
 function loadProfile(d) {
     const p = d.perfil;
-    const photoId = tempPhotoId || p.foto_id || (DATABASE?.photo_references?.random?.[0] || '1581268694');
-    document.getElementById('profile-photo').src = getPhotoUrl(photoId, 300, 300);
+    let photoSrc;
+    if (d.isExample) {
+        // Ejemplos: usar Unsplash
+        const id = tempPhotoId || p.foto_id || (DATABASE?.photo_references?.random?.[0] || '1581268694');
+        photoSrc = getPhotoUrl(id, 300, 300);
+    } else {
+        // Reales: usar Supabase Storage
+        if (p.foto_id && p.foto_id.includes('perfil_')) {
+            photoSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${p.foto_id}`;
+        } else {
+            // Fallback a Unsplash si no tiene foto personalizada
+            photoSrc = getPhotoUrl(p.foto_id || '1581268694', 300, 300);
+        }
+    }
+    document.getElementById('profile-photo').src = photoSrc;
     document.getElementById('profile-dog-name-display').textContent = d.nombre;
     document.getElementById('edit-photo-btn').style.display = isEditing && !d.isExample ? 'block' : 'none';
     document.getElementById('toggle-edit-btn').textContent = isEditing ? '❌ Cancelar' : '✏️ Editar Perfil';
+    
     const v = document.getElementById('profile-details-view');
     v.innerHTML = `
         <h3>🐕 Datos Básicos</h3>
@@ -466,6 +514,7 @@ function loadProfile(d) {
         <div class="detail-row"><span class="detail-label">Energía:</span> <span class="detail-value">${p.energia}</span></div>
         <div class="detail-row"><span class="detail-label">Social:</span> <span class="detail-value">${p.social}</span></div>
     `;
+    
     if (isEditing && !d.isExample) {
         const form = document.createElement('form');
         form.id = 'profile-edit-form';
@@ -477,6 +526,7 @@ function loadProfile(d) {
         form.innerHTML += '<button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>';
         v.innerHTML = '';
         v.appendChild(form);
+        
         form.onsubmit = async (e) => {
             e.preventDefault();
             const formData = new FormData(form);
@@ -504,12 +554,11 @@ function toggleEditMode(){
     loadProfile(currentDog); 
 }
 function randomizeProfilePhoto(){
-    if (currentDog?.isExample) return;
-    const randomId = DATABASE?.photo_references?.random ?
-        DATABASE.photo_references.random[Math.floor(Math.random() * DATABASE.photo_references.random.length)] :
-        '1581268694';
-    tempPhotoId = randomId;
-    document.getElementById('profile-photo').src = getPhotoUrl(tempPhotoId,300,300);
+    if (!currentDog || currentDog.isExample) {
+        showToast('ℹ️ Los ejemplos no permiten cambiar foto', 'info');
+        return;
+    }
+    document.getElementById('photo-upload-input').click();
 }
 
 // === CREATE WALK ===
@@ -570,10 +619,64 @@ document.getElementById('walk-form').onsubmit = async (e) => {
 };
 
 // === HISTORY & EDIT ===
-// (mantén tu lógica actual de historial, ya que edita paseos, no perfil)
+function loadHistory(d) {
+    const c = document.getElementById('walks-history');
+    c.innerHTML = '';
+    if(!d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
+    d.walks.forEach((w,i) => {
+        const imgs = w.fotos.map(f => 
+            `<div class="photo-card" onclick="openLightbox('${f.id}')">
+                <img src="${getPhotoUrl(f.id,200,200)}">
+            </div>`
+        ).join('');
+        const adminBtns = (currentUser && currentUser.isAdmin && !d.isExample) ?
+            `<div class="admin-walk-controls" data-index="${i}">
+                <button class="admin-walk-btn edit-btn">✏️ Editar</button>
+                <button class="admin-walk-btn delete-btn" style="border-color:var(--danger-light); color:#fca5a5;">🗑️ Borrar</button>
+            </div>` : '';
+        const session = document.createElement('div');
+        session.className = 'walk-session';
+        session.style.setProperty('--i', i);
+        session.innerHTML = `
+            <h3><span>📅 ${w.fecha}</span> ${adminBtns}</h3>
+            <div class="walk-details">
+                <div class="walk-metrics">
+                    <span>⏱️ ${w.duracion_minutos} min</span>
+                    <span>📏 ${w.distancia_km} km</span>
+                    <span>📸 ${w.fotos.length} fotos</span>
+                </div>
+                <p><strong>Resumen:</strong> ${w.resumen_diario}</p>
+                ${w.comportamiento_problemas ? '<div class="incident-alert">⚠️ Hubo problemas de comportamiento</div>' : '<div class="success-notice">✅ Paseo tranquilo</div>'}
+                ${w.incidentes_salud ? `<div class="incident-alert">🩺 <strong>Salud:</strong> ${w.incidentes_salud}</div>` : ''}
+                <div class="gallery">${imgs}</div>
+            </div>
+        `;
+        c.appendChild(session);
+    });
+    c.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
+            openEditWalk(parseInt(walkIndex));
+        };
+    });
+    c.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
+            delWalk(parseInt(walkIndex));
+        };
+    });
+}
 
-// === LIGHTBOX, MODALES, ETC. ===
-// (mantén tu lógica actual)
+// === LIGHTBOX ===
+function openLightbox(id){
+    document.getElementById('lightbox-img').src = getPhotoUrl(id,800,800);
+    document.getElementById('lightbox').style.display = 'flex';
+}
+document.getElementById('close-lightbox').onclick = () =>
+    document.getElementById('lightbox').style.display = 'none';
+
+// === FUNCIONES DE EDICIÓN (PASEOS) ===
+// (mantén tu lógica actual, ya que edita paseos, no perfil)
 
 // === BOTÓN: Recargar ejemplos ===
 document.getElementById('toggle-demo-btn').onclick = async () => {
@@ -583,6 +686,21 @@ document.getElementById('toggle-demo-btn').onclick = async () => {
         if (currentView === 'admin-dashboard-section') loadAdminDashboard();
     }
 };
+
+// === ESCUCHADOR DE SUBIDA DE FOTO ===
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('photo-upload-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                showToast('❌ Solo se permiten imágenes', 'error');
+                return;
+            }
+            uploadProfilePhoto(file);
+        }
+        e.target.value = '';
+    });
+});
 
 // === INIT ===
 window.onload = async () => {
