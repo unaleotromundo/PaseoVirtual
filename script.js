@@ -170,14 +170,11 @@ async function uploadProfilePhoto(file) {
 
     // 1. CREAR Y MOSTRAR EFECTO DE CARGA (FILL)
     const container = document.getElementById('profile-photo-container');
-    // Verificamos si ya existe para no duplicar
-    if (container.querySelector('.uploading-fill')) return;
-    
     const loadingOverlay = document.createElement('div');
     loadingOverlay.className = 'uploading-fill';
     container.appendChild(loadingOverlay);
 
-    // Bloquear input
+    // Bloquear botón para no subir doble
     const uploadInput = document.getElementById('photo-upload-input');
     uploadInput.disabled = true;
 
@@ -189,36 +186,38 @@ async function uploadProfilePhoto(file) {
         const { error: uploadError } = await supabaseClient
             .storage
             .from('paseodog-photos')
-            .upload(filePath, file, { cacheControl: '0', upsert: false });
+            .upload(filePath, file, { cacheControl: '0', upsert: false }); // Cache 0 para evitar problemas
 
         if (uploadError) throw uploadError;
 
-        // 3. ACTUALIZAR DB
+        // 3. ACTUALIZAR PERFIL EN BASE DE DATOS
         const newPerfil = { ...currentDog.perfil, foto_id: fileName };
         await updateRealDogProfile(currentDog.id, newPerfil);
 
-        // 4. ACTUALIZAR UI
+        // 4. ACTUALIZAR UI E IMAGEN
+        // Actualizamos el objeto global
         REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
         currentDog = { ...currentDog, perfil: newPerfil };
         
-        // Forzar recarga con timestamp
+        // Forzamos la recarga de la imagen agregando timestamp (?t=...)
+        // Esto soluciona que "no cambie" aunque se haya subido bien.
         const img = document.getElementById('profile-photo');
         const newSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
         
-        // Precargar imagen
+        // Precargar la imagen en memoria antes de mostrarla para evitar parpadeo negro
         const tempImg = new Image();
         tempImg.src = newSrc;
         tempImg.onload = () => {
             img.src = newSrc;
             showToast('✅ Foto actualizada con éxito', 'success');
-            loadingOverlay.remove(); 
+            loadingOverlay.remove(); // Quitar animación solo cuando ya cargó la nueva
             uploadInput.disabled = false;
         };
 
     } catch (err) {
         console.error('Error subida:', err);
         showToast('❌ Error al subir: ' + err.message, 'error');
-        loadingOverlay.remove();
+        loadingOverlay.remove(); // Quitar animación si falla
         uploadInput.disabled = false;
     }
 }
