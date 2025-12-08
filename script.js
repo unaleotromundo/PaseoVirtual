@@ -111,6 +111,15 @@ async function updateRealDogWalks(dogId, walks) {
         .eq('id', dogId);
     if (error) throw error;
 }
+// === ACTUALIZAR PERFIL EN SUPABASE ===
+async function updateRealDogProfile(dogId, newPerfil) {
+    const { error } = await supabaseClient
+        .from('dogs_real')
+        .update({ perfil: newPerfil })
+        .eq('id', dogId);
+    if (error) throw error;
+}
+
 
 // === AUDIO DEL CARRUSEL ===
 const CARRUSEL_TRACKS = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3', 'musica4.mp3'];
