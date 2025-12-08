@@ -426,7 +426,7 @@ async function loadAdminDashboard() {
 // === CREAR PERRO (solo reales van a Supabase) ===
 document.getElementById('create-dog-form').onsubmit = async (e) => {
     e.preventDefault();
-    const submitBtn = document.getElementById('save-dog-btn');
+    const submitBtn = e.submitter;
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '🔄 Guardando...';
     submitBtn.disabled = true;
@@ -550,7 +550,7 @@ document.getElementById('walk-form').onsubmit = async (e) => {
         showToast('ℹ️ Los perros de ejemplo no se pueden modificar', 'info');
         return;
     }
-    const submitBtn = e.submitter;
+    const submitBtn = document.getElementById('save-dog-btn');
     submitBtn.innerHTML = '🔄 Guardando...';
     submitBtn.disabled = true;
     
