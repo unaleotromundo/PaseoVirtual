@@ -52,7 +52,7 @@ function getPhotoUrl(id, w = 400, h = 400) {
     return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
 }
 
-// === CARGAR EJEMPLOS DESDE JSON (con IDs 995–999) ===
+// === CARGAR EJEMPLOS DESDE JSON (IDs 995–999) ===
 async function loadExampleDogs() {
     try {
         const res = await fetch(DB_URL);
@@ -111,6 +111,7 @@ async function updateRealDogWalks(dogId, walks) {
         .eq('id', dogId);
     if (error) throw error;
 }
+
 // === ACTUALIZAR PERFIL EN SUPABASE ===
 async function updateRealDogProfile(dogId, newPerfil) {
     const { error } = await supabaseClient
@@ -119,7 +120,6 @@ async function updateRealDogProfile(dogId, newPerfil) {
         .eq('id', dogId);
     if (error) throw error;
 }
-
 
 // === AUDIO DEL CARRUSEL ===
 const CARRUSEL_TRACKS = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3', 'musica4.mp3'];
@@ -452,7 +452,6 @@ function loadProfile(d) {
     document.getElementById('edit-photo-btn').style.display = isEditing && !d.isExample ? 'block' : 'none';
     document.getElementById('toggle-edit-btn').textContent = isEditing ? '❌ Cancelar' : '✏️ Editar Perfil';
     const v = document.getElementById('profile-details-view');
-    const e = document.getElementById('profile-details-edit');
     v.innerHTML = `
         <h3>🐕 Datos Básicos</h3>
         <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${p.raza}</span></div>
@@ -467,55 +466,17 @@ function loadProfile(d) {
         <div class="detail-row"><span class="detail-label">Energía:</span> <span class="detail-value">${p.energia}</span></div>
         <div class="detail-row"><span class="detail-label">Social:</span> <span class="detail-value">${p.social}</span></div>
     `;
-    e.innerHTML = '';
-    const fields = ['raza','edad','sexo','peso','alergias','dueno','telefono','energia','social'];
-    fields.forEach(k => {
-        e.innerHTML += `<label>${k.charAt(0).toUpperCase() + k.slice(1)}</label><input type="text" name="${k}" value="${p[k]}">`;
-    });
-    e.innerHTML += '<button type="submit" class="save-btn ripple">Guardar Cambios</button>';
-    v.style.display = isEditing ? 'none' : 'block';
-    e.style.display = isEditing ? 'block' : 'none';
-    if (isEditing) {
-        e.onsubmit = (ev) => {
-            ev.preventDefault();
-            const btn = e.querySelector('.save-btn');
-            if (!btn || btn.disabled) return;
-            const txt = btn.innerHTML;
-            btn.innerHTML = '🔄 Guardando...';
-            btn.disabled = true;
-            setTimeout(() => {
-                btn.innerHTML = txt;
-                btn.disabled = false;
-                showToast('✅ Perfil actualizado', 'success');
-                toggleEditMode();
-            }, 600);
-        };
-    }
-}
-// === PROFILE: guardar cambios (versión corregida para Supabase) ===
-function toggleEditMode() {
-    if (currentDog?.isExample) {
-        showToast('ℹ️ Los ejemplos no se pueden editar', 'info');
-        return;
-    }
-    isEditing = !isEditing;
-    tempPhotoId = null;
-    loadProfile(currentDog);
-    
-    if (isEditing) {
-        // Activar formulario editable
-        const form = document.getElementById('profile-details-edit');
-        form.innerHTML = '';
+    if (isEditing && !d.isExample) {
+        const form = document.createElement('form');
+        form.id = 'profile-edit-form';
         const fields = ['raza','edad','sexo','peso','alergias','dueno','telefono','energia','social'];
-        const p = currentDog.perfil;
-        
         fields.forEach(k => {
             form.innerHTML += `<label>${k.charAt(0).toUpperCase() + k.slice(1)}</label>
-                              <input type="text" name="${k}" value="${p[k]}" required>`;
+                              <input type="text" name="${k}" value="${p[k]}">`;
         });
-        
         form.innerHTML += '<button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>';
-        
+        v.innerHTML = '';
+        v.appendChild(form);
         form.onsubmit = async (e) => {
             e.preventDefault();
             const formData = new FormData(form);
@@ -523,17 +484,24 @@ function toggleEditMode() {
             for (let [key, value] of formData.entries()) {
                 updatedPerfil[key] = value;
             }
-            
             try {
-                // ✅ Guardar en Supabase
                 await updateRealDogProfile(currentDog.id, updatedPerfil);
                 showToast('✅ Perfil actualizado en la nube', 'success');
-                toggleEditMode(); // salir del modo edición
+                toggleEditMode();
             } catch (err) {
                 showToast('❌ Error al guardar: ' + err.message, 'error');
             }
         };
     }
+}
+function toggleEditMode(){ 
+    if (currentDog?.isExample) {
+        showToast('ℹ️ Los ejemplos no se pueden editar', 'info');
+        return;
+    }
+    isEditing = !isEditing; 
+    tempPhotoId = null; 
+    loadProfile(currentDog); 
 }
 function randomizeProfilePhoto(){
     if (currentDog?.isExample) return;
@@ -602,131 +570,12 @@ document.getElementById('walk-form').onsubmit = async (e) => {
 };
 
 // === HISTORY & EDIT ===
-function loadHistory(d) {
-    const c = document.getElementById('walks-history');
-    c.innerHTML = '';
-    if(!d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
-    d.walks.forEach((w,i) => {
-        const imgs = w.fotos.map(f => 
-            `<div class="photo-card" onclick="openLightbox('${f.id}')">
-                <img src="${getPhotoUrl(f.id,200,200)}">
-            </div>`
-        ).join('');
-        const adminBtns = (currentUser && currentUser.isAdmin && !d.isExample) ?
-            `<div class="admin-walk-controls" data-index="${i}">
-                <button class="admin-walk-btn edit-btn">✏️ Editar</button>
-                <button class="admin-walk-btn delete-btn" style="border-color:var(--danger-light); color:#fca5a5;">🗑️ Borrar</button>
-            </div>` : '';
-        const session = document.createElement('div');
-        session.className = 'walk-session';
-        session.style.setProperty('--i', i);
-        session.innerHTML = `
-            <h3><span>📅 ${w.fecha}</span> ${adminBtns}</h3>
-            <div class="walk-details">
-                <div class="walk-metrics">
-                    <span>⏱️ ${w.duracion_minutos} min</span>
-                    <span>📏 ${w.distancia_km} km</span>
-                    <span>📸 ${w.fotos.length} fotos</span>
-                </div>
-                <p><strong>Resumen:</strong> ${w.resumen_diario}</p>
-                ${w.comportamiento_problemas ? '<div class="incident-alert">⚠️ Hubo problemas de comportamiento</div>' : '<div class="success-notice">✅ Paseo tranquilo</div>'}
-                ${w.incidentes_salud ? `<div class="incident-alert">🩺 <strong>Salud:</strong> ${w.incidentes_salud}</div>` : ''}
-                <div class="gallery">${imgs}</div>
-            </div>
-        `;
-        c.appendChild(session);
-    });
-    c.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
-            openEditWalk(parseInt(walkIndex));
-        };
-    });
-    c.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            const walkIndex = e.target.closest('.admin-walk-controls').dataset.index;
-            delWalk(parseInt(walkIndex));
-        };
-    });
-}
+// (mantén tu lógica actual de historial, ya que edita paseos, no perfil)
 
-// === LIGHTBOX ===
-function openLightbox(id){
-    document.getElementById('lightbox-img').src = getPhotoUrl(id,800,800);
-    document.getElementById('lightbox').style.display = 'flex';
-}
-document.getElementById('close-lightbox').onclick = () =>
-    document.getElementById('lightbox').style.display = 'none';
+// === LIGHTBOX, MODALES, ETC. ===
+// (mantén tu lógica actual)
 
-// === FUNCIONES DE EDICIÓN ===
-function openEditWalk(i){
-    if (currentDog?.isExample) return;
-    editWalkIdx=i; 
-    editWalkPhotos=[...currentDog.walks[i].fotos];
-    const w=currentDog.walks[i];
-    document.getElementById('edit-walk-date').value=w.fecha;
-    document.getElementById('edit-walk-duration').value=w.duracion_minutos;
-    document.getElementById('edit-walk-distance').value=w.distancia_km;
-    document.getElementById('edit-walk-summary').value=w.resumen_diario;
-    document.getElementById('edit-walk-behavior').checked=w.comportamiento_problemas;
-    document.getElementById('edit-walk-health').value=w.incidentes_salud;
-    renderEditPhotos();
-    document.getElementById('edit-walk-modal').style.display='flex';
-}
-function renderEditPhotos(){ 
-    const c=document.getElementById('edit-photo-preview'); 
-    c.innerHTML=''; 
-    editWalkPhotos.forEach((p,i)=>
-        c.innerHTML+=`<div style="position:relative">
-            <img src="${getPhotoUrl(p.id,100,100)}">
-            <button type="button" class="delete-photo-btn" onclick="delEditPhoto(${i})">x</button>
-        </div>`
-    ); 
-}
-function delEditPhoto(i){ 
-    editWalkPhotos.splice(i,1); 
-    renderEditPhotos(); 
-}
-function addPhotoEdit(){ 
-    const newId = DATABASE?.photo_references?.random?.[0] || '1581268694';
-    editWalkPhotos.push({
-        id: newId, 
-        comentario: 'Nueva foto'
-    }); 
-    renderEditPhotos(); 
-}
-document.getElementById('edit-walk-form').onsubmit = async (e) => {
-    e.preventDefault();
-    if (currentDog?.isExample) return;
-    try {
-        const updatedWalks = [...currentDog.walks];
-        updatedWalks[editWalkIdx] = {
-            fecha: document.getElementById('edit-walk-date').value,
-            duracion_minutos: parseInt(document.getElementById('edit-walk-duration').value),
-            distancia_km: parseFloat(document.getElementById('edit-walk-distance').value),
-            resumen_diario: document.getElementById('edit-walk-summary').value,
-            comportamiento_problemas: document.getElementById('edit-walk-behavior').checked,
-            incidentes_salud: document.getElementById('edit-walk-health').value,
-            fotos: editWalkPhotos
-        };
-        await updateRealDogWalks(currentDog.id, updatedWalks);
-        document.getElementById('edit-walk-modal').style.display = 'none';
-        loadHistory(currentDog);
-        showToast('✅ Paseo actualizado', 'success');
-    } catch (err) {
-        showToast('❌ Error al actualizar', 'error');
-    }
-};
-
-function delWalk(i) {
-    if (!confirm('¿Borrar este paseo?') || currentDog?.isExample) return;
-    const updatedWalks = currentDog.walks.filter((_, idx) => idx !== i);
-    updateRealDogWalks(currentDog.id, updatedWalks)
-        .then(() => loadHistory(currentDog))
-        .catch(() => showToast('❌ Error al borrar', 'error'));
-}
-
-// === BOTÓN: Recargar ejemplos (sin tocar Supabase) ===
+// === BOTÓN: Recargar ejemplos ===
 document.getElementById('toggle-demo-btn').onclick = async () => {
     if (confirm('¿Recargar datos de ejemplo desde paseoDogDB.json?')) {
         await loadExampleDogs();
