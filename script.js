@@ -286,9 +286,13 @@ function updateWhatsApp() {
 
 // === NAVEGACIÓN ===
 async function showView(id, dogId = null) {
+    // Cargar todos los perros (ejemplos + reales) para la lista general
     const allDogs = await loadAllDogs();
-    if(id !== currentView) backStack.push(currentView);
+    
+    if (id !== currentView) backStack.push(currentView);
     currentView = id;
+
+    // Detener carrusel si salimos del dashboard
     if (currentView !== 'dog-selection-dashboard' && slideInterval) {
         clearInterval(slideInterval);
         slideInterval = null;
@@ -298,18 +302,30 @@ async function showView(id, dogId = null) {
         }
         isPlaying = false;
     }
+
+    // Ocultar todas las secciones
     document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
     document.getElementById(id).style.display = 'block';
-    if(dogId) currentDog = allDogs.find(d => d.id === dogId);
-    if(currentDog) {
+
+    // ✅ CORRECCIÓN CLAVE: Buscar primero en perros reales, luego en ejemplos
+    if (dogId) {
+        currentDog = REAL_DOGS.find(d => d.id === dogId) || EXAMPLE_DOGS.find(d => d.id === dogId);
+    }
+
+    if (currentDog) {
         document.querySelectorAll('.dog-name-placeholder').forEach(e => e.textContent = currentDog.nombre);
-        if(id === 'dog-selection-dashboard') {
+        if (id === 'dog-selection-dashboard') {
             document.getElementById('admin-create-walk-btn').style.display = currentUser?.isAdmin ? 'block' : 'none';
             initCarousel();
         }
-        if(id === 'profile-section') { isEditing = false; loadProfile(currentDog); }
-        if(id === 'walks-history-section') loadHistory(currentDog);
-        if(id === 'create-walk-section') {
+        if (id === 'profile-section') {
+            isEditing = false;
+            loadProfile(currentDog);
+        }
+        if (id === 'walks-history-section') {
+            loadHistory(currentDog);
+        }
+        if (id === 'create-walk-section') {
             document.getElementById('walk-form').reset();
             document.getElementById('walk-date').valueAsDate = new Date();
             simulatedPhotos = [];
@@ -317,12 +333,17 @@ async function showView(id, dogId = null) {
             loadMultiDog();
         }
     }
-    if(id === 'admin-dashboard-section') loadAdminDashboard();
-    if((id === 'dog-selection-dashboard' || id === 'admin-dashboard-section') && userHasInteracted) {
+
+    if (id === 'admin-dashboard-section') {
+        loadAdminDashboard();
+    }
+
+    if ((id === 'dog-selection-dashboard' || id === 'admin-dashboard-section') && userHasInteracted) {
         setTimeout(playWelcomeSound, 500);
     }
+
     updateWhatsApp();
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
 }
 function goBack(){
     if(backStack.length) showView(backStack.pop());
