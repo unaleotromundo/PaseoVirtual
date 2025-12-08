@@ -1205,25 +1205,48 @@ button:hover {
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
 }
-/* === NAVEGACIÓN Y MENÚ HAMBURGUESA === */
+/* === NAVEGACIÓN Y MENÚ (DISTRIBUCIÓN CORRECTA) === */
 
 header {
-    position: relative; /* Para posicionar los botones absolutos */
+    position: relative;
     padding-top: 20px;
 }
 
-/* Menú en Desktop (PC) */
+/* 1. BOTÓN DE TEMA (PERRITO) -> A LA IZQUIERDA */
+#theme-toggle {
+    position: absolute;
+    top: 0;
+    left: 0;  /* Fijo a la izquierda */
+    right: auto; /* Anulamos cualquier estilo previo de derecha */
+    /* Mantenemos tus estilos originales del botón */
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    z-index: 10;
+}
+
+/* 2. MENÚ EN PC -> A LA DERECHA */
 #main-nav {
     position: absolute;
     top: 10px;
-    left: 10px;
+    right: 0; /* Pegado a la derecha */
+    left: auto;
     display: flex;
     gap: 10px;
     z-index: 100;
 }
 
 .nav-link {
-    background: var(--bg-input); /* Botón sutil */
+    background: var(--bg-input);
     color: var(--text-primary);
     border: 1px solid var(--border);
     padding: 8px 16px;
@@ -1231,8 +1254,7 @@ header {
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.2s;
-    width: auto;
-    margin: 0;
+    white-space: nowrap;
 }
 
 .nav-link:hover {
@@ -1250,12 +1272,13 @@ header {
     background: var(--danger-light);
 }
 
-/* Botón Hamburguesa (Oculto en PC) */
+/* 3. HAMBURGUESA (MÓVIL) -> A LA DERECHA */
 #hamburger-btn {
     display: none; 
     position: absolute;
     top: 5px;
-    left: 10px;
+    right: 0; /* Pegado a la derecha */
+    left: auto;
     background: none;
     border: none;
     font-size: 2rem;
@@ -1267,27 +1290,26 @@ header {
 
 /* === ESTILOS MÓVIL (Menú desplegable) === */
 @media (max-width: 768px) {
-    /* Mostrar hamburguesa */
     #hamburger-btn {
         display: block;
     }
 
-    /* Ocultar menú por defecto y estilizar como caja flotante */
     #main-nav {
-        display: none; /* Oculto inicialmente */
+        display: none;
         flex-direction: column;
         top: 60px;
-        left: 10px;
+        right: 0; /* El menú cae alineado a la derecha */
+        left: auto;
         background: var(--bg-card);
         padding: 15px;
         border-radius: var(--radius);
         box-shadow: var(--shadow-lg);
         border: 1px solid var(--border);
         min-width: 200px;
-        animation: fadeInDown 0.3s ease;
+        animation: fadeInRight 0.3s ease;
+        z-index: 3000;
     }
 
-    /* Clase para mostrar el menú cuando se toca la hamburguesa */
     #main-nav.show {
         display: flex;
     }
@@ -1299,4 +1321,9 @@ header {
         font-size: 1rem;
         padding: 12px;
     }
+}
+
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
 }
