@@ -95,7 +95,7 @@ async function saveRealDog(dogData) {
     const { error } = await supabaseClient
         .from('dogs_real')
         .insert([{
-            nombre: dogData.nombre,
+            nombre: dogDato.nombre,
             dueno_email: dogData.dueno_email,
             perfil: dogData.perfil,
             walks: dogData.walks || []
@@ -153,7 +153,7 @@ async function uploadProfilePhoto(file) {
         REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
         currentDog = { ...currentDog, perfil: newPerfil };
 
-        // Forzar recarga de imagen con timestamp para evitar caché
+        // Forzar recarga de imagen con timestamp
         const photoUrl = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
         const imgEl = document.getElementById('profile-photo');
         imgEl.src = photoUrl;
@@ -495,15 +495,12 @@ function loadProfile(d) {
     const p = d.perfil;
     let photoSrc;
     if (d.isExample) {
-        // Ejemplos: usar Unsplash
         const id = tempPhotoId || p.foto_id || (DATABASE?.photo_references?.random?.[0] || '1581268694');
         photoSrc = getPhotoUrl(id, 300, 300);
     } else {
-        // Reales: usar Supabase Storage
         if (p.foto_id && p.foto_id.includes('perfil_')) {
             photoSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${p.foto_id}`;
         } else {
-            // Fallback a Unsplash si no tiene foto personalizada
             photoSrc = getPhotoUrl(p.foto_id || '1581268694', 300, 300);
         }
     }
@@ -541,23 +538,23 @@ function loadProfile(d) {
         v.appendChild(form);
         
         form.onsubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(form);
-    const updatedPerfil = {};
-    for (let [key, value] of formData.entries()) {
-        updatedPerfil[key] = value;
-    }
-    try {
-        await updateRealDogProfile(currentDog.id, updatedPerfil);
-        // ✅ Aquí actualizamos currentDog y recargamos sin recargar página
-        currentDog.perfil = { ...currentDog.perfil, ...updatedPerfil };
-        REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? currentDog : d);
-        showToast('✅ Perfil actualizado en la nube', 'success');
-        toggleEditMode(); // esto llama a loadProfile()
-    } catch (err) {
-        showToast('❌ Error al guardar: ' + err.message, 'error');
-    }
-};
+            e.preventDefault();
+            const formData = new FormData(form);
+            const updatedPerfil = {};
+            for (let [key, value] of formData.entries()) {
+                updatedPerfil[key] = value;
+            }
+            try {
+                await updateRealDogProfile(currentDog.id, updatedPerfil);
+                // ✅ Actualizar currentDog en memoria
+                currentDog.perfil = { ...currentDog.perfil, ...updatedPerfil };
+                REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? currentDog : d);
+                showToast('✅ Perfil actualizado en la nube', 'success');
+                toggleEditMode(); // recarga la vista
+            } catch (err) {
+                showToast('❌ Error al guardar: ' + err.message, 'error');
+            }
+        };
     }
 }
 function toggleEditMode(){ 
@@ -692,7 +689,89 @@ document.getElementById('close-lightbox').onclick = () =>
     document.getElementById('lightbox').style.display = 'none';
 
 // === FUNCIONES DE EDICIÓN (PASEOS) ===
-// (mantén tu lógica actual, ya que edita paseos, no perfil)
+function openEditWalk(walkIndex) {
+    if (!currentDog || currentDog.isExample) {
+        showToast('ℹ️ Solo se pueden editar paseos de perros reales', 'info');
+        return;
+    }
+    editWalkIdx = walkIndex;
+    const walk = currentDog.walks[walkIndex];
+    document.getElementById('edit-walk-date').value = walk.fecha;
+    document.getElementById('edit-walk-duration').value = walk.duracion_minutos;
+    document.getElementById('edit-walk-distance').value = walk.distancia_km;
+    document.getElementById('edit-walk-summary').value = walk.resumen_diario;
+    document.getElementById('edit-walk-behavior').checked = walk.comportamiento_problemas;
+    document.getElementById('edit-walk-health').value = walk.incidentes_salud || '';
+
+    const preview = document.getElementById('edit-photo-preview');
+    preview.innerHTML = '';
+    editWalkPhotos = [...walk.fotos];
+    editWalkPhotos.forEach((f, i) => {
+        const img = document.createElement('img');
+        img.src = getPhotoUrl(f.id, 100, 100);
+        img.style.cursor = 'pointer';
+        img.title = 'Haz clic para eliminar';
+        img.onclick = () => {
+            editWalkPhotos.splice(i, 1);
+            openEditWalk(walkIndex);
+        };
+        preview.appendChild(img);
+    });
+
+    document.getElementById('edit-walk-modal').style.display = 'flex';
+}
+
+document.getElementById('edit-walk-form').onsubmit = async (e) => {
+    e.preventDefault();
+    if (!currentDog || currentDog.isExample || editWalkIdx === null) return;
+
+    const updatedWalk = {
+        fecha: document.getElementById('edit-walk-date').value,
+        duracion_minutos: parseInt(document.getElementById('edit-walk-duration').value),
+        distancia_km: parseFloat(document.getElementById('edit-walk-distance').value),
+        resumen_diario: document.getElementById('edit-walk-summary').value,
+        comportamiento_problemas: document.getElementById('edit-walk-behavior').checked,
+        incidentes_salud: document.getElementById('edit-walk-health').value,
+        fotos: editWalkPhotos
+    };
+
+    currentDog.walks[editWalkIdx] = updatedWalk;
+    REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? currentDog : d);
+
+    try {
+        await updateRealDogWalks(currentDog.id, currentDog.walks);
+        showToast('✅ Paseo actualizado en la nube', 'success');
+        document.getElementById('edit-walk-modal').style.display = 'none';
+        loadHistory(currentDog);
+    } catch (err) {
+        showToast('❌ Error al guardar cambios', 'error');
+    }
+};
+
+function delWalk(walkIndex) {
+    if (!confirm('¿Eliminar este paseo? Esta acción no se puede deshacer.')) return;
+    if (!currentDog || currentDog.isExample) return;
+
+    currentDog.walks.splice(walkIndex, 1);
+    REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? currentDog : d);
+
+    updateRealDogWalks(currentDog.id, currentDog.walks)
+        .then(() => {
+            showToast('🗑️ Paseo eliminado', 'success');
+            loadHistory(currentDog);
+        })
+        .catch(err => {
+            showToast('❌ Error al eliminar', 'error');
+        });
+}
+
+function addPhotoEdit() {
+    const refs = DATABASE?.photo_references?.random || ['1581268694', '1581268695', '1581268696'];
+    const randomId = refs[Math.floor(Math.random() * refs.length)];
+    editWalkPhotos.push({ id: randomId, comentario: 'Foto agregada' });
+    const walkIndex = editWalkIdx;
+    openEditWalk(walkIndex);
+}
 
 // === BOTÓN: Recargar ejemplos ===
 document.getElementById('toggle-demo-btn').onclick = async () => {
@@ -708,10 +787,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('photo-upload-input').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (!file.type.startsWith('image/')) {
-                showToast('❌ Solo se permiten imágenes', 'error');
-                return;
-            }
             uploadProfilePhoto(file);
         }
         e.target.value = '';
@@ -775,91 +850,3 @@ window.onload = async () => {
         if (!userHasInteracted) userHasInteracted = true;
     }, { once: true });
 };
-// === EDITAR PASEO (modal) ===
-function openEditWalk(walkIndex) {
-    if (!currentDog || currentDog.isExample) {
-        showToast('ℹ️ Solo se pueden editar paseos de perros reales', 'info');
-        return;
-    }
-    editWalkIdx = walkIndex;
-    const walk = currentDog.walks[walkIndex];
-    document.getElementById('edit-walk-date').value = walk.fecha;
-    document.getElementById('edit-walk-duration').value = walk.duracion_minutos;
-    document.getElementById('edit-walk-distance').value = walk.distancia_km;
-    document.getElementById('edit-walk-summary').value = walk.resumen_diario;
-    document.getElementById('edit-walk-behavior').checked = walk.comportamiento_problemas;
-    document.getElementById('edit-walk-health').value = walk.incidentes_salud || '';
-
-    // Mostrar fotos actuales
-    const preview = document.getElementById('edit-photo-preview');
-    preview.innerHTML = '';
-    editWalkPhotos = [...walk.fotos]; // copia para editar
-    editWalkPhotos.forEach((f, i) => {
-        const img = document.createElement('img');
-        img.src = getPhotoUrl(f.id, 100, 100);
-        img.style.cursor = 'pointer';
-        img.title = 'Haz clic para eliminar';
-        img.onclick = () => {
-            editWalkPhotos.splice(i, 1);
-            openEditWalk(walkIndex); // recargar vista
-        };
-        preview.appendChild(img);
-    });
-
-    document.getElementById('edit-walk-modal').style.display = 'flex';
-}
-
-// === GUARDAR CAMBIOS EN PASEO ===
-document.getElementById('edit-walk-form').onsubmit = async (e) => {
-    e.preventDefault();
-    if (!currentDog || currentDog.isExample || editWalkIdx === null) return;
-
-    const updatedWalk = {
-        fecha: document.getElementById('edit-walk-date').value,
-        duracion_minutos: parseInt(document.getElementById('edit-walk-duration').value),
-        distancia_km: parseFloat(document.getElementById('edit-walk-distance').value),
-        resumen_diario: document.getElementById('edit-walk-summary').value,
-        comportamiento_problemas: document.getElementById('edit-walk-behavior').checked,
-        incidentes_salud: document.getElementById('edit-walk-health').value,
-        fotos: editWalkPhotos
-    };
-
-    currentDog.walks[editWalkIdx] = updatedWalk;
-    REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? currentDog : d);
-
-    try {
-        await updateRealDogWalks(currentDog.id, currentDog.walks);
-        showToast('✅ Paseo actualizado en la nube', 'success');
-        document.getElementById('edit-walk-modal').style.display = 'none';
-        loadHistory(currentDog); // ¡actualiza sin recargar!
-    } catch (err) {
-        showToast('❌ Error al guardar cambios', 'error');
-    }
-};
-
-// === ELIMINAR PASEO ===
-function delWalk(walkIndex) {
-    if (!confirm('¿Eliminar este paseo? Esta acción no se puede deshacer.')) return;
-    if (!currentDog || currentDog.isExample) return;
-
-    currentDog.walks.splice(walkIndex, 1);
-    REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? currentDog : d);
-
-    updateRealDogWalks(currentDog.id, currentDog.walks)
-        .then(() => {
-            showToast('🗑️ Paseo eliminado', 'success');
-            loadHistory(currentDog); // ¡actualiza sin recargar!
-        })
-        .catch(err => {
-            showToast('❌ Error al eliminar', 'error');
-        });
-}
-
-// === AGREGAR FOTO EN EDICIÓN (simulada) ===
-function addPhotoEdit() {
-    const refs = DATABASE?.photo_references?.random || ['1581268694', '1581268695', '1581268696'];
-    const randomId = refs[Math.floor(Math.random() * refs.length)];
-    editWalkPhotos.push({ id: randomId, comentario: 'Foto agregada' });
-    const walkIndex = editWalkIdx;
-    openEditWalk(walkIndex); // recargar vista
-}
