@@ -5,7 +5,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // === DATA DE RESPALDO (CON IDs 995-999) ===
-// Se usa si falla la carga del JSON local
 const FALLBACK_DB = {
   "dogs": [
     { "id": 995, "nombre": "Fido (Ejemplo)", "dueno_email": "cliente@paseos.com", "perfil": { "raza": "Pastor Alemán", "foto_id": "1589941013453-ec89f33b5e95", "telefono": "5491155550000" }, "walks": [] },
@@ -51,7 +50,7 @@ let DATABASE = null;
 
 // === ESTADO GLOBAL ===
 let currentUser = null, currentDog = null, currentView = 'login-section';
-let currentWalkFiles = []; // <--- NUEVA VARIABLE PARA LAS FOTOS
+let currentWalkFiles = []; // Almacena fotos reales para subir en nuevo paseo
 let simulatedPhotos = [], isEditing = false, tempPhotoId = null, backStack = [];
 let editWalkIdx = null, editWalkPhotos = [];
 let slideInterval = null, isPlaying = false;
@@ -67,9 +66,8 @@ function getPhotoUrl(id, w = 400, h = 400) {
     if(!id) return 'https://via.placeholder.com/400?text=No+Foto';
     
     // Soporte para fotos subidas a Supabase
-    if (id.includes('perfil_') || id.includes('paseodog')) { 
+    if (id.includes('perfil_') || id.includes('walk_') || id.includes('paseodog')) { 
        if(!id.startsWith('http')) {
-           // Usamos timestamp para evitar caché agresivo
            return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
        }
        return id;
@@ -78,7 +76,7 @@ function getPhotoUrl(id, w = 400, h = 400) {
     return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
 }
 
-// === CARGAR DATOS (LOCAL + SUPABASE) ===
+// === CARGAR DATOS ===
 async function loadExampleDogs() {
     try {
         const res = await fetch(DB_URL);
@@ -92,16 +90,12 @@ async function loadExampleDogs() {
 }
 
 function processLoadedData(data) {
-    // Forzamos IDs altos para evitar conflictos con IDs numéricos de Supabase (1, 2, 3...)
     const exampleIds = [995, 996, 997, 998, 999];
-    
     EXAMPLE_DOGS = (data.dogs || []).map((d, index) => ({
         ...d,
-        // IMPORTANTE: Ignoramos el ID del JSON y asignamos el reservado
         id: exampleIds[index] || (1000 + index),
         isExample: true
     }));
-    
     TRAINER_PHONE = data.trainer_phone || "5491100000000";
     if(data.admin) ADMIN_USER = data.admin;
     DATABASE = data;
@@ -128,7 +122,6 @@ async function loadAllDogs() {
 
 // === ACCIONES SUPABASE ===
 async function saveRealDog(dogData) {
-    // CORREGIDO: usar dogData, no dogDato
     const { error } = await supabaseClient
         .from('dogs_real')
         .insert([{
@@ -156,6 +149,7 @@ async function updateRealDogProfile(dogId, newPerfil) {
     if (error) throw error;
 }
 
+// === SUBIR FOTO PERFIL (CON EFECTO FILL) ===
 async function uploadProfilePhoto(file) {
     if (!currentDog || currentDog.isExample) {
         showToast('ℹ️ Solo se pueden subir fotos de perros reales', 'info');
@@ -171,11 +165,12 @@ async function uploadProfilePhoto(file) {
 
     // 1. CREAR Y MOSTRAR EFECTO DE CARGA (FILL)
     const container = document.getElementById('profile-photo-container');
+    if (container.querySelector('.uploading-fill')) return;
+    
     const loadingOverlay = document.createElement('div');
     loadingOverlay.className = 'uploading-fill';
     container.appendChild(loadingOverlay);
 
-    // Bloquear botón para no subir doble
     const uploadInput = document.getElementById('photo-upload-input');
     uploadInput.disabled = true;
 
@@ -187,38 +182,36 @@ async function uploadProfilePhoto(file) {
         const { error: uploadError } = await supabaseClient
             .storage
             .from('paseodog-photos')
-            .upload(filePath, file, { cacheControl: '0', upsert: false }); // Cache 0 para evitar problemas
+            .upload(filePath, file, { cacheControl: '0', upsert: false });
 
         if (uploadError) throw uploadError;
 
-        // 3. ACTUALIZAR PERFIL EN BASE DE DATOS
+        // 3. ACTUALIZAR DB
         const newPerfil = { ...currentDog.perfil, foto_id: fileName };
         await updateRealDogProfile(currentDog.id, newPerfil);
 
-        // 4. ACTUALIZAR UI E IMAGEN
-        // Actualizamos el objeto global
+        // 4. ACTUALIZAR UI
         REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
         currentDog = { ...currentDog, perfil: newPerfil };
         
-        // Forzamos la recarga de la imagen agregando timestamp (?t=...)
-        // Esto soluciona que "no cambie" aunque se haya subido bien.
+        // Forzar recarga con timestamp
         const img = document.getElementById('profile-photo');
         const newSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
         
-        // Precargar la imagen en memoria antes de mostrarla para evitar parpadeo negro
+        // Precargar imagen
         const tempImg = new Image();
         tempImg.src = newSrc;
         tempImg.onload = () => {
             img.src = newSrc;
             showToast('✅ Foto actualizada con éxito', 'success');
-            loadingOverlay.remove(); // Quitar animación solo cuando ya cargó la nueva
+            loadingOverlay.remove(); 
             uploadInput.disabled = false;
         };
 
     } catch (err) {
         console.error('Error subida:', err);
         showToast('❌ Error al subir: ' + err.message, 'error');
-        loadingOverlay.remove(); // Quitar animación si falla
+        loadingOverlay.remove();
         uploadInput.disabled = false;
     }
 }
@@ -236,21 +229,15 @@ function playRandomCarouselTrack() {
     const randomTrack = CARRUSEL_TRACKS[Math.floor(Math.random() * CARRUSEL_TRACKS.length)];
     carouselAudio = new Audio(randomTrack);
     
-    // Cuando termina la canción: parar música y parar fotos
+    // Si termina la canción, paran las fotos
     carouselAudio.onended = () => { 
         isPlaying = false; 
         updatePlayBtnState(); 
         if(slideInterval) clearInterval(slideInterval);
     };
     
-    carouselAudio.onerror = () => {
-        // Fallo silencioso si no hay mp3
-        console.log('Audio no disponible, continuando solo con fotos.');
-    };
-    
-    carouselAudio.play().catch(e => {
-        console.log('Autoplay bloqueado o archivo faltante');
-    });
+    carouselAudio.onerror = () => { console.log('Audio no disponible'); };
+    carouselAudio.play().catch(e => { console.log('Autoplay bloqueado'); });
 }
 
 function updatePlayBtnState() {
@@ -260,7 +247,6 @@ function updatePlayBtnState() {
     if(btn) btn.textContent = icon;
     if(largeBtn) largeBtn.textContent = icon;
     
-    // Clases para ocultar controles si está playing
     if(isPlaying) {
         largeBtn?.classList.add('playing');
         document.querySelector('.carousel-controls')?.classList.add('playing');
@@ -287,7 +273,7 @@ function initCarousel() {
     
     wrapper.style.display = 'flex';
     
-    // REQUISITO: Empezar en la última foto
+    // EMPEZAR EN LA ÚLTIMA FOTO (Estático)
     let idx = slides.length - 1; 
     
     isPlaying = false;
@@ -320,16 +306,13 @@ function initCarousel() {
         updatePlayBtnState();
 
         if(isPlaying) {
-            // REQUISITO: Play = Musica + Intervalo de 5s
             playRandomCarouselTrack(); 
-            
+            // INTERVALO DE 5 SEGUNDOS
             if (slideInterval) clearInterval(slideInterval);
             slideInterval = setInterval(() => {
                 window.nextSlide();
-            }, 5000); // 5 segundos
-            
+            }, 5000); 
         } else {
-            // Stop = Parar música y parar intervalo
             if(carouselAudio) carouselAudio.pause();
             if(slideInterval) clearInterval(slideInterval);
         }
@@ -341,7 +324,6 @@ function initCarousel() {
         else document.exitFullscreen();
     };
 
-    // Mostrar foto inicial estática
     showSlide();
     updatePlayBtnState();
 }
@@ -376,7 +358,6 @@ async function showView(id, dogId = null) {
     if(id !== currentView) backStack.push(currentView);
     currentView = id;
 
-    // Limpieza al cambiar de vista
     if (currentView !== 'dog-selection-dashboard') {
         if(slideInterval) clearInterval(slideInterval);
         if(carouselAudio) { carouselAudio.pause(); isPlaying=false; }
@@ -386,7 +367,6 @@ async function showView(id, dogId = null) {
     document.getElementById(id).style.display = 'block';
 
     if(dogId) {
-        // Comparación segura (string vs string)
         currentDog = allDogs.find(d => String(d.id) === String(dogId));
     }
 
@@ -401,8 +381,11 @@ async function showView(id, dogId = null) {
         if(id === 'create-walk-section') {
             document.getElementById('walk-form').reset();
             document.getElementById('walk-date').valueAsDate = new Date();
-            simulatedPhotos = [];
+            
+            // LIMPIAR FOTOS PENDIENTES
+            currentWalkFiles = [];
             document.getElementById('photo-preview').innerHTML = '';
+            
             loadMultiDog();
         }
     }
@@ -477,7 +460,6 @@ async function loadAdminDashboard() {
         const card = document.createElement('div');
         card.className = 'dog-card';
         card.style.setProperty('--i', i);
-        // CORREGIDO: comillas simples en el ID '${d.id}' para soportar UUIDs
         card.innerHTML = `
             <span>🐶 <strong>${d.nombre}</strong> <small style="color:var(--text-secondary)">(${d.perfil.raza})${suffix}</small></span>
             <button class="ripple" onclick="showView('dog-selection-dashboard', '${d.id}')">Gestionar</button>
@@ -505,7 +487,7 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
                 sexo: document.getElementById('new-dog-sex').value,
                 dueno: document.getElementById('new-dog-owner').value,
                 telefono: document.getElementById('new-dog-phone').value,
-                foto_id: '1581268694', // Foto default
+                foto_id: '1581268694', 
                 edad: '?', peso: '?', alergias: 'Ninguna', energia: 'Media', social: '?'
             },
             walks: []
@@ -553,7 +535,6 @@ function loadProfile(d) {
             try {
                 await updateRealDogProfile(currentDog.id, updatedPerfil);
                 currentDog.perfil = updatedPerfil;
-                // Actualizar array en memoria
                 const idx = REAL_DOGS.findIndex(x => x.id === currentDog.id);
                 if(idx !== -1) REAL_DOGS[idx] = currentDog;
                 
@@ -565,7 +546,7 @@ function loadProfile(d) {
             }
         };
     } else {
-        // VISTA LECTURA (Aquí faltaban los datos de comportamiento)
+        // VISTA LECTURA (Incluye comportamiento)
         v.innerHTML = `
             <h3>🐕 Datos Básicos</h3>
             <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${p.raza}</span></div>
@@ -577,14 +558,13 @@ function loadProfile(d) {
             <div class="detail-row"><span class="detail-label">Alergias:</span> <span class="detail-value">${p.alergias}</span></div>
             <div class="detail-row"><span class="detail-label">Dueño:</span> <span class="detail-value">${p.dueno}</span></div>
             <div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${p.telefono}</span></div>
-            
+
             <h3>🎾 Comportamiento</h3>
             <div class="detail-row"><span class="detail-label">Energía:</span> <span class="detail-value">${p.energia || '?'}</span></div>
             <div class="detail-row"><span class="detail-label">Social:</span> <span class="detail-value">${p.social || '?'}</span></div>
         `;
     }
-} // <--- Cierre de la función loadProfile
-
+}
 function toggleEditMode(){ 
     if (currentDog?.isExample) {
         showToast('ℹ️ Los ejemplos no se pueden editar', 'info');
@@ -597,7 +577,59 @@ function randomizeProfilePhoto(){
     document.getElementById('photo-upload-input').click();
 }
 
-// === CREATE WALK ===
+// === CREATE WALK (LOGICA SUBIDA FOTOS) ===
+
+// 1. Listeners para input de fotos
+document.addEventListener('DOMContentLoaded', () => {
+    const addBtn = document.getElementById('add-walk-photo-btn');
+    const walkInput = document.getElementById('walk-photo-input');
+
+    if (addBtn && walkInput) {
+        addBtn.onclick = () => walkInput.click();
+        walkInput.onchange = (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                const newFiles = Array.from(e.target.files);
+                currentWalkFiles = [...currentWalkFiles, ...newFiles];
+                renderWalkPreview();
+            }
+            e.target.value = '';
+        };
+    }
+});
+
+// 2. Renderizar miniaturas
+function renderWalkPreview() {
+    const container = document.getElementById('photo-preview');
+    container.innerHTML = '';
+
+    currentWalkFiles.forEach((file, index) => {
+        const div = document.createElement('div');
+        div.style.position = 'relative';
+        div.style.width = '80px';
+        div.style.height = '80px';
+        div.style.margin = '5px';
+
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '8px';
+
+        const delBtn = document.createElement('button');
+        delBtn.innerHTML = '×';
+        delBtn.className = 'delete-photo-btn'; 
+        delBtn.onclick = () => {
+            currentWalkFiles.splice(index, 1);
+            renderWalkPreview();
+        };
+
+        div.appendChild(img);
+        div.appendChild(delBtn);
+        container.appendChild(div);
+    });
+}
+
 async function loadMultiDog(){
     const c = document.getElementById('multi-dog-container');
     c.innerHTML = '';
@@ -607,25 +639,44 @@ async function loadMultiDog(){
     });
 }
 
-document.getElementById('simulate-photos-btn').onclick = () => {
-    simulatedPhotos = [];
-    const c = document.getElementById('photo-preview');
-    c.innerHTML = '';
-    const refs = ['1581268694', '1592194996308-7b43878e84a6', '1587300003388-5920dcc28193'];
-    refs.forEach((id, i) => {
-        simulatedPhotos.push({id, comentario: `Foto ${i+1}`});
-        c.innerHTML += `<img src="${getPhotoUrl(id,100,100)}">`;
-    });
-};
-
+// 3. Submit con subida secuencial
 document.getElementById('walk-form').onsubmit = async (e) => {
     e.preventDefault();
     if (currentDog?.isExample) return showToast('ℹ️ Ejemplo: no editable', 'info');
     
     const submitBtn = document.querySelector('#walk-form .save-btn');
-    submitBtn.innerHTML = '🔄 Guardando...'; submitBtn.disabled = true;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
     
     try {
+        const uploadedPhotos = [];
+
+        // PASO A: Subir fotos
+        if (currentWalkFiles.length > 0) {
+            for (let i = 0; i < currentWalkFiles.length; i++) {
+                const file = currentWalkFiles[i];
+                const ext = file.name.split('.').pop().toLowerCase();
+                const fileName = `walk_${currentDog.id}_${Date.now()}_${i}.${ext}`;
+                
+                submitBtn.innerHTML = `☁️ Subiendo ${i+1} de ${currentWalkFiles.length}...`;
+
+                const { error } = await supabaseClient
+                    .storage
+                    .from('paseodog-photos')
+                    .upload(fileName, file);
+
+                if (error) throw error;
+                
+                uploadedPhotos.push({
+                    id: fileName,
+                    comentario: 'Foto del paseo'
+                });
+            }
+        }
+
+        submitBtn.innerHTML = '💾 Guardando datos...';
+
+        // PASO B: Guardar paseo
         const w = {
             fecha: document.getElementById('walk-date').value,
             duracion_minutos: parseInt(document.getElementById('walk-duration').value),
@@ -633,18 +684,24 @@ document.getElementById('walk-form').onsubmit = async (e) => {
             resumen_diario: document.getElementById('walk-summary').value,
             comportamiento_problemas: document.getElementById('comportamiento-problemas').checked,
             incidentes_salud: document.getElementById('incidentes-salud').value,
-            fotos: simulatedPhotos.length ? simulatedPhotos : [{id: '1581268694', comentario: 'Paseo'}]
+            fotos: uploadedPhotos 
         };
+
         const updatedWalks = [w, ...(currentDog.walks || [])];
         await updateRealDogWalks(currentDog.id, updatedWalks);
         currentDog.walks = updatedWalks;
         
         showToast('✅ Paseo guardado', 'success');
         showView('dog-selection-dashboard');
+
     } catch (err) {
+        console.error(err);
         showToast('❌ Error: ' + err.message, 'error');
     } finally {
-        submitBtn.innerHTML = '💾 Guardar Paseo'; submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText; 
+        submitBtn.disabled = false;
+        currentWalkFiles = [];
+        renderWalkPreview();
     }
 };
 
@@ -694,7 +751,7 @@ window.openLightbox = (id) => {
 };
 document.getElementById('close-lightbox').onclick = () => document.getElementById('lightbox').style.display = 'none';
 
-// === EDIT WALK (CON LOGICA DE NO BORRAR TEXTO) ===
+// === EDIT WALK ===
 window.openEditWalk = (walkIndex) => {
     if (!currentDog || currentDog.isExample) return;
     editWalkIdx = walkIndex;
@@ -730,7 +787,7 @@ function renderEditPhotos() {
         btn.innerHTML = '×';
         btn.className = 'delete-photo-btn';
         btn.onclick = (e) => {
-            e.preventDefault(); // Prevenir submit del form
+            e.preventDefault(); 
             editWalkPhotos.splice(i, 1);
             renderEditPhotos();
         };
@@ -744,7 +801,7 @@ function renderEditPhotos() {
 window.addPhotoEdit = () => {
     const randomId = ['1581268694', '1581268695', '1581268696'][Math.floor(Math.random()*3)];
     editWalkPhotos.push({ id: randomId, comentario: 'Foto agregada' });
-    renderEditPhotos(); // Solo renderizamos fotos, no tocamos inputs
+    renderEditPhotos();
 };
 
 document.getElementById('edit-walk-form').onsubmit = async (e) => {
