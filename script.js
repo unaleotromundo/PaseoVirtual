@@ -190,6 +190,7 @@ async function uploadProfilePhoto(file) {
 
 // === AUDIO DEL CARRUSEL ===
 const CARRUSEL_TRACKS = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3', 'musica4.mp3'];
+// === AUDIO DEL CARRUSEL (Actualizar esta parte también) ===
 function playRandomCarouselTrack() {
     if (!isAudioEnabled) return;
     if (carouselAudio) {
@@ -197,23 +198,28 @@ function playRandomCarouselTrack() {
         carouselAudio = null;
     }
     
-    // Selección aleatoria simple
     const randomTrack = CARRUSEL_TRACKS[Math.floor(Math.random() * CARRUSEL_TRACKS.length)];
     
     carouselAudio = new Audio(randomTrack);
-    carouselAudio.onended = () => { isPlaying = false; updatePlayBtnState(); };
     
-    // Manejo silencioso de error (por si no existen los archivos)
+    // CUANDO TERMINA LA CANCIÓN:
+    carouselAudio.onended = () => { 
+        isPlaying = false; 
+        updatePlayBtnState(); 
+        if(slideInterval) clearInterval(slideInterval); // <--- AGREGAR ESTO: Detiene las fotos
+    };
+    
     carouselAudio.onerror = () => {
-        console.warn('🎵 Audio no encontrado, continuando sin música.');
+        console.warn('🎵 Audio no encontrado.');
         isPlaying = false;
         updatePlayBtnState();
+        if(slideInterval) clearInterval(slideInterval); // Detener si falla audio
     };
     
     carouselAudio.play().catch(() => {
-        // Bloqueado por el navegador o error de archivo
         isPlaying = false;
         updatePlayBtnState();
+        if(slideInterval) clearInterval(slideInterval);
     });
 }
 
