@@ -915,3 +915,72 @@ window.onload = async () => {
         if (!userHasInteracted) userHasInteracted = true;
     }, { once: true });
 };
+// === LÓGICA DE NAVEGACIÓN Y MENÚ ===
+
+document.addEventListener('DOMContentLoaded', () => {
+    const nav = document.getElementById('main-nav');
+    const burger = document.getElementById('hamburger-btn');
+    const btnHome = document.getElementById('nav-home-btn');
+    const btnLogout = document.getElementById('nav-logout-btn');
+
+    // 1. Toggle Menú Hamburguesa
+    if (burger) {
+        burger.onclick = (e) => {
+            e.stopPropagation(); // Evitar que se cierre al hacer click
+            nav.classList.toggle('show');
+            burger.textContent = nav.classList.contains('show') ? '✕' : '☰';
+        };
+    }
+
+    // Cerrar menú al hacer click fuera
+    document.addEventListener('click', (e) => {
+        if (nav && nav.classList.contains('show') && !nav.contains(e.target) && e.target !== burger) {
+            nav.classList.remove('show');
+            burger.textContent = '☰';
+        }
+    });
+
+    // 2. Botón Inicio
+    if (btnHome) {
+        btnHome.onclick = () => {
+            nav.classList.remove('show'); // Cerrar menú móvil
+            burger.textContent = '☰';
+            
+            if (!currentUser) {
+                showView('login-section');
+                return;
+            }
+
+            if (currentUser.isAdmin) {
+                showView('admin-dashboard-section');
+            } else {
+                // Si es cliente, volvemos a su dashboard
+                // (currentDog debería estar seteado desde el login)
+                if (currentDog) {
+                    showView('dog-selection-dashboard');
+                } else {
+                    showView('login-section'); // Fallback por seguridad
+                }
+            }
+        };
+    }
+
+    // 3. Botón Cerrar Sesión
+    if (btnLogout) {
+        btnLogout.onclick = () => {
+            if(confirm('¿Cerrar sesión?')) {
+                nav.classList.remove('show');
+                burger.textContent = '☰';
+                
+                // Limpiar variables globales
+                currentUser = null;
+                currentDog = null;
+                // Opcional: Limpiar caches o fotos pendientes
+                currentWalkFiles = [];
+                
+                showToast('👋 ¡Hasta luego!', 'info');
+                showView('login-section');
+            }
+        };
+    }
+});
