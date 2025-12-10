@@ -1296,7 +1296,7 @@ header {
         border: 1px solid var(--border);
         min-width: 200px;
         animation: fadeInRight 0.3s ease;
-        z-index: 3000;
+        z-index: 9999;
     }
 
     #main-nav.show {
