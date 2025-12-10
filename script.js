@@ -1,33 +1,8 @@
-// === CONTROL DE ACCESO showView('login-section')(CLIENTE vs ADMIN) ===
-function goToLogin(role) {
-    // 1. Mostrar la vista de login
-    showView('login-section');
-    
-    // 2. Referencias a elementos
-    const title = document.getElementById('login-title');
-    const clientOptions = document.getElementById('client-login-options');
-    const emailInput = document.getElementById('email');
-
-    // 3. Adaptar la pantalla según el rol
-    if (role === 'admin') {
-        title.textContent = '🧢 Acceso Paseador';
-        clientOptions.style.display = 'none'; // OCULTA EL REGISTRO
-        // Opcional: Autocompletar tu mail para ir más rápido
-        // emailInput.value = ADMIN_USER.email; 
-    } else {
-        title.textContent = '🦴 Acceso Dueños';
-        clientOptions.style.display = 'block'; // MUESTRA EL REGISTRO
-        emailInput.value = '';
-    }
-}
-
 // === SUPABASE CONFIG ===
 const { createClient } = window.supabase;
 const SUPABASE_URL = 'https://asejbhohkbcoixiwdhcq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZWpiaG9oa2Jjb2l4aXdkaGNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjk0NzMsImV4cCI6MjA4MDYwNTQ3M30.kbRKO5PEljZ29_kn6GYKoyGfB_t8xalxtMiq1ovPo4w';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-
 
 // === DATA DE RESPALDO (CON IDs 995-999) ===
 const FALLBACK_DB = {
@@ -535,11 +510,7 @@ function playWelcomeSound() {
     o.stop(audioContext.currentTime + 0.3);
 }
 
-// === LOGIN ===
-document.getElementById('toggle-password').onclick = () => {
-    const p = document.getElementById('password');
-    p.type = p.type === 'password' ? 'text' : 'password';
-};
+// === LOGIN MODIFICADO ===
 document.getElementById('login-form').onsubmit = async (e) => {
     e.preventDefault();
     const em = document.getElementById('email').value.toLowerCase().trim();
@@ -552,7 +523,7 @@ document.getElementById('login-form').onsubmit = async (e) => {
     errorMsg.style.display = 'none';
 
     try {
-        // 1. CASO ADMIN (Tu cuenta)
+        // 1. CASO ADMIN
         if (em === ADMIN_USER.email && pw === ADMIN_USER.password) {
             currentUser = { email: em, isAdmin: true };
             showToast('👋 ¡Hola Paseador!', 'success');
@@ -569,13 +540,56 @@ document.getElementById('login-form').onsubmit = async (e) => {
             password: pw
         });
 
-        if (!authError && authData.user) {
+        if (authError) throw new Error('Credenciales incorrectas o email no confirmado.');
+
+        if (authData.user) {
             currentUser = { 
                 email: authData.user.email, 
                 isAdmin: false,
                 id: authData.user.id,
                 name: authData.user.user_metadata.full_name
             };
+
+            // Buscar si este email tiene un perro asignado
+            dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === em);
+
+            if (dogFound) {
+                currentDog = dogFound;
+                showToast(`👋 Bienvenido ${currentUser.name || 'Cliente'}`, 'success');
+                showView('dog-selection-dashboard');
+            } else {
+                // SI ENTRA PERO NO TIENE PERRO, LO MANDAMOS A LA PANTALLA DE ESPERA
+                showToast('ℹ️ Cuenta activa sin perro asignado', 'info');
+                
+                const waBtn = document.getElementById('whatsapp-pending-btn');
+                if(waBtn) waBtn.href = `https://wa.me/${TRAINER_PHONE}?text=Hola, soy ${currentUser.name} (${currentUser.email}). Ya me registré en la App y espero que vinculen a mi perro.`;
+                
+                showView('pending-dog-section');
+            }
+            return;
+        }
+
+        // 3. CASO CLIENTE DEMO
+        dogFound = allDogs.find(x => x.dueno_email === em);
+        if (dogFound && pw === '123456') {
+            currentUser = { email: em, isAdmin: false };
+            currentDog = dogFound;
+            showToast('👋 Acceso Demo', 'info');
+            showView('dog-selection-dashboard');
+            return;
+        }
+
+        throw new Error('Credenciales incorrectas');
+
+    } catch (err) {
+        console.error(err);
+        errorMsg.textContent = '❌ Usuario o contraseña incorrectos.';
+        errorMsg.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Iniciar Sesión';
+    }
+};
 
             // Buscar si este email tiene un perro asignado en la base de datos
             dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === em);
@@ -637,69 +651,33 @@ async function loadAdminDashboard() {
     });
 }
 
-// === CREAR PERRO (ADMIN + INVITACIÓN) ===
+// === CREATE DOG ===
 document.getElementById('create-dog-form').onsubmit = async (e) => {
     e.preventDefault();
     const submitBtn = document.querySelector('#create-dog-form .save-btn');
     if(submitBtn.disabled) return;
     
-    // Obtener valores
-    const dogName = document.getElementById('new-dog-name').value;
-    const ownerEmail = document.getElementById('new-dog-email').value.toLowerCase().trim();
-    const ownerPhone = document.getElementById('new-dog-phone').value;
-    const ownerName = document.getElementById('new-dog-owner').value;
-    
     submitBtn.innerHTML = '🔄 Guardando...';
     submitBtn.disabled = true;
     
     try {
-        // 1. Guardar en Base de Datos (Pre-registro)
         const nd = {
-            nombre: dogName,
-            dueno_email: ownerEmail,
+            nombre: document.getElementById('new-dog-name').value,
+            dueno_email: document.getElementById('new-dog-email').value,
             perfil: {
                 raza: document.getElementById('new-dog-breed').value,
                 sexo: document.getElementById('new-dog-sex').value,
-                dueno: ownerName,
-                telefono: ownerPhone,
-                foto_id: '1581268694', // Placeholder
+                dueno: document.getElementById('new-dog-owner').value,
+                telefono: document.getElementById('new-dog-phone').value,
+                foto_id: '1581268694', 
                 edad: '?', peso: '?', alergias: 'Ninguna', energia: 'Media', social: '?'
             },
             walks: []
         };
         await saveRealDog(nd);
-
-        // 2. Preparar Link de WhatsApp
-        // URL actual de tu web (automática)
-        const appLink = window.location.href; 
-        
-        const message = `Hola ${ownerName}! 👋 Soy tu paseador de PaseoDog.\n\n` +
-                        `Ya registré a 🐶 *${dogName}* en el sistema.\n\n` +
-                        `Para ver sus fotos y reportes, por favor activa tu cuenta aquí:\n` +
-                        `${appLink}\n\n` +
-                        `👉 Usa este correo: *${ownerEmail}* y crea tu contraseña.`;
-
-        const waLink = `https://wa.me/${ownerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-        const mailLink = `mailto:${ownerEmail}?subject=Bienvenido a PaseoDog&body=${encodeURIComponent(message)}`;
-
-        // 3. Mostrar opciones al Admin
-        showToast('✅ Perro guardado en DB', 'success');
-        
-        // Crear un modal o alerta customizada para enviar la invitación
-        const confirmSend = confirm(`✅ ${dogName} registrado correctamente.\n\n¿Quieres enviar la invitación al dueño por WhatsApp ahora?`);
-        
-        if (confirmSend) {
-            window.open(waLink, '_blank');
-        } else {
-            // Si dice que no, preguntamos por correo
-             if(confirm('¿Enviar por Correo Electrónico?')) {
-                 window.location.href = mailLink;
-             }
-        }
-
+        showToast('✅ Perro registrado', 'success');
         document.getElementById('create-dog-form').reset();
         showView('admin-dashboard-section');
-
     } catch (err) {
         showToast('❌ Error: ' + (err.message || 'Desconocido'), 'error');
     } finally {
@@ -1193,75 +1171,45 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
-// === ACTIVACIÓN DE CUENTA (SOLO SI EL ADMIN YA LO CREÓ) ===
+// === LOGICA DE REGISTRO DE NUEVO CLIENTE ===
 document.getElementById('register-form').onsubmit = async (e) => {
     e.preventDefault();
     
     const name = document.getElementById('reg-name').value;
     const phone = document.getElementById('reg-phone').value;
-    const email = document.getElementById('reg-email').value.toLowerCase().trim();
+    const email = document.getElementById('reg-email').value;
     const pass = document.getElementById('reg-pass').value;
     const passConf = document.getElementById('reg-pass-conf').value;
     const btn = e.target.querySelector('button[type="submit"]');
 
     if (pass !== passConf) return showToast('❌ Las contraseñas no coinciden', 'error');
-    if (pass.length < 6) return showToast('❌ La contraseña es muy corta', 'error');
+    if (pass.length < 6) return showToast('❌ La contraseña es muy corta (mínimo 6)', 'error');
 
     btn.disabled = true;
-    btn.innerHTML = '🔍 Verificando invitación...';
+    btn.innerHTML = '⏳ Creando usuario...';
 
     try {
-        // 1. SEGURIDAD: Verificar si el Admin ya registró este email en la DB de perros
-        // Esto evita que gente random se registre en tu app.
-        const allDogs = await loadAllDogs();
-        const isInvited = allDogs.find(d => d.dueno_email && d.dueno_email.toLowerCase() === email && d.isReal);
-
-        if (!isInvited && email !== ADMIN_USER.email) {
-            throw new Error('Este correo no ha sido registrado por el paseador. Pídele que te agregue primero.');
-        }
-
-        btn.innerHTML = '⏳ Creando credenciales...';
-
-        // 2. Crear el usuario en Auth (Supabase)
         const { data, error } = await supabaseClient.auth.signUp({
             email: email,
             password: pass,
             options: {
-                data: { full_name: name, phone: phone }
+                data: { full_name: name, phone: phone } // Guardamos datos extra
             }
         });
 
         if (error) throw error;
 
-        // 3. Login Exitoso
-        if (data.session) {
-            showToast('✅ ¡Cuenta activada! Bienvenido.', 'success');
-            
-            // Auto-login
-            currentUser = { 
-                email: data.user.email, 
-                isAdmin: false, 
-                id: data.user.id,
-                name: name
-            };
-            
-            // Redirigir directo al dashboard del perro (porque YA existe)
-            currentDog = isInvited; // Ya lo encontramos arriba
-            document.getElementById('register-form').reset();
-            showView('dog-selection-dashboard');
-
-        } else {
-            showToast('✅ Revisa tu correo para confirmar.', 'info');
-            showView('login-section');
-        }
+        showToast('✅ ¡Cuenta creada! Por favor inicia sesión.', 'success');
+        document.getElementById('register-form').reset();
+        showView('login-section');
 
     } catch (err) {
         let msg = err.message;
-        if(msg.includes('already registered')) msg = 'Este usuario ya existe. Intenta Iniciar Sesión.';
-        showToast('❌ ' + msg, 'error');
+        if(msg.includes('already registered')) msg = 'Este correo ya está registrado.';
+        showToast('❌ Error: ' + msg, 'error');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '✅ Activar Cuenta';
+        btn.innerHTML = '✅ Crear Cuenta';
     }
 };
 });
