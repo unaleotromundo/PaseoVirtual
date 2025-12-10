@@ -50,7 +50,6 @@ let EXAMPLE_DOGS = [];
 let REAL_DOGS = [];
 let DATABASE = null;
 
-
 // === ESTADO GLOBAL ===
 let currentUser = null, currentDog = null, currentView = 'login-section';
 let currentWalkFiles = []; // Fotos reales para nuevo paseo
@@ -64,20 +63,19 @@ let userHasInteracted = false;
 let lastPlayedTrack = null;
 let carouselAudio = null;
 
+// === NUEVAS VARIABLES PARA LOGIN INTELIGENTE ===
+let loginStep = 'email';
+let currentEmailLogin = '';
+
 // === FUNCIONES DE IMÁGENES ===
 function getPhotoUrl(id, w = 400, h = 400) {
     if(!id) return 'https://via.placeholder.com/400?text=No+Foto';
-    
-    // Soporte para fotos subidas a Supabase
     if (id.includes('perfil_') || id.includes('walk_') || id.includes('paseodog')) { 
        if(!id.startsWith('http')) {
-           // Usamos timestamp para evitar caché agresivo si es necesario, 
-           // pero aquí lo devolvemos limpio y manejamos el cache en la llamada
            return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
        }
        return id;
     }
-    // Soporte Unsplash
     return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
 }
 
@@ -111,7 +109,6 @@ async function loadRealDogs() {
         .from('dogs_real')
         .select('*')
         .order('nombre', { ascending: true });
-    
     if (error) {
         console.error('Error Supabase:', error);
         return [];
@@ -161,55 +158,44 @@ async function convertToWebP(file, maxWidth = 1920, quality = 0.85) {
             reject(new Error('El archivo no es una imagen'));
             return;
         }
-
         const reader = new FileReader();
         reader.onerror = () => reject(new Error('Error al leer el archivo'));
-        
         reader.onload = (e) => {
             const img = new Image();
             img.onerror = () => reject(new Error('Error al cargar la imagen'));
-            
             img.onload = () => {
                 let width = img.width;
                 let height = img.height;
-                
                 if (width > maxWidth) {
                     height = (height * maxWidth) / width;
                     width = maxWidth;
                 }
-                
                 const canvas = document.createElement('canvas');
                 canvas.width = width;
                 canvas.height = height;
-                
                 const ctx = canvas.getContext('2d');
                 ctx.fillStyle = '#FFFFFF';
                 ctx.fillRect(0, 0, width, height);
                 ctx.drawImage(img, 0, 0, width, height);
-                
                 canvas.toBlob(
                     (blob) => {
                         if (!blob) {
                             reject(new Error('Error al convertir a WebP'));
                             return;
                         }
-                        
                         const webpFile = new File(
                             [blob], 
                             file.name.replace(/\.(jpg|jpeg|png)$/i, '.webp'),
                             { type: 'image/webp' }
                         );
-                        
                         resolve(webpFile);
                     },
                     'image/webp',
                     quality
                 );
             };
-            
             img.src = e.target.result;
         };
-        
         reader.readAsDataURL(file);
     });
 }
@@ -219,41 +205,29 @@ async function uploadProfilePhoto(file) {
         showToast('ℹ️ Solo se pueden subir fotos de perros reales', 'info');
         return;
     }
-
     const container = document.getElementById('profile-photo-container');
     if (container.querySelector('.uploading-fill')) return;
-    
     const loadingOverlay = document.createElement('div');
     loadingOverlay.className = 'uploading-fill';
     container.appendChild(loadingOverlay);
-
     const uploadInput = document.getElementById('photo-upload-input');
     uploadInput.disabled = true;
-
     try {
-        // CONVERTIR A WEBP ANTES DE SUBIR
         showToast('🔄 Optimizando imagen...', 'info');
         const webpFile = await convertToWebP(file, 1920, 0.85);
-        
         const fileName = `perfil_${currentDog.id}_${Date.now()}.webp`;
         const filePath = fileName;
-
         const { error: uploadError } = await supabaseClient
             .storage
             .from('paseodog-photos')
             .upload(filePath, webpFile, { cacheControl: '0', upsert: false });
-
         if (uploadError) throw uploadError;
-
         const newPerfil = { ...currentDog.perfil, foto_id: fileName };
         await updateRealDogProfile(currentDog.id, newPerfil);
-
         REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
         currentDog = { ...currentDog, perfil: newPerfil };
-        
         const img = document.getElementById('profile-photo');
         const newSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
-        
         const tempImg = new Image();
         tempImg.src = newSrc;
         tempImg.onload = () => {
@@ -262,7 +236,6 @@ async function uploadProfilePhoto(file) {
             loadingOverlay.remove(); 
             uploadInput.disabled = false;
         };
-
     } catch (err) {
         console.error('Error subida:', err);
         showToast('❌ Error: ' + err.message, 'error');
@@ -280,16 +253,13 @@ function playRandomCarouselTrack() {
         carouselAudio.pause();
         carouselAudio = null;
     }
-    
     const randomTrack = CARRUSEL_TRACKS[Math.floor(Math.random() * CARRUSEL_TRACKS.length)];
     carouselAudio = new Audio(randomTrack);
-    
     carouselAudio.onended = () => { 
         isPlaying = false; 
         updatePlayBtnState(); 
         if(slideInterval) clearInterval(slideInterval);
     };
-    
     carouselAudio.onerror = () => { console.log('Audio no disponible'); };
     carouselAudio.play().catch(e => { console.log('Autoplay bloqueado'); });
 }
@@ -312,9 +282,7 @@ function hideCarouselControls() {
 function showCarouselControls() {
     const wrapper = document.getElementById('carousel-wrapper');
     wrapper?.classList.remove('hide-controls');
-    
     if (carouselMouseTimeout) clearTimeout(carouselMouseTimeout);
-    
     if (isFullscreen && isPlaying) {
         carouselMouseTimeout = setTimeout(hideCarouselControls, 3000);
     }
@@ -323,27 +291,21 @@ function showCarouselControls() {
 function initCarousel() {
     const wrapper = document.getElementById('carousel-wrapper');
     const slides = [];
-    
     if (currentDog && currentDog.walks) {
         currentDog.walks.forEach(wa => {
             if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
         });
     }
-
     if (!slides.length) {
         wrapper.style.display = 'none';
         return;
     }
-    
     wrapper.style.display = 'flex';
-    let idx = slides.length - 1; // Empezar en la última
-    
+    let idx = slides.length - 1;
     isPlaying = false;
     if (slideInterval) clearInterval(slideInterval);
-
     const img = document.getElementById('carousel-img');
     const counter = document.getElementById('carousel-counter');
-    
     const showSlide = () => {
         img.style.opacity = 0;
         setTimeout(() => {
@@ -352,21 +314,17 @@ function initCarousel() {
             counter.textContent = `${idx + 1} / ${slides.length}`;
         }, 200);
     };
-
     window.nextSlide = () => {
         idx = (idx + 1) % slides.length;
         showSlide();
     };
-
     window.prevSlide = () => {
         idx = (idx - 1 + slides.length) % slides.length;
         showSlide();
     };
-
     window.togglePlay = () => {
         isPlaying = !isPlaying;
         updatePlayBtnState();
-
         if(isPlaying) {
             playRandomCarouselTrack(); 
             if (slideInterval) clearInterval(slideInterval);
@@ -378,46 +336,38 @@ function initCarousel() {
             if(slideInterval) clearInterval(slideInterval);
         }
     };
-
     window.toggleFullscreen = () => {
-    const elem = document.getElementById('carousel-container');
-    if (!document.fullscreenElement) {
-        elem.requestFullscreen().catch(err => {});
-    } else {
-        document.exitFullscreen();
-    }
-};
-
-// Detectar cambios de pantalla completa
-document.addEventListener('fullscreenchange', () => {
-    isFullscreen = !!document.fullscreenElement;
-    const wrapper = document.getElementById('carousel-wrapper');
-    
-    if (isFullscreen) {
-        // Activar auto-hide en fullscreen
-        if (isPlaying) {
-            carouselMouseTimeout = setTimeout(hideCarouselControls, 3000);
+        const elem = document.getElementById('carousel-container');
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => {});
+        } else {
+            document.exitFullscreen();
         }
-    } else {
-        // Desactivar auto-hide fuera de fullscreen
-        wrapper?.classList.remove('hide-controls');
-        if (carouselMouseTimeout) clearTimeout(carouselMouseTimeout);
+    };
+    document.addEventListener('fullscreenchange', () => {
+        isFullscreen = !!document.fullscreenElement;
+        const wrapper = document.getElementById('carousel-wrapper');
+        if (isFullscreen) {
+            if (isPlaying) {
+                carouselMouseTimeout = setTimeout(hideCarouselControls, 3000);
+            }
+        } else {
+            wrapper?.classList.remove('hide-controls');
+            if (carouselMouseTimeout) clearTimeout(carouselMouseTimeout);
+        }
+    });
+    const wrapperEl = document.getElementById('carousel-wrapper');
+    if (wrapperEl) {
+        wrapperEl.addEventListener('mousemove', showCarouselControls);
+        wrapperEl.addEventListener('mouseenter', showCarouselControls);
+        wrapperEl.addEventListener('mouseleave', () => {
+            if (carouselMouseTimeout) clearTimeout(carouselMouseTimeout);
+            if (isFullscreen && isPlaying) hideCarouselControls();
+        });
     }
-});
-
     showSlide();
-showSlide();
-    updatePlayBtnState();
     updatePlayBtnState();
 }
-// Detectar movimiento del mouse en el carrusel
-    const wrapper = document.getElementById('carousel-wrapper');
-    wrapper.addEventListener('mousemove', showCarouselControls);
-    wrapper.addEventListener('mouseenter', showCarouselControls);
-    wrapper.addEventListener('mouseleave', () => {
-        if (carouselMouseTimeout) clearTimeout(carouselMouseTimeout);
-        if (isFullscreen && isPlaying) hideCarouselControls();
-    });
 
 // === UI & TEMA ===
 const themeToggle = document.getElementById('theme-toggle');
@@ -445,22 +395,17 @@ function updateWhatsApp() {
 // === NAVEGACIÓN ===
 async function showView(id, dogId = null) {
     const allDogs = await loadAllDogs();
-    
     if(id !== currentView) backStack.push(currentView);
     currentView = id;
-
     if (currentView !== 'dog-selection-dashboard') {
         if(slideInterval) clearInterval(slideInterval);
         if(carouselAudio) { carouselAudio.pause(); isPlaying=false; }
     }
-
     document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
     document.getElementById(id).style.display = 'block';
-
     if(dogId) {
         currentDog = allDogs.find(d => String(d.id) === String(dogId));
     }
-
     if(currentDog) {
         document.querySelectorAll('.dog-name-placeholder').forEach(e => e.textContent = currentDog.nombre);
         if(id === 'dog-selection-dashboard') {
@@ -472,21 +417,15 @@ async function showView(id, dogId = null) {
         if(id === 'create-walk-section') {
             document.getElementById('walk-form').reset();
             document.getElementById('walk-date').valueAsDate = new Date();
-            
-            // LIMPIAR FOTOS PENDIENTES
             currentWalkFiles = [];
             document.getElementById('photo-preview').innerHTML = '';
-            
             loadMultiDog();
         }
     }
-
     if(id === 'admin-dashboard-section') loadAdminDashboard();
-    
     if((id === 'dog-selection-dashboard' || id === 'admin-dashboard-section') && userHasInteracted) {
         playWelcomeSound();
     }
-    
     updateWhatsApp();
     window.scrollTo(0,0);
 }
@@ -510,82 +449,300 @@ function playWelcomeSound() {
     o.stop(audioContext.currentTime + 0.3);
 }
 
-// === LOGIN ===
+// === FUNCIONES DE AUTENTICACIÓN INTELIGENTE ===
+
+async function checkUserStatus(email) {
+    try {
+        if (email === ADMIN_USER.email) {
+            return { exists: true, hasPassword: true, isAdmin: true };
+        }
+
+        const allDogs = await loadAllDogs();
+        const dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === email);
+        
+        if (dogFound) {
+            return { exists: true, hasPassword: true, isDemo: true };
+        }
+
+        const { error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: '___CHECK_ONLY___'
+        });
+
+        if (error) {
+            if (error.message.includes('Invalid login credentials') || 
+                error.message.includes('Invalid')) {
+                return { exists: true, hasPassword: true };
+            }
+            return { exists: false, hasPassword: false };
+        }
+
+        return { exists: true, hasPassword: true };
+
+    } catch (err) {
+        console.error('Error verificando usuario:', err);
+        return { exists: false, hasPassword: false };
+    }
+}
+
+function updateLoginForm(step) {
+    const form = document.getElementById('login-form');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const passwordWrapper = document.querySelector('.password-wrapper');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const errorMsg = document.getElementById('error-message');
+    
+    const registerSection = form.querySelector('div[style*="border-top"]');
+    const infoText = form.querySelector('.info-text');
+    if (registerSection) registerSection.style.display = 'none';
+    if (infoText) infoText.style.display = 'none';
+    errorMsg.style.display = 'none';
+
+    const existingConfirm = form.querySelector('#password-confirm-wrapper');
+    if (existingConfirm) existingConfirm.remove();
+    
+    const existingConfirmLabel = form.querySelector('label[for="password-confirm"]');
+    if (existingConfirmLabel) existingConfirmLabel.remove();
+    
+    const existingChangeBtn = form.querySelector('.change-email-btn');
+    if (existingChangeBtn) existingChangeBtn.remove();
+    
+    const existingInfo = form.querySelector('.set-password-info');
+    if (existingInfo) existingInfo.remove();
+
+    switch(step) {
+        case 'email':
+            emailInput.disabled = false;
+            emailInput.value = '';
+            passwordWrapper.style.display = 'none';
+            submitBtn.textContent = 'Continuar';
+            emailInput.focus();
+            break;
+
+        case 'password':
+            emailInput.disabled = true;
+            passwordWrapper.style.display = 'block';
+            passwordInput.value = '';
+            passwordInput.placeholder = '••••••••';
+            
+            const passwordLabel = passwordWrapper.previousElementSibling;
+            if (passwordLabel && passwordLabel.tagName === 'LABEL') {
+                passwordLabel.textContent = 'Contraseña';
+            }
+            
+            submitBtn.textContent = 'Iniciar Sesión';
+            
+            const changeBtn = document.createElement('button');
+            changeBtn.type = 'button';
+            changeBtn.className = 'nav-button ripple change-email-btn';
+            changeBtn.style.cssText = 'background: var(--text-secondary); margin-top: 10px; font-size: 0.9rem; padding: 10px;';
+            changeBtn.textContent = '← Cambiar email';
+            changeBtn.onclick = () => {
+                loginStep = 'email';
+                updateLoginForm('email');
+            };
+            submitBtn.parentElement.insertBefore(changeBtn, submitBtn.nextSibling);
+            
+            passwordInput.focus();
+            break;
+
+        case 'set-password':
+            emailInput.disabled = true;
+            passwordWrapper.style.display = 'block';
+            passwordInput.value = '';
+            passwordInput.placeholder = 'Nueva contraseña (mínimo 6 caracteres)';
+            
+            const setPasswordLabel = passwordWrapper.previousElementSibling;
+            if (setPasswordLabel && setPasswordLabel.tagName === 'LABEL') {
+                setPasswordLabel.textContent = 'Crear Nueva Contraseña';
+            }
+            
+            const confirmLabel = document.createElement('label');
+            confirmLabel.htmlFor = 'password-confirm';
+            confirmLabel.textContent = 'Confirmar Contraseña';
+            confirmLabel.style.marginTop = '16px';
+            
+            const confirmWrapper = document.createElement('div');
+            confirmWrapper.id = 'password-confirm-wrapper';
+            confirmWrapper.className = 'password-wrapper';
+            
+            const confirmInput = document.createElement('input');
+            confirmInput.type = 'password';
+            confirmInput.id = 'password-confirm';
+            confirmInput.placeholder = 'Repite la contraseña';
+            confirmInput.required = true;
+            
+            const confirmToggle = document.createElement('button');
+            confirmToggle.type = 'button';
+            confirmToggle.className = 'password-toggle';
+            confirmToggle.innerHTML = '👁️';
+            confirmToggle.onclick = () => {
+                confirmInput.type = confirmInput.type === 'password' ? 'text' : 'password';
+            };
+            
+            confirmWrapper.appendChild(confirmInput);
+            confirmWrapper.appendChild(confirmToggle);
+            
+            passwordWrapper.parentElement.insertBefore(confirmLabel, passwordWrapper.nextSibling);
+            passwordWrapper.parentElement.insertBefore(confirmWrapper, confirmLabel.nextSibling);
+            
+            const infoMsg = document.createElement('p');
+            infoMsg.className = 'info-text set-password-info';
+            infoMsg.style.cssText = 'margin-top: 12px; font-size: 0.9rem;';
+            infoMsg.innerHTML = '🔒 <strong>Usuario detectado sin contraseña.</strong><br>Por favor crea una contraseña segura para tu cuenta.';
+            confirmWrapper.parentElement.insertBefore(infoMsg, confirmWrapper.nextSibling);
+            
+            submitBtn.textContent = '✅ Guardar Contraseña';
+            
+            const changeBtn2 = document.createElement('button');
+            changeBtn2.type = 'button';
+            changeBtn2.className = 'nav-button ripple change-email-btn';
+            changeBtn2.style.cssText = 'background: var(--text-secondary); margin-top: 10px; font-size: 0.9rem; padding: 10px;';
+            changeBtn2.textContent = '← Cambiar email';
+            changeBtn2.onclick = () => {
+                loginStep = 'email';
+                updateLoginForm('email');
+            };
+            submitBtn.parentElement.insertBefore(changeBtn2, submitBtn.nextSibling);
+            
+            passwordInput.focus();
+            break;
+    }
+}
+
+// === LOGIN INTELIGENTE ===
 document.getElementById('toggle-password').onclick = () => {
     const p = document.getElementById('password');
     p.type = p.type === 'password' ? 'text' : 'password';
 };
+
 document.getElementById('login-form').onsubmit = async (e) => {
     e.preventDefault();
-    const em = document.getElementById('email').value.toLowerCase().trim();
-    const pw = document.getElementById('password').value;
     const btn = e.target.querySelector('button[type="submit"]');
     const errorMsg = document.getElementById('error-message');
     
     btn.disabled = true;
-    btn.innerHTML = 'Verificando...';
+    const originalText = btn.innerHTML;
     errorMsg.style.display = 'none';
 
     try {
-        // 1. CASO ADMIN (Tu cuenta)
-        if (em === ADMIN_USER.email && pw === ADMIN_USER.password) {
-            currentUser = { email: em, isAdmin: true };
-            showToast('👋 ¡Hola Paseador!', 'success');
-            showView('admin-dashboard-section');
-            return;
-        }
-
-        const allDogs = await loadAllDogs();
-        let dogFound = null;
-
-        // 2. CASO CLIENTE REAL (Supabase Auth)
-        const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
-            email: em,
-            password: pw
-        });
-
-        if (!authError && authData.user) {
-            currentUser = { 
-                email: authData.user.email, 
-                isAdmin: false,
-                id: authData.user.id,
-                name: authData.user.user_metadata.full_name
-            };
-
-            // Buscar si este email tiene un perro asignado en la base de datos
-            dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === em);
-
-            if (dogFound) {
-                currentDog = dogFound;
-                showToast(`👋 Bienvenido ${currentUser.name || 'Cliente'}`, 'success');
-                showView('dog-selection-dashboard');
-            } else {
-                showToast('✅ Login correcto', 'info');
-                errorMsg.innerHTML = "Tu cuenta existe, pero el paseador aún no ha registrado a tu perro con este email.";
+        if (loginStep === 'email') {
+            // PASO 1: Verificar email
+            const email = document.getElementById('email').value.toLowerCase().trim();
+            currentEmailLogin = email;
+            
+            btn.innerHTML = '🔍 Verificando...';
+            
+            const status = await checkUserStatus(email);
+            
+            if (!status.exists) {
+                errorMsg.textContent = '❌ Este email no está registrado. Por favor contacta al paseador para registrarte.';
                 errorMsg.style.display = 'block';
+                return;
             }
-            return;
-        }
+            
+            if (status.hasPassword) {
+                loginStep = 'password';
+                updateLoginForm('password');
+            } else {
+                loginStep = 'set-password';
+                updateLoginForm('set-password');
+            }
+            
+        } else if (loginStep === 'password') {
+            // PASO 2: Login normal
+            const pw = document.getElementById('password').value;
+            btn.innerHTML = '🔐 Iniciando...';
+            
+            if (currentEmailLogin === ADMIN_USER.email && pw === ADMIN_USER.password) {
+                currentUser = { email: currentEmailLogin, isAdmin: true };
+                showToast('👋 ¡Hola Paseador!', 'success');
+                showView('admin-dashboard-section');
+                loginStep = 'email';
+                return;
+            }
 
-        // 3. CASO CLIENTE DEMO (Para probar sin registrarse)
-        dogFound = allDogs.find(x => x.dueno_email === em);
-        if (dogFound && pw === '123456') {
-            currentUser = { email: em, isAdmin: false };
-            currentDog = dogFound;
-            showToast('👋 Acceso Demo', 'info');
-            showView('dog-selection-dashboard');
-            return;
-        }
+            const allDogs = await loadAllDogs();
+            let dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === currentEmailLogin);
 
-        throw new Error('Credenciales incorrectas');
+            if (dogFound && pw === '123456') {
+                currentUser = { email: currentEmailLogin, isAdmin: false };
+                currentDog = dogFound;
+                showToast('👋 Acceso Demo', 'info');
+                showView('dog-selection-dashboard');
+                loginStep = 'email';
+                return;
+            }
+
+            const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+                email: currentEmailLogin,
+                password: pw
+            });
+
+            if (!authError && authData.user) {
+                currentUser = { 
+                    email: authData.user.email, 
+                    isAdmin: false,
+                    id: authData.user.id,
+                    name: authData.user.user_metadata.full_name
+                };
+
+                dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === currentEmailLogin);
+
+                if (dogFound) {
+                    currentDog = dogFound;
+                    showToast(`👋 Bienvenido ${currentUser.name || 'Cliente'}`, 'success');
+                    showView('dog-selection-dashboard');
+                } else {
+                    showToast('✅ Login correcto', 'info');
+                    errorMsg.innerHTML = "Tu cuenta existe, pero el paseador aún no ha registrado a tu perro con este email.";
+                    errorMsg.style.display = 'block';
+                }
+                loginStep = 'email';
+                return;
+            }
+
+            throw new Error('Contraseña incorrecta');
+            
+        } else if (loginStep === 'set-password') {
+            // PASO 3: Crear contraseña nueva
+            const newPass = document.getElementById('password').value;
+            const confirmPass = document.getElementById('password-confirm').value;
+            
+            if (newPass !== confirmPass) {
+                errorMsg.textContent = '❌ Las contraseñas no coinciden. Por favor verifica.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
+            if (newPass.length < 6) {
+                errorMsg.textContent = '❌ La contraseña debe tener al menos 6 caracteres.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            
+            btn.innerHTML = '💾 Guardando...';
+            
+            // Actualizar contraseña en Supabase
+            const { error } = await supabaseClient.auth.updateUser({
+                password: newPass
+            });
+            
+            if (error) throw error;
+            
+            showToast('✅ Contraseña creada con éxito. Ahora inicia sesión.', 'success');
+            loginStep = 'password';
+            updateLoginForm('password');
+        }
 
     } catch (err) {
         console.error(err);
-        errorMsg.textContent = '❌ Usuario o contraseña incorrectos.';
+        errorMsg.textContent = '❌ ' + (err.message || 'Error al procesar la solicitud');
         errorMsg.style.display = 'block';
     } finally {
         btn.disabled = false;
-        btn.innerHTML = 'Iniciar Sesión';
+        btn.innerHTML = originalText;
     }
 };
 
@@ -595,9 +752,7 @@ async function loadAdminDashboard() {
     const c = document.getElementById('dog-list-container');
     c.innerHTML = '';
     document.getElementById('demo-status-text').textContent = `${allDogs.length} perros en sistema`;
-    
     if(!allDogs.length) return c.innerHTML = '<p class="info-text">Sin perros.</p>';
-    
     allDogs.forEach((d, i) => {
         const suffix = d.isExample ? ' (ejemplo)' : '';
         const card = document.createElement('div');
@@ -617,10 +772,8 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
     e.preventDefault();
     const submitBtn = document.querySelector('#create-dog-form .save-btn');
     if(submitBtn.disabled) return;
-    
     submitBtn.innerHTML = '🔄 Guardando...';
     submitBtn.disabled = true;
-    
     try {
         const nd = {
             nombre: document.getElementById('new-dog-name').value,
@@ -651,14 +804,11 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
 function loadProfile(d) {
     const p = d.perfil;
     let photoSrc = getPhotoUrl(p.foto_id, 300, 300);
-    
     document.getElementById('profile-photo').src = photoSrc;
     document.getElementById('profile-dog-name-display').textContent = d.nombre;
     document.getElementById('edit-photo-btn').style.display = isEditing && !d.isExample ? 'block' : 'none';
     document.getElementById('toggle-edit-btn').textContent = isEditing ? '❌ Cancelar' : '✏️ Editar Perfil';
-    
     const v = document.getElementById('profile-details-view');
-    
     if (isEditing && !d.isExample) {
         v.innerHTML = `<form id="profile-edit-form"></form>`;
         const form = document.getElementById('profile-edit-form');
@@ -668,19 +818,16 @@ function loadProfile(d) {
                               <input type="text" name="${k}" value="${p[k] || ''}">`;
         });
         form.innerHTML += '<button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>';
-        
         form.onsubmit = async (e) => {
             e.preventDefault();
             const formData = new FormData(form);
             const updatedPerfil = { ...currentDog.perfil };
             for (let [key, value] of formData.entries()) updatedPerfil[key] = value;
-            
             try {
                 await updateRealDogProfile(currentDog.id, updatedPerfil);
                 currentDog.perfil = updatedPerfil;
                 const idx = REAL_DOGS.findIndex(x => x.id === currentDog.id);
                 if(idx !== -1) REAL_DOGS[idx] = currentDog;
-                
                 showToast('✅ Perfil actualizado', 'success');
                 isEditing = false;
                 loadProfile(currentDog);
@@ -689,25 +836,23 @@ function loadProfile(d) {
             }
         };
     } else {
-        // VISTA LECTURA
         v.innerHTML = `
             <h3>🐕 Datos Básicos</h3>
             <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${p.raza}</span></div>
             <div class="detail-row"><span class="detail-label">Edad:</span> <span class="detail-value">${p.edad}</span></div>
             <div class="detail-row"><span class="detail-label">Sexo:</span> <span class="detail-value">${p.sexo}</span></div>
-            
             <h3>💊 Salud y Contacto</h3>
             <div class="detail-row"><span class="detail-label">Peso:</span> <span class="detail-value">${p.peso}</span></div>
             <div class="detail-row"><span class="detail-label">Alergias:</span> <span class="detail-value">${p.alergias}</span></div>
             <div class="detail-row"><span class="detail-label">Dueño:</span> <span class="detail-value">${p.dueno}</span></div>
             <div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${p.telefono}</span></div>
-
             <h3>🎾 Comportamiento</h3>
             <div class="detail-row"><span class="detail-label">Energía:</span> <span class="detail-value">${p.energia || '?'}</span></div>
             <div class="detail-row"><span class="detail-label">Social:</span> <span class="detail-value">${p.social || '?'}</span></div>
         `;
     }
 }
+
 function toggleEditMode(){ 
     if (currentDog?.isExample) {
         showToast('ℹ️ Los ejemplos no se pueden editar', 'info');
@@ -716,15 +861,13 @@ function toggleEditMode(){
     isEditing = !isEditing; 
     loadProfile(currentDog); 
 }
+
 function randomizeProfilePhoto(){
     document.getElementById('photo-upload-input').click();
 }
 
 // === CREATE WALK (LOGICA SUBIDA FOTOS) ===
-
-// 1. Listeners para inputs de fotos (Crear y Editar)
 document.addEventListener('DOMContentLoaded', () => {
-    // A) CREAR PASEO
     const addBtn = document.getElementById('add-walk-photo-btn');
     const walkInput = document.getElementById('walk-photo-input');
     if (addBtn && walkInput) {
@@ -738,8 +881,6 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.value = '';
         };
     }
-    
-    // B) EDITAR PASEO
     const editInput = document.getElementById('edit-walk-upload-input');
     if (editInput) {
         editInput.onchange = async (e) => {
@@ -748,32 +889,26 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.value = '';
         };
     }
-    
-    // C) FOTO PERFIL
     document.getElementById('photo-upload-input').addEventListener('change', (e) => {
         if(e.target.files[0]) uploadProfilePhoto(e.target.files[0]);
     });
 });
 
-// 2. Renderizar miniaturas crear paseo
 function renderWalkPreview() {
     const container = document.getElementById('photo-preview');
     container.innerHTML = '';
-
     currentWalkFiles.forEach((file, index) => {
         const div = document.createElement('div');
         div.style.position = 'relative';
         div.style.width = '80px';
         div.style.height = '80px';
         div.style.margin = '5px';
-
         const img = document.createElement('img');
         img.src = URL.createObjectURL(file);
         img.style.width = '100%';
         img.style.height = '100%';
         img.style.objectFit = 'cover';
         img.style.borderRadius = '8px';
-
         const delBtn = document.createElement('button');
         delBtn.innerHTML = '×';
         delBtn.className = 'delete-photo-btn'; 
@@ -781,7 +916,6 @@ function renderWalkPreview() {
             currentWalkFiles.splice(index, 1);
             renderWalkPreview();
         };
-
         div.appendChild(img);
         div.appendChild(delBtn);
         container.appendChild(div);
@@ -797,47 +931,33 @@ async function loadMultiDog(){
     });
 }
 
-// 3. Submit con subida secuencial
 document.getElementById('walk-form').onsubmit = async (e) => {
     e.preventDefault();
     if (currentDog?.isExample) return showToast('ℹ️ Ejemplo: no editable', 'info');
-    
     const submitBtn = document.querySelector('#walk-form .save-btn');
     const originalText = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    
     try {
         const uploadedPhotos = [];
-
-        // PASO A: Convertir y subir fotos
         if (currentWalkFiles.length > 0) {
             for (let i = 0; i < currentWalkFiles.length; i++) {
                 const file = currentWalkFiles[i];
-                
                 submitBtn.innerHTML = `🔄 Optimizando ${i+1} de ${currentWalkFiles.length}...`;
-
                 const webpFile = await convertToWebP(file, 1920, 0.85);
                 const fileName = `walk_${currentDog.id}_${Date.now()}_${i}.webp`;
-                
                 submitBtn.innerHTML = `⬆️ Subiendo ${i+1} de ${currentWalkFiles.length}...`;
-
                 const { error } = await supabaseClient
                     .storage
                     .from('paseodog-photos')
                     .upload(fileName, webpFile);
-
                 if (error) throw error;
-                
                 uploadedPhotos.push({
                     id: fileName,
                     comentario: 'Foto del paseo'
                 });
             }
         }
-
         submitBtn.innerHTML = '💾 Guardando datos...';
-
-        // PASO B: Guardar paseo
         const w = {
             fecha: document.getElementById('walk-date').value,
             duracion_minutos: parseInt(document.getElementById('walk-duration').value),
@@ -847,14 +967,11 @@ document.getElementById('walk-form').onsubmit = async (e) => {
             incidentes_salud: document.getElementById('incidentes-salud').value,
             fotos: uploadedPhotos 
         };
-
         const updatedWalks = [w, ...(currentDog.walks || [])];
         await updateRealDogWalks(currentDog.id, updatedWalks);
         currentDog.walks = updatedWalks;
-        
         showToast('✅ Paseo guardado', 'success');
         showView('dog-selection-dashboard');
-
     } catch (err) {
         console.error(err);
         showToast('❌ Error: ' + err.message, 'error');
@@ -871,20 +988,17 @@ function loadHistory(d) {
     const c = document.getElementById('walks-history');
     c.innerHTML = '';
     if(!d.walks || !d.walks.length) return c.innerHTML = '<p class="info-text">Sin historial.</p>';
-    
     d.walks.forEach((w,i) => {
         const imgs = (w.fotos || []).map(f => 
             `<div class="photo-card" onclick="openLightbox('${f.id}')">
                 <img src="${getPhotoUrl(f.id,200,200)}">
             </div>`
         ).join('');
-        
         const adminBtns = (currentUser && currentUser.isAdmin && !d.isExample) ?
             `<div class="admin-walk-controls" data-index="${i}">
                 <button class="admin-walk-btn edit-btn" onclick="openEditWalk(${i})">✏️ Editar</button>
                 <button class="admin-walk-btn delete-btn" style="border-color:var(--danger-light); color:#fca5a5;" onclick="delWalk(${i})">🗑️ Borrar</button>
             </div>` : '';
-            
         const session = document.createElement('div');
         session.className = 'walk-session';
         session.style.setProperty('--i', i);
@@ -910,6 +1024,7 @@ window.openLightbox = (id) => {
     document.getElementById('lightbox-img').src = getPhotoUrl(id,800,800);
     document.getElementById('lightbox').style.display = 'flex';
 };
+
 document.getElementById('close-lightbox').onclick = () => document.getElementById('lightbox').style.display = 'none';
 
 // === EDIT WALK (CON SUBIDA REAL) ===
@@ -917,17 +1032,14 @@ window.openEditWalk = (walkIndex) => {
     if (!currentDog || currentDog.isExample) return;
     editWalkIdx = walkIndex;
     const walk = currentDog.walks[walkIndex];
-    
     document.getElementById('edit-walk-date').value = walk.fecha;
     document.getElementById('edit-walk-duration').value = walk.duracion_minutos;
     document.getElementById('edit-walk-distance').value = walk.distancia_km;
     document.getElementById('edit-walk-summary').value = walk.resumen_diario;
     document.getElementById('edit-walk-behavior').checked = walk.comportamiento_problemas;
     document.getElementById('edit-walk-health').value = walk.incidentes_salud || '';
-    
     editWalkPhotos = [...(walk.fotos || [])];
     renderEditPhotos();
-    
     document.getElementById('edit-walk-modal').style.display = 'flex';
 };
 
@@ -940,25 +1052,19 @@ async function uploadPhotoInEditMode(file) {
     const originalText = btn.innerHTML;
     btn.innerHTML = '⏳ Optimizando...';
     btn.disabled = true;
-
     try {
         const webpFile = await convertToWebP(file, 1920, 0.85);
         const fileName = `walk_edit_${currentDog.id}_${Date.now()}.webp`;
-
         btn.innerHTML = '⬆️ Subiendo...';
-
         const { error } = await supabaseClient
             .storage
             .from('paseodog-photos')
             .upload(fileName, webpFile);
-
         if (error) throw error;
-
         editWalkPhotos.push({ 
             id: fileName, 
             comentario: 'Agregada en edición' 
         });
-        
         renderEditPhotos();
         showToast('✅ Foto subida (WebP)', 'success');
     } catch (err) {
@@ -978,21 +1084,17 @@ function renderEditPhotos() {
         imgContainer.style.position = 'relative';
         imgContainer.style.display = 'inline-block';
         imgContainer.style.margin = '5px';
-        
         const img = document.createElement('img');
         img.src = getPhotoUrl(f.id, 100, 100);
         img.style.borderRadius = '8px';
-        
         const btn = document.createElement('button');
         btn.innerHTML = '×';
         btn.className = 'delete-photo-btn';
         btn.onclick = (e) => {
             e.preventDefault(); 
-            // ELIMINAR SOLO DE LA LISTA (NO DE SUPABASE)
             editWalkPhotos.splice(i, 1);
             renderEditPhotos();
         };
-        
         imgContainer.appendChild(img);
         imgContainer.appendChild(btn);
         preview.appendChild(imgContainer);
@@ -1002,7 +1104,6 @@ function renderEditPhotos() {
 document.getElementById('edit-walk-form').onsubmit = async (e) => {
     e.preventDefault();
     if (!currentDog || currentDog.isExample || editWalkIdx === null) return;
-
     const updatedWalk = {
         fecha: document.getElementById('edit-walk-date').value,
         duracion_minutos: parseInt(document.getElementById('edit-walk-duration').value),
@@ -1012,9 +1113,7 @@ document.getElementById('edit-walk-form').onsubmit = async (e) => {
         incidentes_salud: document.getElementById('edit-walk-health').value,
         fotos: editWalkPhotos
     };
-
     currentDog.walks[editWalkIdx] = updatedWalk;
-    
     try {
         await updateRealDogWalks(currentDog.id, currentDog.walks);
         showToast('✅ Paseo actualizado', 'success');
@@ -1028,10 +1127,8 @@ document.getElementById('edit-walk-form').onsubmit = async (e) => {
 window.delWalk = (walkIndex) => {
     if (!confirm('¿Eliminar este paseo?')) return;
     if (!currentDog || currentDog.isExample) return;
-
     const newWalks = [...currentDog.walks];
     newWalks.splice(walkIndex, 1);
-
     updateRealDogWalks(currentDog.id, newWalks)
         .then(() => {
             currentDog.walks = newWalks;
@@ -1041,12 +1138,46 @@ window.delWalk = (walkIndex) => {
         .catch(err => showToast('❌ Error al eliminar', 'error'));
 };
 
+// === LOGICA DE REGISTRO DE NUEVO CLIENTE ===
+document.getElementById('register-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('reg-name').value;
+    const phone = document.getElementById('reg-phone').value;
+    const email = document.getElementById('reg-email').value;
+    const pass = document.getElementById('reg-pass').value;
+    const passConf = document.getElementById('reg-pass-conf').value;
+    const btn = e.target.querySelector('button[type="submit"]');
+    if (pass !== passConf) return showToast('❌ Las contraseñas no coinciden', 'error');
+    if (pass.length < 6) return showToast('❌ La contraseña es muy corta (mínimo 6)', 'error');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Creando usuario...';
+    try {
+        const { data, error } = await supabaseClient.auth.signUp({
+            email: email,
+            password: pass,
+            options: {
+                data: { full_name: name, phone: phone }
+            }
+        });
+        if (error) throw error;
+        showToast('✅ ¡Cuenta creada! Por favor inicia sesión.', 'success');
+        document.getElementById('register-form').reset();
+        showView('login-section');
+    } catch (err) {
+        let msg = err.message;
+        if(msg.includes('already registered')) msg = 'Este correo ya está registrado.';
+        showToast('❌ Error: ' + msg, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '✅ Crear Cuenta';
+    }
+};
+
 // === INIT ===
 window.onload = async () => {
     await loadExampleDogs();
     document.getElementById('loading-overlay').style.display = 'none';
     showView('login-section');
-    
     const audioToggle = document.getElementById('audio-toggle');
     const savedAudio = localStorage.getItem('paseoDogAudio');
     if (savedAudio === 'off') {
@@ -1059,118 +1190,60 @@ window.onload = async () => {
         localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
         if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
     };
-    
     document.addEventListener('click', () => {
         if (!userHasInteracted) userHasInteracted = true;
     }, { once: true });
 };
-// === LÓGICA DE NAVEGACIÓN Y MENÚ ===
 
+// === LÓGICA DE NAVEGACIÓN Y MENÚ ===
 document.addEventListener('DOMContentLoaded', () => {
     const nav = document.getElementById('main-nav');
     const burger = document.getElementById('hamburger-btn');
     const btnHome = document.getElementById('nav-home-btn');
     const btnLogout = document.getElementById('nav-logout-btn');
-
-    // 1. Toggle Menú Hamburguesa
     if (burger) {
         burger.onclick = (e) => {
-            e.stopPropagation(); // Evitar que se cierre al hacer click
+            e.stopPropagation();
             nav.classList.toggle('show');
             burger.textContent = nav.classList.contains('show') ? '✕' : '☰';
         };
     }
-
-    // Cerrar menú al hacer click fuera
     document.addEventListener('click', (e) => {
         if (nav && nav.classList.contains('show') && !nav.contains(e.target) && e.target !== burger) {
             nav.classList.remove('show');
             burger.textContent = '☰';
         }
     });
-
-    // 2. Botón Inicio
     if (btnHome) {
         btnHome.onclick = () => {
-            nav.classList.remove('show'); // Cerrar menú móvil
+            nav.classList.remove('show');
             burger.textContent = '☰';
-            
             if (!currentUser) {
                 showView('login-section');
                 return;
             }
-
             if (currentUser.isAdmin) {
                 showView('admin-dashboard-section');
             } else {
-                // Si es cliente, volvemos a su dashboard
-                // (currentDog debería estar seteado desde el login)
                 if (currentDog) {
                     showView('dog-selection-dashboard');
                 } else {
-                    showView('login-section'); // Fallback por seguridad
+                    showView('login-section');
                 }
             }
         };
     }
-
-    // 3. Botón Cerrar Sesión
     if (btnLogout) {
         btnLogout.onclick = () => {
             if(confirm('¿Cerrar sesión?')) {
                 nav.classList.remove('show');
                 burger.textContent = '☰';
-                
-                // Limpiar variables globales
                 currentUser = null;
                 currentDog = null;
-                // Opcional: Limpiar caches o fotos pendientes
                 currentWalkFiles = [];
-                
                 showToast('👋 ¡Hasta luego!', 'info');
                 showView('login-section');
             }
         };
     }
-// === LOGICA DE REGISTRO DE NUEVO CLIENTE ===
-document.getElementById('register-form').onsubmit = async (e) => {
-    e.preventDefault();
-    
-    const name = document.getElementById('reg-name').value;
-    const phone = document.getElementById('reg-phone').value;
-    const email = document.getElementById('reg-email').value;
-    const pass = document.getElementById('reg-pass').value;
-    const passConf = document.getElementById('reg-pass-conf').value;
-    const btn = e.target.querySelector('button[type="submit"]');
-
-    if (pass !== passConf) return showToast('❌ Las contraseñas no coinciden', 'error');
-    if (pass.length < 6) return showToast('❌ La contraseña es muy corta (mínimo 6)', 'error');
-
-    btn.disabled = true;
-    btn.innerHTML = '⏳ Creando usuario...';
-
-    try {
-        const { data, error } = await supabaseClient.auth.signUp({
-            email: email,
-            password: pass,
-            options: {
-                data: { full_name: name, phone: phone } // Guardamos datos extra
-            }
-        });
-
-        if (error) throw error;
-
-        showToast('✅ ¡Cuenta creada! Por favor inicia sesión.', 'success');
-        document.getElementById('register-form').reset();
-        showView('login-section');
-
-    } catch (err) {
-        let msg = err.message;
-        if(msg.includes('already registered')) msg = 'Este correo ya está registrado.';
-        showToast('❌ Error: ' + msg, 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '✅ Crear Cuenta';
-    }
-};
 });
