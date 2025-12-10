@@ -714,19 +714,22 @@ document.getElementById('walk-form').onsubmit = async (e) => {
     try {
         const uploadedPhotos = [];
 
-        // PASO A: Subir fotos
+        // PASO A: Convertir y subir fotos
         if (currentWalkFiles.length > 0) {
             for (let i = 0; i < currentWalkFiles.length; i++) {
                 const file = currentWalkFiles[i];
-                const ext = file.name.split('.').pop().toLowerCase();
-                const fileName = `walk_${currentDog.id}_${Date.now()}_${i}.${ext}`;
                 
-                submitBtn.innerHTML = `☁️ Subiendo ${i+1} de ${currentWalkFiles.length}...`;
+                submitBtn.innerHTML = `🔄 Optimizando ${i+1} de ${currentWalkFiles.length}...`;
+
+                const webpFile = await convertToWebP(file, 1920, 0.85);
+                const fileName = `walk_${currentDog.id}_${Date.now()}_${i}.webp`;
+                
+                submitBtn.innerHTML = `⬆️ Subiendo ${i+1} de ${currentWalkFiles.length}...`;
 
                 const { error } = await supabaseClient
                     .storage
                     .from('paseodog-photos')
-                    .upload(fileName, file);
+                    .upload(fileName, webpFile);
 
                 if (error) throw error;
                 
