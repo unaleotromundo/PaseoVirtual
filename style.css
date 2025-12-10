@@ -1316,3 +1316,26 @@ header {
     from { opacity: 0; transform: translateX(20px); }
     to { opacity: 1; transform: translateX(0); }
 }
+/* Auto-hide de controles en pantalla completa */
+#carousel-wrapper.hide-controls .carousel-nav-btn,
+#carousel-wrapper.hide-controls .carousel-controls,
+#carousel-wrapper.hide-controls .carousel-play-large {
+    opacity: 0 !important;
+    transition: opacity 0.5s ease;
+}
+
+#carousel-wrapper.hide-controls {
+    cursor: none;
+}
+
+/* Mostrar controles inmediatamente al mover el mouse */
+#carousel-wrapper:hover.hide-controls .carousel-nav-btn,
+#carousel-wrapper:hover.hide-controls .carousel-controls,
+#carousel-wrapper:hover.hide-controls .carousel-play-large {
+    opacity: 1 !important;
+    transition: opacity 0.2s ease;
+}
+
+#carousel-wrapper:hover.hide-controls {
+    cursor: default;
+}

@@ -42,11 +42,14 @@ function createRipple(event, element) {
 
 // === CONFIGURACIÓN ===
 const DB_URL = 'paseoDogDB.json';
+let carouselMouseTimeout = null;
+let isFullscreen = false;
 let TRAINER_PHONE = "5491100000000";
 let ADMIN_USER = { email: 'admin@paseos.com', password: 'admin123' };
 let EXAMPLE_DOGS = [];
 let REAL_DOGS = [];
 let DATABASE = null;
+
 
 // === ESTADO GLOBAL ===
 let currentUser = null, currentDog = null, currentView = 'login-section';
@@ -299,6 +302,24 @@ function updatePlayBtnState() {
     if(largeBtn) largeBtn.textContent = icon;
 }
 
+function hideCarouselControls() {
+    if (isFullscreen && isPlaying) {
+        const wrapper = document.getElementById('carousel-wrapper');
+        wrapper?.classList.add('hide-controls');
+    }
+}
+
+function showCarouselControls() {
+    const wrapper = document.getElementById('carousel-wrapper');
+    wrapper?.classList.remove('hide-controls');
+    
+    if (carouselMouseTimeout) clearTimeout(carouselMouseTimeout);
+    
+    if (isFullscreen && isPlaying) {
+        carouselMouseTimeout = setTimeout(hideCarouselControls, 3000);
+    }
+}
+
 function initCarousel() {
     const wrapper = document.getElementById('carousel-wrapper');
     const slides = [];
@@ -359,14 +380,44 @@ function initCarousel() {
     };
 
     window.toggleFullscreen = () => {
-        const elem = document.getElementById('carousel-container');
-        if (!document.fullscreenElement) elem.requestFullscreen().catch(err => {});
-        else document.exitFullscreen();
-    };
+    const elem = document.getElementById('carousel-container');
+    if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(err => {});
+    } else {
+        document.exitFullscreen();
+    }
+};
+
+// Detectar cambios de pantalla completa
+document.addEventListener('fullscreenchange', () => {
+    isFullscreen = !!document.fullscreenElement;
+    const wrapper = document.getElementById('carousel-wrapper');
+    
+    if (isFullscreen) {
+        // Activar auto-hide en fullscreen
+        if (isPlaying) {
+            carouselMouseTimeout = setTimeout(hideCarouselControls, 3000);
+        }
+    } else {
+        // Desactivar auto-hide fuera de fullscreen
+        wrapper?.classList.remove('hide-controls');
+        if (carouselMouseTimeout) clearTimeout(carouselMouseTimeout);
+    }
+});
 
     showSlide();
+showSlide();
+    updatePlayBtnState();
     updatePlayBtnState();
 }
+// Detectar movimiento del mouse en el carrusel
+    const wrapper = document.getElementById('carousel-wrapper');
+    wrapper.addEventListener('mousemove', showCarouselControls);
+    wrapper.addEventListener('mouseenter', showCarouselControls);
+    wrapper.addEventListener('mouseleave', () => {
+        if (carouselMouseTimeout) clearTimeout(carouselMouseTimeout);
+        if (isFullscreen && isPlaying) hideCarouselControls();
+    });
 
 // === UI & TEMA ===
 const themeToggle = document.getElementById('theme-toggle');
