@@ -1157,8 +1157,7 @@ document.addEventListener('DOMContentLoaded', () => {
             burger.textContent = '☰';
             
             if (!currentUser) {
-                showView('welcome-section');
-
+                showView('login-section');
                 return;
             }
 
