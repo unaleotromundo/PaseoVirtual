@@ -447,38 +447,7 @@ function playWelcomeSound() {
     o.stop(audioContext.currentTime + 0.3);
 }
 
-// === CORRECCIÓN CLAVE: CHECK USER STATUS ===
-async function checkUserStatus(email) {
-    try {
-        // 1. ¿Es admin?
-        if (email === ADMIN_USER.email) {
-            return { exists: true, hasPassword: true, isAdmin: true };
-        }
-
-        // 2. ¿Está en dogs_real? → existe → debe tener cuenta
-        const allDogs = await loadAllDogs();
-        const dogInDb = allDogs.find(d => d.dueno_email.toLowerCase() === email.toLowerCase());
-
-        if (!dogInDb) {
-            // No está en dogs_real → no está registrado
-            return { exists: false };
-        }
-
-        // 3. Si está en dogs_real → usuario EXISTE → ahora verificamos login
-        // Pero evitamos intentar login con password aleatoria → asumimos que necesita establecer contraseña
-        // porque si ya hubiera hecho login antes, el flujo de "set-password" ya habría terminado
-        // → Entonces lo tratamos como "usuario sin contraseña establecida"
-        return { exists: true, hasPassword: false };
-
-        // NOTA: Si más adelante el usuario establece su contraseña, el login directo funcionará
-        // y este flujo ya no se usará
-
-    } catch (err) {
-        console.error('Error verificando usuario:', err);
-        return { exists: false };
-    }
-}
-
+// === LOGIN INTELIGENTE (detecta contraseña temporal) ===
 function updateLoginForm(step) {
     const form = document.getElementById('login-form');
     const emailInput = document.getElementById('email');
@@ -564,7 +533,7 @@ function updateLoginForm(step) {
             const infoMsg = document.createElement('p');
             infoMsg.className = 'info-text set-password-info';
             infoMsg.style.cssText = 'margin-top: 12px; font-size: 0.9rem;';
-            infoMsg.innerHTML = '🔒 <strong>Usuario detectado sin contraseña.</strong><br>Por favor crea una contraseña segura para tu cuenta.';
+            infoMsg.innerHTML = '🔒 <strong>Usuario nuevo.</strong><br>Por favor elige una contraseña segura para tu cuenta.';
             confirmWrapper.parentElement.insertBefore(infoMsg, confirmWrapper.nextSibling);
             submitBtn.textContent = '✅ Guardar Contraseña';
             const changeBtn2 = document.createElement('button');
@@ -599,22 +568,21 @@ document.getElementById('login-form').onsubmit = async (e) => {
             const email = document.getElementById('email').value.toLowerCase().trim();
             currentEmailLogin = email;
             btn.innerHTML = '🔍 Verificando...';
-            const status = await checkUserStatus(email);
-            if (!status.exists) {
-                errorMsg.textContent = '❌ Este email no está registrado. Por favor contacta al paseador para registrarte.';
+            // Verificar existencia en dogs_real
+            const allDogs = await loadAllDogs();
+            const dogInDb = allDogs.find(d => d.dueno_email.toLowerCase() === email);
+            if (!dogInDb) {
+                errorMsg.textContent = '❌ Este email no está registrado. Contacta al paseador.';
                 errorMsg.style.display = 'block';
                 return;
             }
-            if (status.hasPassword) {
-                loginStep = 'password';
-                updateLoginForm('password');
-            } else {
-                loginStep = 'set-password';
-                updateLoginForm('set-password');
-            }
+            loginStep = 'password';
+            updateLoginForm('password');
         } else if (loginStep === 'password') {
             const pw = document.getElementById('password').value;
             btn.innerHTML = '🔐 Iniciando...';
+
+            // Admin
             if (currentEmailLogin === ADMIN_USER.email && pw === ADMIN_USER.password) {
                 currentUser = { email: currentEmailLogin, isAdmin: true };
                 showToast('👋 ¡Hola Paseador!', 'success');
@@ -624,6 +592,8 @@ document.getElementById('login-form').onsubmit = async (e) => {
                 updateNavButtons();
                 return;
             }
+
+            // Demo
             const allDogs = await loadAllDogs();
             let dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === currentEmailLogin);
             if (dogFound && pw === '123456') {
@@ -636,10 +606,13 @@ document.getElementById('login-form').onsubmit = async (e) => {
                 updateNavButtons();
                 return;
             }
+
+            // Login real
             const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
                 email: currentEmailLogin,
                 password: pw
             });
+
             if (!authError && authData.user) {
                 currentUser = { 
                     email: authData.user.email, 
@@ -647,14 +620,23 @@ document.getElementById('login-form').onsubmit = async (e) => {
                     id: authData.user.id,
                     name: authData.user.user_metadata.full_name
                 };
+
+                // ✅ ¿Es la contraseña temporal?
+                if (pw === '111111') {
+                    showToast('🔐 Detectamos que es tu primera vez. Elige una contraseña segura.', 'info');
+                    loginStep = 'set-password';
+                    updateLoginForm('set-password');
+                    return;
+                }
+
+                // Login normal
                 dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === currentEmailLogin);
                 if (dogFound) {
                     currentDog = dogFound;
                     showToast(`👋 Bienvenido ${currentUser.name || 'Cliente'}`, 'success');
                     showView('dog-selection-dashboard');
                 } else {
-                    showToast('✅ Login correcto', 'info');
-                    errorMsg.innerHTML = "Tu cuenta existe, pero el paseador aún no ha registrado a tu perro con este email.";
+                    errorMsg.innerHTML = "Tu cuenta existe, pero el paseador aún no ha registrado a tu perro.";
                     errorMsg.style.display = 'block';
                 }
                 loginStep = 'email';
@@ -667,7 +649,7 @@ document.getElementById('login-form').onsubmit = async (e) => {
             const newPass = document.getElementById('password').value;
             const confirmPass = document.getElementById('password-confirm').value;
             if (newPass !== confirmPass) {
-                errorMsg.textContent = '❌ Las contraseñas no coinciden. Por favor verifica.';
+                errorMsg.textContent = '❌ Las contraseñas no coinciden.';
                 errorMsg.style.display = 'block';
                 return;
             }
@@ -677,32 +659,13 @@ document.getElementById('login-form').onsubmit = async (e) => {
                 return;
             }
             btn.innerHTML = '💾 Guardando contraseña...';
-
-            // Primero: hacer login con la contraseña temporal para tener sesión
-            // → Pero NO sabemos la contraseña temporal → entonces usamos signInWithOtp o signup no necesario
-
-            // En su lugar: actualizamos la contraseña sin necesidad de sesión (no posible)
-            // → Así que requerimos que el usuario ya tenga sesión → pero no la tiene
-
-            // ✅ SOLUCIÓN: usamos el flujo de "olvidé mi contraseña" NO → no aplica
-
-            // ⚠️ TU FLUJO ACTUAL ASUME QUE EL USUARIO TIENE SESIÓN → pero no la tiene
-            // → Por eso falla updateUser()
-
-            // ✅ CORRECCIÓN: forzamos el login con la contraseña temporal generada en el registro
-            // → Pero no la guardamos → así que no podemos
-
-            // 🆗 ALTERNATIVA: no usar updateUser, sino permitir que al establecer contraseña,
-            // el usuario haga login inmediatamente después → lo cual ya haces en el flujo actual
-
-            // → Por tanto, EN LUGAR DE updateUser, simplemente redirigimos al login normal
-            // → Y ya está: el usuario tiene cuenta en Auth, y al poner su nueva contraseña,
-            //    el login funciona
-
-            // 🟢 Pero updateUser SIN sesión no funciona → así que mejor:
-            // → Eliminamos este paso → y simplemente decimos: "Ahora inicia sesión con tu nueva contraseña"
-
-            showToast('✅ Ahora inicia sesión con tu nueva contraseña.', 'success');
+            const { error: updateError } = await supabaseClient.auth.updateUser({
+                password: newPass
+            });
+            if (updateError) throw updateError;
+            showToast('✅ ¡Contraseña actualizada! Ahora inicia sesión con ella.', 'success');
+            await supabaseClient.auth.signOut();
+            currentUser = null;
             loginStep = 'password';
             updateLoginForm('password');
         }
@@ -742,29 +705,32 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
     e.preventDefault();
     const submitBtn = document.querySelector('#create-dog-form .save-btn');
     if(submitBtn.disabled) return;
-    submitBtn.innerHTML = '🔄 Guardando...';
+    submitBtn.innerHTML = '🔄 Registrando...';
     submitBtn.disabled = true;
     try {
         const email = document.getElementById('new-dog-email').value.toLowerCase().trim();
         const ownerName = document.getElementById('new-dog-owner').value;
         const phone = document.getElementById('new-dog-phone').value;
+        const dogName = document.getElementById('new-dog-name').value;
+        const breed = document.getElementById('new-dog-breed').value;
+        const sex = document.getElementById('new-dog-sex').value;
 
         // Verificar si ya existe en dogs_real
         const allDogs = await loadAllDogs();
-        const dogExists = allDogs.some(d => d.dueno_email.toLowerCase() === email);
-        if (dogExists) {
-            throw new Error('Ya existe un perro registrado con este email.');
+        if (allDogs.some(d => d.dueno_email.toLowerCase() === email)) {
+            throw new Error('Ya existe un perro con este email.');
         }
 
-        // Crear usuario en Auth
-        const tempPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12);
-        const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
+        // ✅ Crear usuario con contraseña temporal fija
+        const TEMP_PASSWORD = '111111';
+        const { data: authData, error: signUpError } = await supabaseClient.auth.signUp({
             email: email,
-            password: tempPassword,
+            password: TEMP_PASSWORD,
             options: {
-                data: { 
+               { 
                     full_name: ownerName,
-                    phone: phone
+                    phone: phone,
+                    created_by_admin: true
                 }
             }
         });
@@ -774,11 +740,11 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
 
         // Registrar perro
         const nd = {
-            nombre: document.getElementById('new-dog-name').value,
+            nombre: dogName,
             dueno_email: email,
             perfil: {
-                raza: document.getElementById('new-dog-breed').value,
-                sexo: document.getElementById('new-dog-sex').value,
+                raza: breed,
+                sexo: sex,
                 dueno: ownerName,
                 telefono: phone,
                 foto_id: '1581268694', 
@@ -788,7 +754,7 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
         };
         await saveRealDog(nd);
         showToast('✅ Perro y usuario creados', 'success');
-        showToast('ℹ️ El cliente deberá crear su contraseña al primer login', 'info');
+        showToast('ℹ️ El cliente usará la contraseña 111111 la primera vez y luego elegirá una nueva.', 'info');
         document.getElementById('create-dog-form').reset();
         showView('admin-dashboard-section');
     } catch (err) {
