@@ -41,7 +41,7 @@
         <!-- MENÚ DE NAVEGACIÓN -->
         <nav id="main-nav">
             <button id="nav-home-btn" class="nav-link">🏠 Inicio</button>
-            <button id="nav-logout-btn" class="nav-link logout" style="display:none;">🚪 Cerrar Sesión</button>
+            <button id="nav-logout-btn" class="nav-link logout">🚪 Cerrar Sesión</button>
         </nav>
 
         <!-- BOTÓN TEMA (Se mantiene a la derecha) -->
@@ -100,12 +100,10 @@
         <input type="email" id="reg-email" placeholder="tu@email.com" required>
         
         <label>Contraseña</label>
-<input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" required>
-
-<label>Confirmar Contraseña</label>
-<input type="password" id="reg-pass-conf" placeholder="Repite la contraseña" required>
-<!-- Mensaje de error oculto -->
-<p id="pass-error-msg" style="color: var(--danger); font-size: 0.8rem; display: none; margin-top: -10px; margin-bottom: 10px;">❌ Las contraseñas no coinciden</p>
+        <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" required>
+        
+        <label>Confirmar Contraseña</label>
+        <input type="password" id="reg-pass-conf" placeholder="Repite la contraseña" required>
         
         <button type="submit" class="save-btn ripple">✅ Crear Cuenta</button>
     </form>
@@ -230,22 +228,6 @@
             <div id="walks-history"></div>
             <button class="nav-button ripple" onclick="goBack()" style="background: var(--text-secondary); margin-top: 16px;">⬅️ Volver</button>
         </section>
-<!-- PANTALLA DE ESPERA (NUEVA) -->
-<section id="pending-dog-section" style="display:none; text-align: center; padding: 40px 20px;">
-    <div style="font-size: 4rem; margin-bottom: 20px;">🏠🐕</div>
-    <h2>¡Bienvenido/a!</h2>
-    <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 30px;">
-        Tu cuenta ha sido creada exitosamente. <br><br>
-        Actualmente, el paseador está revisando tu registro para vincular a tu perrito en el sistema.
-        <br>Te avisaremos por WhatsApp cuando tu perfil esté activo.
-    </p>
-    <a href="#" id="whatsapp-pending-btn" class="nav-button ripple" target="_blank" style="background: #25d366; text-decoration: none; display: inline-flex; width: auto; justify-content: center;">
-        💬 Avisar al Paseador por WhatsApp
-    </a>
-    <button class="nav-button ripple" onclick="showView('login-section')" style="background: var(--text-secondary); margin-top: 20px; width: auto;">
-        ⬅️ Volver al Login
-    </button>
-</section>
     </main>
 
     <!-- LIGHTBOX -->
