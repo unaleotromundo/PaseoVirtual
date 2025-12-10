@@ -446,17 +446,29 @@ function updateWhatsApp() {
 async function showView(id, dogId = null) {
     const allDogs = await loadAllDogs();
     
+    // GESTIÓN DEL HISTORIAL DE NAVEGACIÓN
     if(id !== currentView) backStack.push(currentView);
     currentView = id;
 
+    // DETENER AUDIO SI SALIMOS DEL DASHBOARD
     if (currentView !== 'dog-selection-dashboard') {
         if(slideInterval) clearInterval(slideInterval);
         if(carouselAudio) { carouselAudio.pause(); isPlaying=false; }
     }
 
+    // OCULTAR TODAS LAS SECCIONES Y MOSTRAR LA ACTUAL
     document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
     document.getElementById(id).style.display = 'block';
 
+    // === NUEVO: CONTROL DEL BOTÓN CERRAR SESIÓN ===
+    const logoutBtn = document.getElementById('nav-logout-btn');
+    if (logoutBtn) {
+        // Solo mostramos el botón si existe un currentUser
+        logoutBtn.style.display = currentUser ? 'block' : 'none';
+    }
+    // ==============================================
+
+    // LÓGICA ESPECÍFICA DE CADA VISTA
     if(dogId) {
         currentDog = allDogs.find(d => String(d.id) === String(dogId));
     }
@@ -472,11 +484,8 @@ async function showView(id, dogId = null) {
         if(id === 'create-walk-section') {
             document.getElementById('walk-form').reset();
             document.getElementById('walk-date').valueAsDate = new Date();
-            
-            // LIMPIAR FOTOS PENDIENTES
             currentWalkFiles = [];
             document.getElementById('photo-preview').innerHTML = '';
-            
             loadMultiDog();
         }
     }
