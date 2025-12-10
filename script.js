@@ -517,13 +517,8 @@ async function showView(id, dogId = null) {
 }
 
 function goBack(){
-    if(backStack.length > 0) {
-        // Volver a la pantalla anterior en el historial
-        showView(backStack.pop());
-    } else {
-        // Si no hay historial, volver SIEMPRE a la Bienvenida
-        showView('welcome-section');
-    }
+    if(backStack.length) showView(backStack.pop());
+    else showView('login-section');
 }
 
 function playWelcomeSound() {
@@ -1108,42 +1103,27 @@ window.delWalk = (walkIndex) => {
 };
 
 // === INIT ===
-// === INICIO DE LA APLICACIÓN ===
 window.onload = async () => {
-    // 1. Mostrar carga
-    const loader = document.getElementById('loading-overlay');
-    if(loader) loader.style.display = 'flex';
-
-    // 2. Cargar datos básicos
     await loadExampleDogs();
+    document.getElementById('loading-overlay').style.display = 'none';
+    showView('login-section');
     
-    // 3. Ocultar carga
-    if(loader) loader.style.display = 'none';
-    
-    // 4. CONFIGURACIÓN DEL AUDIO (Mantener tu lógica previa)
     const audioToggle = document.getElementById('audio-toggle');
     const savedAudio = localStorage.getItem('paseoDogAudio');
     if (savedAudio === 'off') {
         isAudioEnabled = false;
-        if(audioToggle) audioToggle.textContent = '🔇';
+        audioToggle.textContent = '🔇';
     }
-    if(audioToggle) {
-        audioToggle.onclick = (e) => {
-            isAudioEnabled = !isAudioEnabled;
-            audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
-            localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
-            if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
-        };
-    }
+    audioToggle.onclick = (e) => {
+        isAudioEnabled = !isAudioEnabled;
+        audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
+        localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
+        if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
+    };
     
-    // 5. DETECTAR INTERACCIÓN (Para el audio)
     document.addEventListener('click', () => {
         if (!userHasInteracted) userHasInteracted = true;
     }, { once: true });
-
-    // === IMPORTANTE: FORZAR LA VISTA DE BIENVENIDA ===
-    // Asegúrate de que NO haya ninguna línea debajo de esta que diga showView('login-section')
-    showView('welcome-section');
 };
 // === LÓGICA DE NAVEGACIÓN Y MENÚ ===
 
