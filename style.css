@@ -59,6 +59,7 @@ header {
     margin-bottom: 40px;
     position: relative;
     animation: fadeInDown 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    z-index: 10000;
 }
 h1 {
     color: var(--primary);
@@ -95,7 +96,6 @@ h1 {
 #theme-toggle:hover {
     transform: scale(1.1);
     border-color: var(--primary);
-}
 #app-container {
     max-width: 900px;
     margin: 0 auto;
@@ -105,6 +105,8 @@ h1 {
     box-shadow: var(--shadow-lg);
     animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     opacity: 0;
+    position: relative;
+    z-index: 1;
 }
 h2 {
     color: var(--text-primary);
@@ -811,7 +813,7 @@ button:hover {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.8);
-    z-index: 12000;
+    z-index: 10000;
     align-items: center;
     justify-content: center;
     flex-direction: column;
@@ -829,7 +831,7 @@ button:hover {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 11500;
+    z-index: 10000;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -1273,7 +1275,7 @@ header {
     font-size: 2rem;
     color: var(--text-primary);
     cursor: pointer;
-    z-index: 20000;
+    z-index: 200;
     padding: 5px;
 }
 
@@ -1296,7 +1298,7 @@ header {
         border: 1px solid var(--border);
         min-width: 200px;
         animation: fadeInRight 0.3s ease;
-        z-index: 20000;
+        z-index: 3000;
     }
 
     #main-nav.show {
@@ -1315,27 +1317,4 @@ header {
 @keyframes fadeInRight {
     from { opacity: 0; transform: translateX(20px); }
     to { opacity: 1; transform: translateX(0); }
-}
-/* Auto-hide de controles en pantalla completa */
-#carousel-wrapper.hide-controls .carousel-nav-btn,
-#carousel-wrapper.hide-controls .carousel-controls,
-#carousel-wrapper.hide-controls .carousel-play-large {
-    opacity: 0 !important;
-    transition: opacity 0.5s ease;
-}
-
-#carousel-wrapper.hide-controls {
-    cursor: none;
-}
-
-/* Mostrar controles inmediatamente al mover el mouse */
-#carousel-wrapper:hover.hide-controls .carousel-nav-btn,
-#carousel-wrapper:hover.hide-controls .carousel-controls,
-#carousel-wrapper:hover.hide-controls .carousel-play-large {
-    opacity: 1 !important;
-    transition: opacity 0.2s ease;
-}
-
-#carousel-wrapper:hover.hide-controls {
-    cursor: default;
 }
