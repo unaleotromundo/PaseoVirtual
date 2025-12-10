@@ -297,14 +297,6 @@ function updatePlayBtnState() {
     const icon = isPlaying ? '⏸' : '▶';
     if(btn) btn.textContent = icon;
     if(largeBtn) largeBtn.textContent = icon;
-    
-    if(isPlaying) {
-        largeBtn?.classList.add('playing');
-        document.querySelector('.carousel-controls')?.classList.add('playing');
-    } else {
-        largeBtn?.classList.remove('playing');
-        document.querySelector('.carousel-controls')?.classList.remove('playing');
-    }
 }
 
 function initCarousel() {

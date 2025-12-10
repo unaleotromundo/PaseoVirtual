@@ -911,10 +911,7 @@ button:hover {
 .carousel-play-large:hover {
     background: rgba(212, 175, 55, 0.9);
 }
-.carousel-play-large.playing {
-    opacity: 0 !important;
-    pointer-events: none;
-}
+
 .carousel-nav {
     position: absolute;
     top: 0;
@@ -944,17 +941,13 @@ button:hover {
     opacity: 0;
     transition: opacity 0.3s ease;
 }
-#carousel-wrapper.active .carousel-nav-btn,
 #carousel-wrapper:hover .carousel-nav-btn {
     opacity: 1;
 }
 .carousel-nav-btn:hover {
     background: rgba(212, 175, 55, 0.8);
 }
-.carousel-nav-btn.playing {
-    opacity: 0 !important;
-    pointer-events: none;
-}
+
 .carousel-controls {
     position: absolute;
     bottom: 20px;
@@ -970,14 +963,10 @@ button:hover {
     opacity: 0;
     transition: opacity 0.3s ease;
 }
-#carousel-wrapper.active .carousel-controls,
 #carousel-wrapper:hover .carousel-controls {
     opacity: 1;
 }
-.carousel-controls.playing {
-    opacity: 0 !important;
-    pointer-events: none;
-}
+
 #carousel-counter {
     color: white;
     font-size: 0.9rem;
