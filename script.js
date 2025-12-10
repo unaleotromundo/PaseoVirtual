@@ -435,6 +435,25 @@ function updateWhatsApp() {
     btn.href = `https://wa.me/${num}`;
 }
 
+// Función para mostrar/ocultar botones de navegación
+function updateNavButtons() {
+    const btnHome = document.getElementById('nav-home-btn');
+    const btnLogout = document.getElementById('nav-logout-btn');
+    const hamburger = document.getElementById('hamburger-btn');
+    
+    // Si NO hay sesión iniciada (estamos en login o register)
+    if (!currentUser || currentView.includes('login') || currentView.includes('register')) {
+        if (btnHome) btnHome.style.display = 'none';
+        if (btnLogout) btnLogout.style.display = 'none';
+        if (hamburger) hamburger.style.display = 'none';
+    } else {
+        // Si hay sesión iniciada, mostrar botones
+        if (btnHome) btnHome.style.display = 'block';
+        if (btnLogout) btnLogout.style.display = 'block';
+        if (hamburger) hamburger.style.display = 'block';
+    }
+}
+
 // === NAVEGACIÓN ===
 async function showView(id, dogId = null) {
     const allDogs = await loadAllDogs();
@@ -449,6 +468,9 @@ async function showView(id, dogId = null) {
 
     document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
     document.getElementById(id).style.display = 'block';
+    
+    // Mostrar/ocultar botones de navegación según el estado de sesión
+    updateNavButtons();
 
     if(dogId) {
         currentDog = allDogs.find(d => String(d.id) === String(dogId));
@@ -712,6 +734,7 @@ document.getElementById('login-form').onsubmit = async (e) => {
                 showView('admin-dashboard-section');
                 loginStep = 'email';
                 updateLoginForm('email');
+                updateNavButtons(); // Actualizar visibilidad de botones
                 return;
             }
 
@@ -725,6 +748,7 @@ document.getElementById('login-form').onsubmit = async (e) => {
                 showView('dog-selection-dashboard');
                 loginStep = 'email';
                 updateLoginForm('email');
+                updateNavButtons(); // Actualizar visibilidad de botones
                 return;
             }
 
@@ -754,6 +778,7 @@ document.getElementById('login-form').onsubmit = async (e) => {
                 }
                 loginStep = 'email';
                 updateLoginForm('email');
+                updateNavButtons(); // Actualizar visibilidad de botones
                 return;
             }
 
@@ -1247,6 +1272,7 @@ window.onload = async () => {
     document.getElementById('loading-overlay').style.display = 'none';
     showView('login-section');
     updateLoginForm('email');
+    updateNavButtons(); // Ocultar botones al inicio
     
     const audioToggle = document.getElementById('audio-toggle');
     const savedAudio = localStorage.getItem('paseoDogAudio');
@@ -1318,10 +1344,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentUser = null;
                 currentDog = null;
                 currentWalkFiles = [];
+                loginStep = 'email'; // Resetear el paso del login
                 
                 showToast('👋 ¡Hasta luego!', 'info');
                 showView('login-section');
                 updateLoginForm('email');
+                updateNavButtons(); // Ocultar botones al cerrar sesión
             }
         };
     }
