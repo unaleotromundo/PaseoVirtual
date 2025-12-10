@@ -1273,7 +1273,7 @@ header {
     font-size: 2rem;
     color: var(--text-primary);
     cursor: pointer;
-    z-index: 11000;
+    z-index: 20000;
     padding: 5px;
 }
 
@@ -1296,7 +1296,7 @@ header {
         border: 1px solid var(--border);
         min-width: 200px;
         animation: fadeInRight 0.3s ease;
-        z-index: 10500;
+        z-index: 20000;
     }
 
     #main-nav.show {
