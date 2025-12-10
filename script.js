@@ -151,21 +151,72 @@ async function updateRealDogProfile(dogId, newPerfil) {
     if (error) throw error;
 }
 
-// === SUBIR FOTO PERFIL (CON EFECTO FILL) ===
+// === FUNCIÓN DE CONVERSIÓN A WEBP ===
+async function convertToWebP(file, maxWidth = 1920, quality = 0.85) {
+    return new Promise((resolve, reject) => {
+        if (!file.type.startsWith('image/')) {
+            reject(new Error('El archivo no es una imagen'));
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Error al leer el archivo'));
+        
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Error al cargar la imagen'));
+            
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+                
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) {
+                            reject(new Error('Error al convertir a WebP'));
+                            return;
+                        }
+                        
+                        const webpFile = new File(
+                            [blob], 
+                            file.name.replace(/\.(jpg|jpeg|png)$/i, '.webp'),
+                            { type: 'image/webp' }
+                        );
+                        
+                        resolve(webpFile);
+                    },
+                    'image/webp',
+                    quality
+                );
+            };
+            
+            img.src = e.target.result;
+        };
+        
+        reader.readAsDataURL(file);
+    });
+}
+
 async function uploadProfilePhoto(file) {
     if (!currentDog || currentDog.isExample) {
         showToast('ℹ️ Solo se pueden subir fotos de perros reales', 'info');
         return;
     }
 
-    const extension = file.name.split('.').pop().toLowerCase();
-    const allowedTypes = ['jpg', 'jpeg', 'png', 'webp'];
-    if (!allowedTypes.includes(extension)) {
-        showToast('❌ Solo se permiten JPG, PNG o WebP', 'error');
-        return;
-    }
-
-    // 1. CREAR Y MOSTRAR EFECTO DE CARGA (FILL)
     const container = document.getElementById('profile-photo-container');
     if (container.querySelector('.uploading-fill')) return;
     
@@ -176,43 +227,42 @@ async function uploadProfilePhoto(file) {
     const uploadInput = document.getElementById('photo-upload-input');
     uploadInput.disabled = true;
 
-    const fileName = `perfil_${currentDog.id}_${Date.now()}.${extension}`;
-    const filePath = fileName;
-
     try {
-        // 2. SUBIR A SUPABASE
+        // CONVERTIR A WEBP ANTES DE SUBIR
+        showToast('🔄 Optimizando imagen...', 'info');
+        const webpFile = await convertToWebP(file, 1920, 0.85);
+        
+        const fileName = `perfil_${currentDog.id}_${Date.now()}.webp`;
+        const filePath = fileName;
+
         const { error: uploadError } = await supabaseClient
             .storage
             .from('paseodog-photos')
-            .upload(filePath, file, { cacheControl: '0', upsert: false });
+            .upload(filePath, webpFile, { cacheControl: '0', upsert: false });
 
         if (uploadError) throw uploadError;
 
-        // 3. ACTUALIZAR DB
         const newPerfil = { ...currentDog.perfil, foto_id: fileName };
         await updateRealDogProfile(currentDog.id, newPerfil);
 
-        // 4. ACTUALIZAR UI
         REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
         currentDog = { ...currentDog, perfil: newPerfil };
         
-        // Forzar recarga con timestamp
         const img = document.getElementById('profile-photo');
         const newSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
         
-        // Precargar imagen
         const tempImg = new Image();
         tempImg.src = newSrc;
         tempImg.onload = () => {
             img.src = newSrc;
-            showToast('✅ Foto actualizada con éxito', 'success');
+            showToast('✅ Foto actualizada (WebP)', 'success');
             loadingOverlay.remove(); 
             uploadInput.disabled = false;
         };
 
     } catch (err) {
         console.error('Error subida:', err);
-        showToast('❌ Error al subir: ' + err.message, 'error');
+        showToast('❌ Error: ' + err.message, 'error');
         loadingOverlay.remove();
         uploadInput.disabled = false;
     }
@@ -790,31 +840,32 @@ window.triggerEditUpload = () => {
 async function uploadPhotoInEditMode(file) {
     const btn = document.getElementById('btn-add-edit-photo');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '⏳ Subiendo...';
+    btn.innerHTML = '⏳ Optimizando...';
     btn.disabled = true;
 
     try {
-        const ext = file.name.split('.').pop().toLowerCase();
-        const fileName = `walk_edit_${currentDog.id}_${Date.now()}.${ext}`;
+        const webpFile = await convertToWebP(file, 1920, 0.85);
+        const fileName = `walk_edit_${currentDog.id}_${Date.now()}.webp`;
+
+        btn.innerHTML = '⬆️ Subiendo...';
 
         const { error } = await supabaseClient
             .storage
             .from('paseodog-photos')
-            .upload(fileName, file);
+            .upload(fileName, webpFile);
 
         if (error) throw error;
 
-        // Agregar foto REAL a la lista visual
         editWalkPhotos.push({ 
             id: fileName, 
             comentario: 'Agregada en edición' 
         });
         
         renderEditPhotos();
-        showToast('✅ Foto subida', 'success');
+        showToast('✅ Foto subida (WebP)', 'success');
     } catch (err) {
         console.error(err);
-        showToast('❌ Error al subir: ' + err.message, 'error');
+        showToast('❌ Error: ' + err.message, 'error');
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
