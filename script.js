@@ -509,7 +509,7 @@ function playWelcomeSound() {
     if (!isAudioEnabled || hasPlayedWelcome) return;
     hasPlayedWelcome = true;
     const o = audioContext.createOscillator();
-    const g = audioContext.createGain();
+    const g = audioContext.createGain();0
     o.connect(g);
     g.connect(audioContext.destination);
     o.frequency.value = 660;
