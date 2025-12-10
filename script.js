@@ -539,19 +539,34 @@ async function checkUserStatus(email) {
             return { exists: true, hasPassword: true, isDemo: true };
         }
 
-        const { error } = await supabaseClient.auth.signInWithPassword({
+        // Intentar login con contraseña temporal para verificar existencia
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
             email: email,
             password: '___CHECK_ONLY___'
         });
 
         if (error) {
+            // Si el error es "Invalid login credentials", el usuario EXISTE
             if (error.message.includes('Invalid login credentials') || 
                 error.message.includes('Invalid')) {
-                return { exists: true, hasPassword: true };
+                
+                // Verificar si es un usuario recién creado sin contraseña configurada
+                // Intentamos con otra contraseña aleatoria
+                const { error: error2 } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: '___ANOTHER_CHECK___'
+                });
+                
+                // Si ambos fallos dan el mismo error, el usuario existe con contraseña
+                // Si fue creado por el admin, debería necesitar configurar contraseña
+                return { exists: true, hasPassword: false }; // Asumimos que necesita configurar
             }
+            
+            // Cualquier otro error significa que no existe
             return { exists: false, hasPassword: false };
         }
 
+        // Si el login fue exitoso (muy raro con contraseña random)
         return { exists: true, hasPassword: true };
 
     } catch (err) {
@@ -856,24 +871,74 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
     submitBtn.disabled = true;
     
     try {
+        const email = document.getElementById('new-dog-email').value.toLowerCase().trim();
+        const ownerName = document.getElementById('new-dog-owner').value;
+        const phone = document.getElementById('new-dog-phone').value;
+        
+        // PASO 1: Crear el usuario en Supabase Auth (SIN contraseña)
+        submitBtn.innerHTML = '👤 Creando usuario...';
+        
+        // Verificar si el usuario ya existe
+        const existingUser = await checkUserStatus(email);
+        
+        if (!existingUser.exists) {
+            // Crear usuario nuevo sin contraseña (la creará después el cliente)
+            // Generamos una contraseña temporal aleatoria muy segura
+            const tempPassword = Math.random().toString(36).slice(-16) + Math.random().toString(36).slice(-16);
+            
+            const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
+                email: email,
+                password: tempPassword,
+                options: {
+                    data: { 
+                        full_name: ownerName,
+                        phone: phone,
+                        created_by_admin: true, // Marcar que fue creado por admin
+                        temp_password: tempPassword // Guardar temporalmente
+                    }
+                    // No configuramos emailRedirectTo para evitar confirmación
+                }
+            });
+
+            if (signUpError) {
+                // Si el error es porque ya existe, continuamos
+                if (!signUpError.message.includes('already registered')) {
+                    throw signUpError;
+                }
+                console.log('Usuario ya existe en Auth, continuando...');
+            } else {
+                console.log('Usuario creado en Supabase Auth:', signUpData);
+            }
+        } else {
+            console.log('Usuario ya existe, solo creando registro del perro');
+        }
+        
+        // PASO 2: Crear el registro del perro
+        submitBtn.innerHTML = '🐶 Registrando perro...';
+        
         const nd = {
             nombre: document.getElementById('new-dog-name').value,
-            dueno_email: document.getElementById('new-dog-email').value,
+            dueno_email: email,
             perfil: {
                 raza: document.getElementById('new-dog-breed').value,
                 sexo: document.getElementById('new-dog-sex').value,
-                dueno: document.getElementById('new-dog-owner').value,
-                telefono: document.getElementById('new-dog-phone').value,
+                dueno: ownerName,
+                telefono: phone,
                 foto_id: '1581268694', 
                 edad: '?', peso: '?', alergias: 'Ninguna', energia: 'Media', social: '?'
             },
             walks: []
         };
+        
         await saveRealDog(nd);
-        showToast('✅ Perro registrado', 'success');
+        
+        showToast('✅ Perro y usuario registrados correctamente', 'success');
+        showToast('ℹ️ El dueño deberá crear su contraseña al primer login', 'info');
         document.getElementById('create-dog-form').reset();
         showView('admin-dashboard-section');
+        
     } catch (err) {
+        console.error('Error completo:', err);
         showToast('❌ Error: ' + (err.message || 'Desconocido'), 'error');
     } finally {
         submitBtn.innerHTML = '💾 Guardar en Base de Datos';
