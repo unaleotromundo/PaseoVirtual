@@ -53,30 +53,64 @@
 
     <main id="app-container">
         <!-- LOGIN -->
-        <section id="login-section">
-            <h2>🔐 Acceso al Sistema</h2>
-            <form id="login-form">
-                <label>Correo Electrónico</label>
-                <input type="email" id="email" placeholder="ejemplo@paseos.com" required>
-                <label>Contraseña</label>
-                <div class="password-wrapper">
-                    <input type="password" id="password" placeholder="••••••••" required>
-                    <button type="button" class="password-toggle" id="toggle-password">👁️</button>
-                </div>
-                <button type="submit">Iniciar Sesión</button>
-                <p id="error-message" class="error" style="display:none;"></p>
-                <div class="info-text" style="margin-top: 20px;">
-                    <strong>🔑 Credenciales de prueba:</strong><br><br>
-                    👨‍💼 <strong>Admin:</strong> <code>admin@paseos.com</code> / <code>admin123</code><br><br>
-                    👤 <strong>Clientes (pass: 123456):</strong><br>
-                    • <code>cliente@paseos.com</code> (Fido)<br>
-                    • <code>luna@paseos.com</code> (Luna)
-                </div>
-                <p id="demo-status" style="text-align: center; margin-top: 12px; color: var(--text-secondary); font-size: 0.9rem;">
-                    Estado: <strong id="demo-status-text">Cargando...</strong>
-                </p>
-            </form>
-        </section>
+<section id="login-section">
+    <h2>🔐 Acceso al Sistema</h2>
+    <form id="login-form">
+        <label>Correo Electrónico</label>
+        <input type="email" id="email" placeholder="ejemplo@paseos.com" required>
+        <label>Contraseña</label>
+        <div class="password-wrapper">
+            <input type="password" id="password" placeholder="••••••••" required>
+            <button type="button" class="password-toggle" id="toggle-password">👁️</button>
+        </div>
+        <button type="submit">Iniciar Sesión</button>
+        
+        <!-- BOTÓN NUEVO PARA IR AL REGISTRO -->
+        <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; text-align: center;">
+            <p style="color: var(--text-secondary); margin-bottom: 10px;">¿Sos dueño y es tu primera vez?</p>
+            <button type="button" class="nav-button ripple" onclick="showView('register-section')" style="background: var(--secondary);">
+                📝 Registrarse como Dueño
+            </button>
+        </div>
+
+        <p id="error-message" class="error" style="display:none;"></p>
+        
+        <div class="info-text" style="margin-top: 20px;">
+            <strong>🔑 Credenciales de prueba:</strong><br><br>
+            👨‍💼 <strong>Admin:</strong> <code>admin@paseos.com</code> / <code>admin123</code><br>
+            (O regístrate para probar como cliente real)
+        </div>
+        <p id="demo-status" style="text-align: center; margin-top: 12px; color: var(--text-secondary); font-size: 0.9rem;">
+            Estado: <strong id="demo-status-text">Cargando...</strong>
+        </p>
+    </form>
+</section>
+
+<!-- NUEVA SECCIÓN: REGISTRO -->
+<section id="register-section" style="display:none;">
+    <h2>📝 Nuevo Cliente</h2>
+    <form id="register-form">
+        <label>Nombre y Apellido</label>
+        <input type="text" id="reg-name" placeholder="Tu nombre" required>
+        
+        <label>Teléfono (WhatsApp)</label>
+        <input type="tel" id="reg-phone" placeholder="Ej: 1155554444" required>
+        
+        <label>Correo Electrónico</label>
+        <input type="email" id="reg-email" placeholder="tu@email.com" required>
+        
+        <label>Contraseña</label>
+        <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" required>
+        
+        <label>Confirmar Contraseña</label>
+        <input type="password" id="reg-pass-conf" placeholder="Repite la contraseña" required>
+        
+        <button type="submit" class="save-btn ripple">✅ Crear Cuenta</button>
+    </form>
+    <button class="nav-button ripple" onclick="showView('login-section')" style="background: var(--text-secondary); margin-top: 16px;">
+        ⬅️ Volver al Login
+    </button>
+</section>
 
         <!-- ADMIN DASHBOARD -->
         <section id="admin-dashboard-section" style="display:none;">

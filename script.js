@@ -517,23 +517,75 @@ document.getElementById('toggle-password').onclick = () => {
 };
 document.getElementById('login-form').onsubmit = async (e) => {
     e.preventDefault();
-    const em = document.getElementById('email').value.toLowerCase();
+    const em = document.getElementById('email').value.toLowerCase().trim();
     const pw = document.getElementById('password').value;
+    const btn = e.target.querySelector('button[type="submit"]');
+    const errorMsg = document.getElementById('error-message');
     
-    const allDogs = await loadAllDogs();
+    btn.disabled = true;
+    btn.innerHTML = 'Verificando...';
+    errorMsg.style.display = 'none';
 
-    if(em === ADMIN_USER.email && pw === ADMIN_USER.password){
-        currentUser = { email: em, isAdmin: true };
-        showView('admin-dashboard-section');
-    } else {
-        const d = allDogs.find(x => x.dueno_email === em);
-        if(d && pw === '123456'){
-            currentUser = { email: em, isAdmin: false };
-            currentDog = d;
-            showView('dog-selection-dashboard');
-        } else {
-            showToast('Credenciales incorrectas', 'error');
+    try {
+        // 1. CASO ADMIN (Tu cuenta)
+        if (em === ADMIN_USER.email && pw === ADMIN_USER.password) {
+            currentUser = { email: em, isAdmin: true };
+            showToast('👋 ¡Hola Paseador!', 'success');
+            showView('admin-dashboard-section');
+            return;
         }
+
+        const allDogs = await loadAllDogs();
+        let dogFound = null;
+
+        // 2. CASO CLIENTE REAL (Supabase Auth)
+        const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+            email: em,
+            password: pw
+        });
+
+        if (!authError && authData.user) {
+            currentUser = { 
+                email: authData.user.email, 
+                isAdmin: false,
+                id: authData.user.id,
+                name: authData.user.user_metadata.full_name
+            };
+
+            // Buscar si este email tiene un perro asignado en la base de datos
+            dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === em);
+
+            if (dogFound) {
+                currentDog = dogFound;
+                showToast(`👋 Bienvenido ${currentUser.name || 'Cliente'}`, 'success');
+                showView('dog-selection-dashboard');
+            } else {
+                showToast('✅ Login correcto', 'info');
+                errorMsg.innerHTML = "Tu cuenta existe, pero el paseador aún no ha registrado a tu perro con este email.";
+                errorMsg.style.display = 'block';
+            }
+            return;
+        }
+
+        // 3. CASO CLIENTE DEMO (Para probar sin registrarse)
+        dogFound = allDogs.find(x => x.dueno_email === em);
+        if (dogFound && pw === '123456') {
+            currentUser = { email: em, isAdmin: false };
+            currentDog = dogFound;
+            showToast('👋 Acceso Demo', 'info');
+            showView('dog-selection-dashboard');
+            return;
+        }
+
+        throw new Error('Credenciales incorrectas');
+
+    } catch (err) {
+        console.error(err);
+        errorMsg.textContent = '❌ Usuario o contraseña incorrectos.';
+        errorMsg.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Iniciar Sesión';
     }
 };
 
@@ -1080,4 +1132,45 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
+// === LOGICA DE REGISTRO DE NUEVO CLIENTE ===
+document.getElementById('register-form').onsubmit = async (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById('reg-name').value;
+    const phone = document.getElementById('reg-phone').value;
+    const email = document.getElementById('reg-email').value;
+    const pass = document.getElementById('reg-pass').value;
+    const passConf = document.getElementById('reg-pass-conf').value;
+    const btn = e.target.querySelector('button[type="submit"]');
+
+    if (pass !== passConf) return showToast('❌ Las contraseñas no coinciden', 'error');
+    if (pass.length < 6) return showToast('❌ La contraseña es muy corta (mínimo 6)', 'error');
+
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Creando usuario...';
+
+    try {
+        const { data, error } = await supabaseClient.auth.signUp({
+            email: email,
+            password: pass,
+            options: {
+                data: { full_name: name, phone: phone } // Guardamos datos extra
+            }
+        });
+
+        if (error) throw error;
+
+        showToast('✅ ¡Cuenta creada! Por favor inicia sesión.', 'success');
+        document.getElementById('register-form').reset();
+        showView('login-section');
+
+    } catch (err) {
+        let msg = err.message;
+        if(msg.includes('already registered')) msg = 'Este correo ya está registrado.';
+        showToast('❌ Error: ' + msg, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '✅ Crear Cuenta';
+    }
+};
 });
