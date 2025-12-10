@@ -52,35 +52,51 @@
     </header>
 
     <main id="app-container">
-        <!-- LOGIN -->
-<section id="login-section">
-    <h2>🔐 Acceso al Sistema</h2>
+<!-- PANTALLA DE BIENVENIDA / SELECCIÓN -->
+<section id="welcome-section" style="text-align: center; padding: 40px 20px;">
+    <div style="font-size: 5rem; margin-bottom: 10px; animation: float 6s ease-in-out infinite;">🐕</div>
+    <h2 style="font-size: 2rem; margin-bottom: 10px; border:none;">PaseoDog</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 40px;">Tu mascota, nuestra pasión.</p>
+
+    <div style="display: flex; flex-direction: column; gap: 15px; max-width: 300px; margin: 0 auto;">
+        <!-- BOTÓN CLIENTES -->
+        <button class="ripple" onclick="goToLogin('client')" style="background: var(--primary); padding: 18px; font-size: 1.1rem; border-radius: var(--radius-lg); box-shadow: var(--shadow);">
+            🦴 Soy Dueño / Cliente
+        </button>
+
+        <!-- BOTÓN PASEADOR (ADMIN) -->
+        <button class="ripple" onclick="goToLogin('admin')" style="background: var(--bg-input); color: var(--text-primary); border: 2px solid var(--border); padding: 18px; font-size: 1.1rem; border-radius: var(--radius-lg);">
+            🧢 Soy el Paseador
+        </button>
+    </div>
+</section>
+        <!-- LOGIN (COMPARTIDO PERO ADAPTABLE) -->
+<section id="login-section" style="display:none;">
+    <h2 id="login-title">🔐 Acceso</h2>
     <form id="login-form">
         <label>Correo Electrónico</label>
-        <input type="email" id="email" placeholder="ejemplo@paseos.com" required>
+        <input type="email" id="email" placeholder="correo@ejemplo.com" required>
         <label>Contraseña</label>
         <div class="password-wrapper">
             <input type="password" id="password" placeholder="••••••••" required>
             <button type="button" class="password-toggle" id="toggle-password">👁️</button>
         </div>
-        <button type="submit">Iniciar Sesión</button>
+        <button type="submit" style="margin-top: 10px;">Iniciar Sesión</button>
         
-        <div style="margin-top: 20px; text-align: center;">
-    <button type="button" onclick="showView('register-section')" style="background: none; border: none; color: var(--secondary); text-decoration: underline; cursor: pointer; font-size: 0.9rem;">
-        🔑 ¿Primera vez? Activa tu cuenta aquí
-    </button>
-</div>
+        <!-- ESTO SOLO SE VERÁ SI ERES CLIENTE -->
+        <div id="client-login-options" style="margin-top: 25px; text-align: center; border-top: 1px solid var(--border); padding-top: 20px;">
+            <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 0.9rem;">¿Recibiste la invitación del paseador?</p>
+            <button type="button" onclick="showView('register-section')" style="background: none; border: none; color: var(--secondary); text-decoration: underline; cursor: pointer; font-weight: 600;">
+                🔑 Activar mi Cuenta aquí
+            </button>
+        </div>
 
         <p id="error-message" class="error" style="display:none;"></p>
         
-        <div class="info-text" style="margin-top: 20px;">
-            <strong>🔑 Credenciales de prueba:</strong><br><br>
-            👨‍💼 <strong>Admin:</strong> <code>admin@paseos.com</code> / <code>admin123</code><br>
-            (O regístrate para probar como cliente real)
-        </div>
-        <p id="demo-status" style="text-align: center; margin-top: 12px; color: var(--text-secondary); font-size: 0.9rem;">
-            Estado: <strong id="demo-status-text">Cargando...</strong>
-        </p>
+        <!-- Botón para volver al inicio -->
+        <button type="button" onclick="showView('welcome-section')" style="background: none; border: none; color: var(--text-secondary); margin-top: 20px; font-size: 0.9rem;">
+            ⬅️ Volver al Inicio
+        </button>
     </form>
 </section>
 
@@ -107,7 +123,7 @@
         
         <button type="submit" class="save-btn ripple">✅ Crear Cuenta</button>
     </form>
-    <button class="nav-button ripple" onclick="showView('login-section')" style="background: var(--text-secondary); margin-top: 16px;">
+    <button class="nav-button ripple" onclick="goToLogin('client')" style="background: var(--text-secondary); margin-top: 16px;">
         ⬅️ Volver al Login
     </button>
 </section>
@@ -240,7 +256,7 @@
     <a href="#" id="whatsapp-pending-btn" class="nav-button ripple" target="_blank" style="background: #25d366; text-decoration: none; display: inline-flex; width: auto; justify-content: center;">
         💬 Avisar al Paseador por WhatsApp
     </a>
-    <button class="nav-button ripple" onclick="showView('login-section')" style="background: var(--text-secondary); margin-top: 20px; width: auto;">
+    <button class="nav-button ripple" onclick="goToLogin('client')" style="background: var(--text-secondary); margin-top: 20px; width: auto;">
         ⬅️ Volver al Login
     </button>
 </section>

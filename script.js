@@ -1,8 +1,33 @@
+// === CONTROL DE ACCESO showView('login-section')(CLIENTE vs ADMIN) ===
+function goToLogin(role) {
+    // 1. Mostrar la vista de login
+    showView('login-section');
+    
+    // 2. Referencias a elementos
+    const title = document.getElementById('login-title');
+    const clientOptions = document.getElementById('client-login-options');
+    const emailInput = document.getElementById('email');
+
+    // 3. Adaptar la pantalla según el rol
+    if (role === 'admin') {
+        title.textContent = '🧢 Acceso Paseador';
+        clientOptions.style.display = 'none'; // OCULTA EL REGISTRO
+        // Opcional: Autocompletar tu mail para ir más rápido
+        // emailInput.value = ADMIN_USER.email; 
+    } else {
+        title.textContent = '🦴 Acceso Dueños';
+        clientOptions.style.display = 'block'; // MUESTRA EL REGISTRO
+        emailInput.value = '';
+    }
+}
+
 // === SUPABASE CONFIG ===
 const { createClient } = window.supabase;
 const SUPABASE_URL = 'https://asejbhohkbcoixiwdhcq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZWpiaG9oa2Jjb2l4aXdkaGNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjk0NzMsImV4cCI6MjA4MDYwNTQ3M30.kbRKO5PEljZ29_kn6GYKoyGfB_t8xalxtMiq1ovPo4w';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
 
 // === DATA DE RESPALDO (CON IDs 995-999) ===
 const FALLBACK_DB = {
@@ -1132,7 +1157,8 @@ document.addEventListener('DOMContentLoaded', () => {
             burger.textContent = '☰';
             
             if (!currentUser) {
-                showView('login-section');
+                showView('welcome-section');
+
                 return;
             }
 
