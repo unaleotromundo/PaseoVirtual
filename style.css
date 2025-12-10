@@ -1321,14 +1321,3 @@ header {
     from { opacity: 0; transform: translateX(20px); }
     to { opacity: 1; transform: translateX(0); }
 }
-#welcome-section {
-    animation: fadeIn 0.5s ease-out;
-}
-
-#welcome-section button {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-#welcome-section button:active {
-    transform: scale(0.95);
-}
