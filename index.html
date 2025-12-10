@@ -65,13 +65,11 @@
         </div>
         <button type="submit">Iniciar Sesión</button>
         
-        <!-- BOTÓN NUEVO PARA IR AL REGISTRO -->
-        <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; text-align: center;">
-            <p style="color: var(--text-secondary); margin-bottom: 10px;">¿Sos dueño y es tu primera vez?</p>
-            <button type="button" class="nav-button ripple" onclick="showView('register-section')" style="background: var(--secondary);">
-                📝 Registrarse como Dueño
-            </button>
-        </div>
+        <div style="margin-top: 20px; text-align: center;">
+    <button type="button" onclick="showView('register-section')" style="background: none; border: none; color: var(--secondary); text-decoration: underline; cursor: pointer; font-size: 0.9rem;">
+        🔑 ¿Primera vez? Activa tu cuenta aquí
+    </button>
+</div>
 
         <p id="error-message" class="error" style="display:none;"></p>
         
@@ -88,7 +86,7 @@
 
 <!-- NUEVA SECCIÓN: REGISTRO -->
 <section id="register-section" style="display:none;">
-    <h2>📝 Nuevo Cliente</h2>
+    <h2>🔐 Activar Cuenta</h2>
     <form id="register-form">
         <label>Nombre y Apellido</label>
         <input type="text" id="reg-name" placeholder="Tu nombre" required>
