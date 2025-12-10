@@ -510,7 +510,11 @@ function playWelcomeSound() {
     o.stop(audioContext.currentTime + 0.3);
 }
 
-// === LOGIN MODIFICADO ===
+// === LOGIN ===
+document.getElementById('toggle-password').onclick = () => {
+    const p = document.getElementById('password');
+    p.type = p.type === 'password' ? 'text' : 'password';
+};
 document.getElementById('login-form').onsubmit = async (e) => {
     e.preventDefault();
     const em = document.getElementById('email').value.toLowerCase().trim();
@@ -523,7 +527,7 @@ document.getElementById('login-form').onsubmit = async (e) => {
     errorMsg.style.display = 'none';
 
     try {
-        // 1. CASO ADMIN
+        // 1. CASO ADMIN (Tu cuenta)
         if (em === ADMIN_USER.email && pw === ADMIN_USER.password) {
             currentUser = { email: em, isAdmin: true };
             showToast('👋 ¡Hola Paseador!', 'success');
@@ -540,56 +544,13 @@ document.getElementById('login-form').onsubmit = async (e) => {
             password: pw
         });
 
-        if (authError) throw new Error('Credenciales incorrectas o email no confirmado.');
-
-        if (authData.user) {
+        if (!authError && authData.user) {
             currentUser = { 
                 email: authData.user.email, 
                 isAdmin: false,
                 id: authData.user.id,
                 name: authData.user.user_metadata.full_name
             };
-
-            // Buscar si este email tiene un perro asignado
-            dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === em);
-
-            if (dogFound) {
-                currentDog = dogFound;
-                showToast(`👋 Bienvenido ${currentUser.name || 'Cliente'}`, 'success');
-                showView('dog-selection-dashboard');
-            } else {
-                // SI ENTRA PERO NO TIENE PERRO, LO MANDAMOS A LA PANTALLA DE ESPERA
-                showToast('ℹ️ Cuenta activa sin perro asignado', 'info');
-                
-                const waBtn = document.getElementById('whatsapp-pending-btn');
-                if(waBtn) waBtn.href = `https://wa.me/${TRAINER_PHONE}?text=Hola, soy ${currentUser.name} (${currentUser.email}). Ya me registré en la App y espero que vinculen a mi perro.`;
-                
-                showView('pending-dog-section');
-            }
-            return;
-        }
-
-        // 3. CASO CLIENTE DEMO
-        dogFound = allDogs.find(x => x.dueno_email === em);
-        if (dogFound && pw === '123456') {
-            currentUser = { email: em, isAdmin: false };
-            currentDog = dogFound;
-            showToast('👋 Acceso Demo', 'info');
-            showView('dog-selection-dashboard');
-            return;
-        }
-
-        throw new Error('Credenciales incorrectas');
-
-    } catch (err) {
-        console.error(err);
-        errorMsg.textContent = '❌ Usuario o contraseña incorrectos.';
-        errorMsg.style.display = 'block';
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = 'Iniciar Sesión';
-    }
-};
 
             // Buscar si este email tiene un perro asignado en la base de datos
             dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === em);
