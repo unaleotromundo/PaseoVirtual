@@ -1273,7 +1273,7 @@ header {
     font-size: 2rem;
     color: var(--text-primary);
     cursor: pointer;
-    z-index: 200;
+    z-index: 10000;
     padding: 5px;
 }
 
