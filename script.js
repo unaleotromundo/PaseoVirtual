@@ -702,69 +702,6 @@ async function loadAdminDashboard() {
 
 // === CREATE DOG ===
 document.getElementById('create-dog-form').onsubmit = async (e) => {
-    e.preventDefault();
-    const submitBtn = document.querySelector('#create-dog-form .save-btn');
-    if(submitBtn.disabled) return;
-    submitBtn.innerHTML = '🔄 Registrando...';
-    submitBtn.disabled = true;
-    try {
-        const email = document.getElementById('new-dog-email').value.toLowerCase().trim();
-        const ownerName = document.getElementById('new-dog-owner').value;
-        const phone = document.getElementById('new-dog-phone').value;
-        const dogName = document.getElementById('new-dog-name').value;
-        const breed = document.getElementById('new-dog-breed').value;
-        const sex = document.getElementById('new-dog-sex').value;
-
-        // Verificar si ya existe en dogs_real
-        const allDogs = await loadAllDogs();
-        if (allDogs.some(d => d.dueno_email.toLowerCase() === email)) {
-            throw new Error('Ya existe un perro con este email.');
-        }
-
-        // ✅ Crear usuario con contraseña temporal fija
-        const TEMP_PASSWORD = '111111';
-        const { data: authData, error: signUpError } = await supabaseClient.auth.signUp({
-            email: email,
-            password: TEMP_PASSWORD,
-            options: {
-                data: {  // <--- CORRECCIÓN: Se agregó 'data:'
-                    full_name: ownerName,
-                    phone: phone,
-                    created_by_admin: true
-                }
-            }
-        });
-        if (signUpError && !signUpError.message.includes('already registered')) {
-            throw signUpError;
-        }
-
-        // Registrar perro
-        const nd = {
-            nombre: dogName,
-            dueno_email: email,
-            perfil: {
-                raza: breed,
-                sexo: sex,
-                dueno: ownerName,
-                telefono: phone,
-                foto_id: '1581268694', 
-                edad: '?', peso: '?', alergias: 'Ninguna', energia: 'Media', social: '?'
-            },
-            walks: []
-        };
-        await saveRealDog(nd);
-        showToast('✅ Perro y usuario creados', 'success');
-        showToast('ℹ️ El cliente usará la contraseña 111111 la primera vez y luego elegirá una nueva.', 'info');
-        document.getElementById('create-dog-form').reset();
-        showView('admin-dashboard-section');
-    } catch (err) {
-        console.error('Error:', err);
-        showToast('❌ Error: ' + (err.message || 'Desconocido'), 'error');
-    } finally {
-        submitBtn.innerHTML = '💾 Guardar en Base de Datos';
-        submitBtn.disabled = false;
-    }
-};
 
 // === PROFILE ===
 function loadProfile(d) {
