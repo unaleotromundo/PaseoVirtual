@@ -1092,35 +1092,45 @@ window.delWalk = (walkIndex) => {
 
 // === INIT ===
 window.onload = async () => {
-    // --- NUEVO: LIMPIEZA DE SESIONES CORRUPTAS ---
-    // Intentamos obtener la sesión actual. Si falla o da error, forzamos el cierre.
-    try {
-        const { data, error } = await supabaseClient.auth.getSession();
-        if (error) {
-            console.warn("Sesión inválida detectada, limpiando...", error);
-            await supabaseClient.auth.signOut();
-            localStorage.clear(); // Limpieza agresiva local
-        } else if (data.session) {
-            // Opcional: Si hay sesión válida, podrías autologuear al usuario aquí
-            console.log("Sesión recuperada:", data.session.user.email);
-            // Si quieres auto-login descomenta la siguiente línea:
-            // currentUser = { email: data.session.user.email, id: data.session.user.id, isAdmin: false };
-        }
-    } catch (err) {
-        console.error("Error crítico de auth:", err);
-        localStorage.clear();
-    }
-    // ---------------------------------------------
-
     await loadExampleDogs();
     document.getElementById('loading-overlay').style.display = 'none';
-    
-    // ... resto de tu código window.onload original ...
     showView('login-section');
     updateLoginForm('email');
     updateNavButtons();
-    // ...
+    const audioToggle = document.getElementById('audio-toggle');
+    const savedAudio = localStorage.getItem('paseoDogAudio');
+    if (savedAudio === 'off') {
+        isAudioEnabled = false;
+        audioToggle.textContent = '🔇';
+    }
+    audioToggle.onclick = (e) => {
+        isAudioEnabled = !isAudioEnabled;
+        audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
+        localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
+        if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
+    };
+    document.addEventListener('click', () => {
+        if (!userHasInteracted) userHasInteracted = true;
+    }, { once: true });
 };
+document.addEventListener('DOMContentLoaded', () => {
+    const nav = document.getElementById('main-nav');
+    const burger = document.getElementById('hamburger-btn');
+    const btnHome = document.getElementById('nav-home-btn');
+    const btnLogout = document.getElementById('nav-logout-btn');
+    if (burger) {
+        burger.onclick = (e) => {
+            e.stopPropagation();
+            nav.classList.toggle('show');
+            burger.textContent = nav.classList.contains('show') ? '✕' : '☰';
+        };
+    }
+    document.addEventListener('click', (e) => {
+        if (nav && nav.classList.contains('show') && !nav.contains(e.target) && e.target !== burger) {
+            nav.classList.remove('show');
+            burger.textContent = '☰';
+        }
+    });
     if (btnHome) {
         btnHome.onclick = () => {
             nav.classList.remove('show');
@@ -1189,4 +1199,5 @@ window.onload = async () => {
             btn.innerHTML = '✅ Crear Cuenta';
         }
     };
+}
 });
