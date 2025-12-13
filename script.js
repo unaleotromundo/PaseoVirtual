@@ -533,7 +533,7 @@ function updateLoginForm(step) {
             const infoMsg = document.createElement('p');
             infoMsg.className = 'info-text set-password-info';
             infoMsg.style.cssText = 'margin-top: 12px; font-size: 0.9rem;';
-            infoMsg.innerHTML = '🔒 <strong>Usuario nuevo.</strong><br>Por favor elige una contraseña segura para tu cuenta.';
+            infoMsg.innerHTML = '🔑 <strong>Usuario nuevo.</strong><br>Por favor elige una contraseña segura para tu cuenta.';
             confirmWrapper.parentElement.insertBefore(infoMsg, confirmWrapper.nextSibling);
             submitBtn.textContent = '✅ Guardar Contraseña';
             const changeBtn2 = document.createElement('button');
@@ -580,7 +580,7 @@ document.getElementById('login-form').onsubmit = async (e) => {
             updateLoginForm('password');
         } else if (loginStep === 'password') {
             const pw = document.getElementById('password').value;
-            btn.innerHTML = '🔐 Iniciando...';
+            btn.innerHTML = '🔍 Iniciando...';
 
             // Admin
             if (currentEmailLogin === ADMIN_USER.email && pw === ADMIN_USER.password) {
