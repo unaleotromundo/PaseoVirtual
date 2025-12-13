@@ -1076,3 +1076,40 @@ window.onload = async () => {
         if (!userHasInteracted) userHasInteracted = true;
     }, { once: true });
 };
+// === TEST MENÚ (TEMPORAL) ===
+setTimeout(() => {
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const mainNav = document.getElementById('main-nav');
+    
+    console.log('TEST - Hamburger existe:', !!hamburgerBtn);
+    console.log('TEST - Nav existe:', !!mainNav);
+    console.log('TEST - Hamburger visible:', hamburgerBtn ? window.getComputedStyle(hamburgerBtn).display : 'N/A');
+    
+    if (hamburgerBtn) {
+        hamburgerBtn.onclick = () => {
+            console.log('CLICK EN HAMBURGUESA');
+            if (mainNav) {
+                mainNav.classList.toggle('show');
+                hamburgerBtn.textContent = mainNav.classList.contains('show') ? '✕' : '☰';
+                console.log('Menu ahora:', mainNav.classList.contains('show') ? 'ABIERTO' : 'CERRADO');
+            }
+        };
+    }
+    
+    const navHomeBtn = document.getElementById('nav-home-btn');
+    const navLogoutBtn = document.getElementById('nav-logout-btn');
+    
+    if (navHomeBtn) {
+        navHomeBtn.onclick = () => {
+            console.log('CLICK EN HOME');
+            alert('Home funciona!');
+        };
+    }
+    
+    if (navLogoutBtn) {
+        navLogoutBtn.onclick = () => {
+            console.log('CLICK EN LOGOUT');
+            alert('Logout funciona!');
+        };
+    }
+}, 2000);
