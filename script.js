@@ -1090,51 +1090,85 @@ window.delWalk = (walkIndex) => {
         .catch(err => showToast('❌ Error al eliminar', 'error'));
 };
 
-// === INIT ===
+// === INIT (INICIO DEL SISTEMA) ===
 window.onload = async () => {
+    // 1. LIMPIEZA DE SESIONES CORRUPTAS (Evita el error 400)
+    try {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error) {
+            console.warn("Sesión inválida detectada, limpiando...", error);
+            await supabaseClient.auth.signOut();
+            localStorage.clear();
+        }
+    } catch (err) {
+        console.error("Error crítico de auth:", err);
+        localStorage.clear();
+    }
+
+    // 2. CARGA DE DATOS
     await loadExampleDogs();
-    document.getElementById('loading-overlay').style.display = 'none';
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
+    
+    // 3. INICIALIZAR VISTA
     showView('login-section');
     updateLoginForm('email');
     updateNavButtons();
+
+    // 4. CONFIGURAR AUDIO
     const audioToggle = document.getElementById('audio-toggle');
-    const savedAudio = localStorage.getItem('paseoDogAudio');
-    if (savedAudio === 'off') {
-        isAudioEnabled = false;
-        audioToggle.textContent = '🔇';
+    if (audioToggle) {
+        const savedAudio = localStorage.getItem('paseoDogAudio');
+        if (savedAudio === 'off') {
+            isAudioEnabled = false;
+            audioToggle.textContent = '🔇';
+        }
+        audioToggle.onclick = (e) => {
+            isAudioEnabled = !isAudioEnabled;
+            audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
+            localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
+            if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
+        };
     }
-    audioToggle.onclick = (e) => {
-        isAudioEnabled = !isAudioEnabled;
-        audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
-        localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
-        if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
-    };
+
+    // 5. DETECTAR INTERACCIÓN (Para reproducir audio después)
     document.addEventListener('click', () => {
         if (!userHasInteracted) userHasInteracted = true;
     }, { once: true });
 };
+
+// === EVENTOS DEL DOM (MENÚ, REGISTRO, ETC) ===
 document.addEventListener('DOMContentLoaded', () => {
     const nav = document.getElementById('main-nav');
     const burger = document.getElementById('hamburger-btn');
     const btnHome = document.getElementById('nav-home-btn');
     const btnLogout = document.getElementById('nav-logout-btn');
+
+    // Menú Hamburguesa
     if (burger) {
         burger.onclick = (e) => {
             e.stopPropagation();
-            nav.classList.toggle('show');
-            burger.textContent = nav.classList.contains('show') ? '✕' : '☰';
+            if (nav) {
+                nav.classList.toggle('show');
+                burger.textContent = nav.classList.contains('show') ? '✕' : '☰';
+            }
         };
     }
+
+    // Cerrar menú al hacer click fuera
     document.addEventListener('click', (e) => {
         if (nav && nav.classList.contains('show') && !nav.contains(e.target) && e.target !== burger) {
             nav.classList.remove('show');
-            burger.textContent = '☰';
+            if (burger) burger.textContent = '☰';
         }
     });
+
+    // Botón Inicio
     if (btnHome) {
         btnHome.onclick = () => {
-            nav.classList.remove('show');
-            burger.textContent = '☰';
+            if (nav) nav.classList.remove('show');
+            if (burger) burger.textContent = '☰';
+            
             if (!currentUser) {
                 showView('login-section');
                 return;
@@ -1150,15 +1184,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
+
+    // Botón Cerrar Sesión
     if (btnLogout) {
         btnLogout.onclick = () => {
             if(confirm('¿Cerrar sesión?')) {
-                nav.classList.remove('show');
-                burger.textContent = '☰';
+                if (nav) nav.classList.remove('show');
+                if (burger) burger.textContent = '☰';
+                
                 currentUser = null;
                 currentDog = null;
                 currentWalkFiles = [];
                 loginStep = 'email';
+                
                 showToast('👋 ¡Hasta luego!', 'info');
                 showView('login-section');
                 updateLoginForm('email');
@@ -1166,37 +1204,46 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
-    document.getElementById('register-form').onsubmit = async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('reg-name').value;
-        const phone = document.getElementById('reg-phone').value;
-        const email = document.getElementById('reg-email').value;
-        const pass = document.getElementById('reg-pass').value;
-        const passConf = document.getElementById('reg-pass-conf').value;
-        const btn = e.target.querySelector('button[type="submit"]');
-        if (pass !== passConf) return showToast('❌ Las contraseñas no coinciden', 'error');
-        if (pass.length < 6) return showToast('❌ La contraseña es muy corta (mínimo 6)', 'error');
-        btn.disabled = true;
-        btn.innerHTML = '⏳ Creando usuario...';
-        try {
-            const { data, error } = await supabaseClient.auth.signUp({
-                email: email,
-                password: pass,
-                options: {
-                    data: { full_name: name, phone: phone }
-                }
-            });
-            if (error) throw error;
-            showToast('✅ ¡Cuenta creada! Por favor inicia sesión.', 'success');
-            document.getElementById('register-form').reset();
-            showView('login-section');
-        } catch (err) {
-            let msg = err.message;
-            if(msg.includes('already registered')) msg = 'Este correo ya está registrado.';
-            showToast('❌ Error: ' + msg, 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '✅ Crear Cuenta';
-        }
-    };
+
+    // FORMULARIO DE REGISTRO (NUEVO CLIENTE)
+    const regForm = document.getElementById('register-form');
+    if (regForm) {
+        regForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const phone = document.getElementById('reg-phone').value;
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+            const passConf = document.getElementById('reg-pass-conf').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+
+            if (pass !== passConf) return showToast('❌ Las contraseñas no coinciden', 'error');
+            if (pass.length < 6) return showToast('❌ La contraseña es muy corta (mínimo 6)', 'error');
+
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Creando usuario...';
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: pass,
+                    options: {
+                        data: { full_name: name, phone: phone }
+                    }
+                });
+
+                if (error) throw error;
+                showToast('✅ ¡Cuenta creada! Por favor inicia sesión.', 'success');
+                regForm.reset();
+                showView('login-section');
+            } catch (err) {
+                let msg = err.message;
+                if(msg.includes('already registered')) msg = 'Este correo ya está registrado.';
+                showToast('❌ Error: ' + msg, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '✅ Crear Cuenta';
+            }
+        };
+    }
 });
