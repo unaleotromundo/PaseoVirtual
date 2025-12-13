@@ -1,10 +1,27 @@
-// === SUPABASE CONFIG ===
-const { createClient } = window.supabase;
+// ==========================================
+// 1. CONFIGURACIÓN Y SUPABASE (BLINDADO)
+// ==========================================
+
 const SUPABASE_URL = 'https://asejbhohkbcoixiwdhcq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZWpiaG9oa2Jjb2l4aXdkaGNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjk0NzMsImV4cCI6MjA4MDYwNTQ3M30.kbRKO5PEljZ29_kn6GYKoyGfB_t8xalxtMiq1ovPo4w';
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// === DATA DE RESPALDO (CON IDs 995-999) ===
+let supabaseClient = null;
+
+try {
+    if (window.supabase) {
+        const { createClient } = window.supabase;
+        supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else {
+        console.warn('⚠️ La librería de Supabase no cargó. Se usará modo offline limitado.');
+    }
+} catch (err) {
+    console.error('❌ Error crítico inicializando Supabase:', err);
+}
+
+// ==========================================
+// 2. DATOS DE RESPALDO Y VARIABLES GLOBALES
+// ==========================================
+
 const FALLBACK_DB = {
   "dogs": [
     { "id": 995, "nombre": "Fido (Ejemplo)", "dueno_email": "cliente@paseos.com", "perfil": { "raza": "Pastor Alemán", "foto_id": "1589941013453-ec89f33b5e95", "telefono": "5491155550000" }, "walks": [] },
@@ -16,7 +33,29 @@ const FALLBACK_DB = {
   "admin": { "email": "admin@paseos.com", "password": "admin123" }
 };
 
-// === UTILIDADES ===
+const DB_URL = 'paseoDogDB.json';
+let TRAINER_PHONE = "5491100000000";
+let ADMIN_USER = { email: 'admin@paseos.com', password: 'admin123' };
+let EXAMPLE_DOGS = [];
+let REAL_DOGS = [];
+let DATABASE = null;
+
+// ESTADO GLOBAL
+let currentUser = null, currentDog = null, currentView = 'login-section';
+let currentWalkFiles = []; // Fotos para NUEVO paseo
+let simulatedPhotos = [], isEditing = false, backStack = [];
+let editWalkIdx = null, editWalkPhotos = []; // Fotos para EDICIÓN de paseo
+let slideInterval = null, isPlaying = false;
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let isAudioEnabled = true;
+let hasPlayedWelcome = false;
+let userHasInteracted = false;
+let carouselAudio = null;
+
+// ==========================================
+// 3. UTILIDADES (Toast, URL Fotos, Ripples)
+// ==========================================
+
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
@@ -40,43 +79,25 @@ function createRipple(event, element) {
     button.appendChild(circle);
 }
 
-// === CONFIGURACIÓN ===
-const DB_URL = 'paseoDogDB.json';
-let TRAINER_PHONE = "5491100000000";
-let ADMIN_USER = { email: 'admin@paseos.com', password: 'admin123' };
-let EXAMPLE_DOGS = [];
-let REAL_DOGS = [];
-let DATABASE = null;
-
-// === ESTADO GLOBAL ===
-let currentUser = null, currentDog = null, currentView = 'login-section';
-let currentWalkFiles = []; // Almacena fotos reales para subir en nuevo paseo
-let simulatedPhotos = [], isEditing = false, tempPhotoId = null, backStack = [];
-let editWalkIdx = null, editWalkPhotos = [];
-let slideInterval = null, isPlaying = false;
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-let isAudioEnabled = true;
-let hasPlayedWelcome = false;
-let userHasInteracted = false;
-let lastPlayedTrack = null;
-let carouselAudio = null;
-
-// === FUNCIONES DE IMÁGENES ===
 function getPhotoUrl(id, w = 400, h = 400) {
     if(!id) return 'https://via.placeholder.com/400?text=No+Foto';
     
-    // Soporte para fotos subidas a Supabase
-    if (id.includes('perfil_') || id.includes('walk_') || id.includes('paseodog')) { 
-       if(!id.startsWith('http')) {
-           return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
+    // Si contiene puntos (extensión) o prefijos conocidos, es de Supabase o local
+    if (id.includes('perfil_') || id.includes('walk_') || id.includes('.')) { 
+       if(id.startsWith('http')) {
+           return id;
        }
-       return id;
+       // Construir URL pública de Supabase
+       return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
     }
-    // Soporte Unsplash
+    // Si es un ID simple, asumimos Unsplash (para datos de ejemplo)
     return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
 }
 
-// === CARGAR DATOS ===
+// ==========================================
+// 4. CARGA DE DATOS (DB Local y Supabase)
+// ==========================================
+
 async function loadExampleDogs() {
     try {
         const res = await fetch(DB_URL);
@@ -84,7 +105,7 @@ async function loadExampleDogs() {
         const data = await res.json();
         processLoadedData(data);
     } catch (err) {
-        console.warn("⚠️ Usando base de datos de respaldo:", err);
+        console.warn("⚠️ Usando base de datos de respaldo interna.");
         processLoadedData(FALLBACK_DB);
     }
 }
@@ -102,13 +123,15 @@ function processLoadedData(data) {
 }
 
 async function loadRealDogs() {
+    if (!supabaseClient) return [];
+    
     const { data, error } = await supabaseClient
         .from('dogs_real')
         .select('*')
         .order('nombre', { ascending: true });
     
     if (error) {
-        console.error('Error Supabase:', error);
+        console.error('Error Supabase Load:', error);
         return [];
     }
     return data.map(d => ({ ...d, isReal: true }));
@@ -120,8 +143,10 @@ async function loadAllDogs() {
     return [...EXAMPLE_DOGS, ...reals];
 }
 
-// === ACCIONES SUPABASE ===
+// ACCIONES EN SUPABASE (Insert/Update)
+
 async function saveRealDog(dogData) {
+    if (!supabaseClient) throw new Error("Sin conexión a base de datos");
     const { error } = await supabaseClient
         .from('dogs_real')
         .insert([{
@@ -134,6 +159,7 @@ async function saveRealDog(dogData) {
 }
 
 async function updateRealDogWalks(dogId, walks) {
+    if (!supabaseClient) throw new Error("Sin conexión a base de datos");
     const { error } = await supabaseClient
         .from('dogs_real')
         .update({ walks })
@@ -142,6 +168,7 @@ async function updateRealDogWalks(dogId, walks) {
 }
 
 async function updateRealDogProfile(dogId, newPerfil) {
+    if (!supabaseClient) throw new Error("Sin conexión a base de datos");
     const { error } = await supabaseClient
         .from('dogs_real')
         .update({ perfil: newPerfil })
@@ -149,28 +176,38 @@ async function updateRealDogProfile(dogId, newPerfil) {
     if (error) throw error;
 }
 
-// === SUBIR FOTO PERFIL (CON EFECTO FILL) ===
+// ==========================================
+// 5. GESTIÓN DE FOTOS (PERFIL) - ACTUALIZADO
+// ==========================================
+
 async function uploadProfilePhoto(file) {
-    if (!currentDog || currentDog.isExample) {
-        showToast('ℹ️ Solo se pueden subir fotos de perros reales', 'info');
+    // 1. Validar Conexión
+    if (!supabaseClient) {
+        showToast('❌ Error de conexión con la base de datos', 'error');
         return;
     }
 
+    // 2. Validar que no sea Ejemplo
+    if (!currentDog || currentDog.isExample) {
+        showToast('ℹ️ Los perros de ejemplo no se guardan en la nube. Crea uno nuevo.', 'info');
+        return;
+    }
+
+    // 3. Validar Archivo
     const extension = file.name.split('.').pop().toLowerCase();
     const allowedTypes = ['jpg', 'jpeg', 'png', 'webp'];
     if (!allowedTypes.includes(extension)) {
-        showToast('❌ Solo se permiten JPG, PNG o WebP', 'error');
+        showToast('❌ Solo imágenes JPG, PNG o WebP', 'error');
         return;
     }
-
-    // Validar tamaño (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-        showToast('❌ La foto debe pesar menos de 5MB', 'error');
+        showToast('❌ Máximo 5MB por foto', 'error');
         return;
     }
 
+    // 4. UI de carga (Fill Effect)
     const container = document.getElementById('profile-photo-container');
-    if (container.querySelector('.uploading-fill')) return;
+    if (container.querySelector('.uploading-fill')) return; // Ya está subiendo
     
     const loadingOverlay = document.createElement('div');
     loadingOverlay.className = 'uploading-fill';
@@ -179,12 +216,11 @@ async function uploadProfilePhoto(file) {
     const uploadInput = document.getElementById('photo-upload-input');
     uploadInput.disabled = true;
 
+    // Nombre único
     const fileName = `perfil_${currentDog.id}_${Date.now()}.${extension}`;
 
     try {
-        loadingOverlay.innerHTML = '<span style="color:white; font-weight:bold;">⬆️ Subiendo...</span>';
-        
-        // Subir archivo directamente (sin validar bucket)
+        // 5. Subida a Storage
         const { error: uploadError } = await supabaseClient
             .storage
             .from('paseodog-photos')
@@ -192,41 +228,49 @@ async function uploadProfilePhoto(file) {
 
         if (uploadError) throw uploadError;
 
-        // Actualizar DB
+        // 6. Actualizar DB
         const newPerfil = { ...currentDog.perfil, foto_id: fileName };
         await updateRealDogProfile(currentDog.id, newPerfil);
 
-        // Actualizar UI
+        // 7. Actualizar Estado Local
         REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
-        currentDog = { ...currentDog, perfil: newPerfil };
+        currentDog.perfil = newPerfil;
         
+        // 8. Refrescar imagen visualmente
         const img = document.getElementById('profile-photo');
-        const newSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
+        const newSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}`;
         
+        // Pre-carga para evitar parpadeo
         const tempImg = new Image();
         tempImg.src = newSrc;
         tempImg.onload = () => {
             img.src = newSrc;
-            showToast('✅ Foto actualizada con éxito', 'success');
-            loadingOverlay.remove(); 
-            uploadInput.disabled = false;
+            showToast('✅ Foto actualizada', 'success');
+            cleanup();
         };
         tempImg.onerror = () => {
+            // A veces tarda en propagarse la URL pública
             img.src = newSrc;
-            showToast('✅ Foto subida (puede tardar en cargar)', 'success');
-            loadingOverlay.remove();
-            uploadInput.disabled = false;
+            showToast('✅ Subida (refresca si no se ve)', 'warning');
+            cleanup();
         };
 
     } catch (err) {
         console.error('Error subida:', err);
         showToast('❌ Error: ' + (err.message || 'Desconocido'), 'error');
-        loadingOverlay.remove();
+        cleanup();
+    }
+
+    function cleanup() {
+        if(loadingOverlay) loadingOverlay.remove();
         uploadInput.disabled = false;
+        uploadInput.value = ''; // Reset input
     }
 }
 
-// === AUDIO Y CARRUSEL ===
+// ==========================================
+// 6. AUDIO Y CARRUSEL
+// ==========================================
 const CARRUSEL_TRACKS = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3', 'musica4.mp3'];
 
 function playRandomCarouselTrack() {
@@ -239,15 +283,14 @@ function playRandomCarouselTrack() {
     const randomTrack = CARRUSEL_TRACKS[Math.floor(Math.random() * CARRUSEL_TRACKS.length)];
     carouselAudio = new Audio(randomTrack);
     
-    // Si termina la canción, paran las fotos
     carouselAudio.onended = () => { 
         isPlaying = false; 
         updatePlayBtnState(); 
         if(slideInterval) clearInterval(slideInterval);
     };
     
-    carouselAudio.onerror = () => { console.log('Audio no disponible'); };
-    carouselAudio.play().catch(e => { console.log('Autoplay bloqueado'); });
+    carouselAudio.onerror = () => { console.log('Audio no disponible o bloqueado'); };
+    carouselAudio.play().catch(e => { console.log('Autoplay bloqueado por navegador'); });
 }
 
 function updatePlayBtnState() {
@@ -282,8 +325,6 @@ function initCarousel() {
     }
     
     wrapper.style.display = 'flex';
-    
-    // EMPEZAR EN LA ÚLTIMA FOTO (Estático)
     let idx = slides.length - 1; 
     
     isPlaying = false;
@@ -317,7 +358,6 @@ function initCarousel() {
 
         if(isPlaying) {
             playRandomCarouselTrack(); 
-            // INTERVALO DE 5 SEGUNDOS
             if (slideInterval) clearInterval(slideInterval);
             slideInterval = setInterval(() => {
                 window.nextSlide();
@@ -338,14 +378,19 @@ function initCarousel() {
     updatePlayBtnState();
 }
 
-// === UI & TEMA ===
+// ==========================================
+// 7. UI, TEMA Y NAVEGACIÓN
+// ==========================================
+
 const themeToggle = document.getElementById('theme-toggle');
-themeToggle.onclick = (e) => {
-    createRipple(e, themeToggle);
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-    themeToggle.textContent = isDark ? '🐕‍🦺' : '🐩';
-};
+if (themeToggle) {
+    themeToggle.onclick = (e) => {
+        createRipple(e, themeToggle);
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        themeToggle.textContent = isDark ? '🐕‍🦺' : '🐩';
+    };
+}
 
 function updateWhatsApp() {
     const btn = document.getElementById('whatsapp-btn');
@@ -361,13 +406,14 @@ function updateWhatsApp() {
     btn.href = `https://wa.me/${num}`;
 }
 
-// === NAVEGACIÓN ===
 async function showView(id, dogId = null) {
+    // Si vamos al dashboard principal, recargamos la lista completa para tener datos frescos
     const allDogs = await loadAllDogs();
     
     if(id !== currentView) backStack.push(currentView);
     currentView = id;
 
+    // Detener música si salimos del dashboard del perro
     if (currentView !== 'dog-selection-dashboard') {
         if(slideInterval) clearInterval(slideInterval);
         if(carouselAudio) { carouselAudio.pause(); isPlaying=false; }
@@ -391,11 +437,9 @@ async function showView(id, dogId = null) {
         if(id === 'create-walk-section') {
             document.getElementById('walk-form').reset();
             document.getElementById('walk-date').valueAsDate = new Date();
-            
-            // LIMPIAR FOTOS PENDIENTES
+            // Limpiar estado
             currentWalkFiles = [];
             document.getElementById('photo-preview').innerHTML = '';
-            
             loadMultiDog();
         }
     }
@@ -429,11 +473,15 @@ function playWelcomeSound() {
     o.stop(audioContext.currentTime + 0.3);
 }
 
-// === LOGIN ===
+// ==========================================
+// 8. LOGIN Y REGISTRO
+// ==========================================
+
 document.getElementById('toggle-password').onclick = () => {
     const p = document.getElementById('password');
     p.type = p.type === 'password' ? 'text' : 'password';
 };
+
 document.getElementById('login-form').onsubmit = async (e) => {
     e.preventDefault();
     const em = document.getElementById('email').value.toLowerCase();
@@ -446,6 +494,7 @@ document.getElementById('login-form').onsubmit = async (e) => {
         showView('admin-dashboard-section');
     } else {
         const d = allDogs.find(x => x.dueno_email === em);
+        // Contraseña hardcodeada para demo: '123456'
         if(d && pw === '123456'){
             currentUser = { email: em, isAdmin: false };
             currentDog = d;
@@ -456,14 +505,18 @@ document.getElementById('login-form').onsubmit = async (e) => {
     }
 };
 
-// === ADMIN DASHBOARD ===
+// ==========================================
+// 9. ADMIN DASHBOARD Y CREAR PERRO
+// ==========================================
+
 async function loadAdminDashboard() {
     const allDogs = await loadAllDogs();
     const c = document.getElementById('dog-list-container');
     c.innerHTML = '';
-    document.getElementById('demo-status-text').textContent = `${allDogs.length} perros en sistema`;
+    const statusText = document.getElementById('demo-status-text');
+    if(statusText) statusText.textContent = `${allDogs.length} perros en sistema`;
     
-    if(!allDogs.length) return c.innerHTML = '<p class="info-text">Sin perros.</p>';
+    if(!allDogs.length) return c.innerHTML = '<p class="info-text">Sin perros registrados.</p>';
     
     allDogs.forEach((d, i) => {
         const suffix = d.isExample ? ' (ejemplo)' : '';
@@ -479,9 +532,13 @@ async function loadAdminDashboard() {
     });
 }
 
-// === CREATE DOG ===
 document.getElementById('create-dog-form').onsubmit = async (e) => {
     e.preventDefault();
+    if (!supabaseClient) {
+        showToast('❌ Error: No hay conexión con la base de datos.', 'error');
+        return;
+    }
+
     const submitBtn = document.querySelector('#create-dog-form .save-btn');
     if(submitBtn.disabled) return;
     
@@ -491,19 +548,20 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
     try {
         const nd = {
             nombre: document.getElementById('new-dog-name').value,
-            dueno_email: document.getElementById('new-dog-email').value,
+            dueno_email: document.getElementById('new-dog-email').value.toLowerCase(),
             perfil: {
                 raza: document.getElementById('new-dog-breed').value,
                 sexo: document.getElementById('new-dog-sex').value,
                 dueno: document.getElementById('new-dog-owner').value,
                 telefono: document.getElementById('new-dog-phone').value,
+                // Foto por defecto
                 foto_id: '1581268694', 
                 edad: '?', peso: '?', alergias: 'Ninguna', energia: 'Media', social: '?'
             },
             walks: []
         };
         await saveRealDog(nd);
-        showToast('✅ Perro registrado', 'success');
+        showToast('✅ Perro registrado con éxito', 'success');
         document.getElementById('create-dog-form').reset();
         showView('admin-dashboard-section');
     } catch (err) {
@@ -514,15 +572,28 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
     }
 };
 
-// === PROFILE ===
+// ==========================================
+// 10. PERFIL Y EDICIÓN
+// ==========================================
+
 function loadProfile(d) {
     const p = d.perfil;
     let photoSrc = getPhotoUrl(p.foto_id, 300, 300);
     
     document.getElementById('profile-photo').src = photoSrc;
     document.getElementById('profile-dog-name-display').textContent = d.nombre;
-    document.getElementById('edit-photo-btn').style.display = isEditing && !d.isExample ? 'block' : 'none';
-    document.getElementById('toggle-edit-btn').textContent = isEditing ? '❌ Cancelar' : '✏️ Editar Perfil';
+    
+    // Solo permitir edición si es admin y NO es ejemplo
+    const canEdit = currentUser?.isAdmin && !d.isExample;
+    document.getElementById('edit-photo-btn').style.display = (isEditing && canEdit) ? 'block' : 'none';
+    
+    const toggleBtn = document.getElementById('toggle-edit-btn');
+    if (!canEdit) {
+        toggleBtn.style.display = 'none';
+    } else {
+        toggleBtn.style.display = 'block';
+        toggleBtn.textContent = isEditing ? '❌ Cancelar' : '✏️ Editar Perfil';
+    }
     
     const v = document.getElementById('profile-details-view');
     
@@ -545,6 +616,7 @@ function loadProfile(d) {
             try {
                 await updateRealDogProfile(currentDog.id, updatedPerfil);
                 currentDog.perfil = updatedPerfil;
+                // Actualizar array local
                 const idx = REAL_DOGS.findIndex(x => x.id === currentDog.id);
                 if(idx !== -1) REAL_DOGS[idx] = currentDog;
                 
@@ -556,7 +628,7 @@ function loadProfile(d) {
             }
         };
     } else {
-        // VISTA LECTURA (Incluye comportamiento)
+        // VISTA LECTURA
         v.innerHTML = `
             <h3>🐕 Datos Básicos</h3>
             <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${p.raza}</span></div>
@@ -575,6 +647,7 @@ function loadProfile(d) {
         `;
     }
 }
+
 function toggleEditMode(){ 
     if (currentDog?.isExample) {
         showToast('ℹ️ Los ejemplos no se pueden editar', 'info');
@@ -583,15 +656,15 @@ function toggleEditMode(){
     isEditing = !isEditing; 
     loadProfile(currentDog); 
 }
+
 function randomizeProfilePhoto(){
     document.getElementById('photo-upload-input').click();
 }
 
-// === CREATE WALK (LOGICA SUBIDA FOTOS) ===
+// ==========================================
+// 11. CREAR PASEO (Lógica de Fotos)
+// ==========================================
 
-
-
-// 2. Renderizar miniaturas
 function renderWalkPreview() {
     const container = document.getElementById('photo-preview');
     container.innerHTML = '';
@@ -633,11 +706,11 @@ async function loadMultiDog(){
     });
 }
 
-// 3. Submit con subida secuencial
 document.getElementById('walk-form').onsubmit = async (e) => {
     e.preventDefault();
     if (currentDog?.isExample) return showToast('ℹ️ Ejemplo: no editable', 'info');
-    
+    if (!supabaseClient) return showToast('❌ Error DB', 'error');
+
     const submitBtn = document.querySelector('#walk-form .save-btn');
     const originalText = submitBtn.innerHTML;
     submitBtn.disabled = true;
@@ -681,9 +754,22 @@ document.getElementById('walk-form').onsubmit = async (e) => {
             fotos: uploadedPhotos 
         };
 
-        const updatedWalks = [w, ...(currentDog.walks || [])];
+        // Primero al perro actual
+        let updatedWalks = [w, ...(currentDog.walks || [])];
         await updateRealDogWalks(currentDog.id, updatedWalks);
         currentDog.walks = updatedWalks;
+
+        // Luego a los otros perros seleccionados (Multi-Dog)
+        const others = document.querySelectorAll('#multi-dog-container input:checked');
+        for (const chk of others) {
+            const otherDogId = chk.value;
+            // Buscar al otro perro en los reales
+            const otherDog = REAL_DOGS.find(d => String(d.id) === String(otherDogId));
+            if(otherDog) {
+                const otherWalks = [w, ...(otherDog.walks || [])];
+                await updateRealDogWalks(otherDogId, otherWalks);
+            }
+        }
         
         showToast('✅ Paseo guardado', 'success');
         showView('dog-selection-dashboard');
@@ -699,7 +785,10 @@ document.getElementById('walk-form').onsubmit = async (e) => {
     }
 };
 
-// === HISTORY & EDIT ===
+// ==========================================
+// 12. HISTORIAL Y EDICIÓN DE PASEOS
+// ==========================================
+
 function loadHistory(d) {
     const c = document.getElementById('walks-history');
     c.innerHTML = '';
@@ -745,7 +834,8 @@ window.openLightbox = (id) => {
 };
 document.getElementById('close-lightbox').onclick = () => document.getElementById('lightbox').style.display = 'none';
 
-// === EDIT WALK ===
+// --- EDICIÓN DE PASEO ---
+
 window.openEditWalk = (walkIndex) => {
     if (!currentDog || currentDog.isExample) return;
     editWalkIdx = walkIndex;
@@ -760,6 +850,9 @@ window.openEditWalk = (walkIndex) => {
     
     editWalkPhotos = [...(walk.fotos || [])];
     renderEditPhotos();
+    
+    // Resetear input file oculto
+    document.getElementById('edit-walk-upload-input').value = '';
     
     document.getElementById('edit-walk-modal').style.display = 'flex';
 };
@@ -792,11 +885,55 @@ function renderEditPhotos() {
     });
 }
 
-window.addPhotoEdit = () => {
-    const randomId = ['1581268694', '1581268695', '1581268696'][Math.floor(Math.random()*3)];
-    editWalkPhotos.push({ id: randomId, comentario: 'Foto agregada' });
-    renderEditPhotos();
+// FUNCIÓN PARA DISPARAR EL INPUT OCULTO
+window.triggerEditUpload = () => {
+    document.getElementById('edit-walk-upload-input').click();
 };
+
+// LISTENER PARA SUBIR FOTO EN EL MODAL DE EDICIÓN
+const editFileInput = document.getElementById('edit-walk-upload-input');
+if(editFileInput) {
+    editFileInput.addEventListener('change', async (e) => {
+        if (!e.target.files || !e.target.files[0]) return;
+        if (!supabaseClient) return showToast('❌ Error DB', 'error');
+        
+        const file = e.target.files[0];
+        const btn = document.getElementById('btn-add-edit-photo');
+        const originalText = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '⌛ Subiendo...';
+
+        try {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const fileName = `walk_edit_${Date.now()}.${ext}`;
+
+            // Subida a Supabase
+            const { error } = await supabaseClient
+                .storage
+                .from('paseodog-photos')
+                .upload(fileName, file);
+
+            if (error) throw error;
+
+            // Agregar a la lista temporal de edición
+            editWalkPhotos.push({
+                id: fileName,
+                comentario: 'Foto agregada en edición'
+            });
+            renderEditPhotos();
+            showToast('✅ Foto subida', 'success');
+
+        } catch (err) {
+            console.error(err);
+            showToast('❌ Error subida: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            e.target.value = ''; // Limpiar para permitir subir de nuevo
+        }
+    });
+}
 
 document.getElementById('edit-walk-form').onsubmit = async (e) => {
     e.preventDefault();
@@ -840,14 +977,20 @@ window.delWalk = (walkIndex) => {
         .catch(err => showToast('❌ Error al eliminar', 'error'));
 };
 
-// === INIT DOM ===
-document.addEventListener('DOMContentLoaded', () => {
-    // Foto de perfil
-    document.getElementById('photo-upload-input').addEventListener('change', (e) => {
-        if(e.target.files[0]) uploadProfilePhoto(e.target.files[0]);
-    });
+// ==========================================
+// 13. INICIALIZACIÓN (DOM & ONLOAD)
+// ==========================================
 
-    // Fotos de paseos
+document.addEventListener('DOMContentLoaded', () => {
+    // Listener para foto de perfil
+    const photoInput = document.getElementById('photo-upload-input');
+    if (photoInput) {
+        photoInput.addEventListener('change', (e) => {
+            if(e.target.files[0]) uploadProfilePhoto(e.target.files[0]);
+        });
+    }
+
+    // Listener para fotos de NUEVO paseo
     const addBtn = document.getElementById('add-walk-photo-btn');
     const walkInput = document.getElementById('walk-photo-input');
     if (addBtn && walkInput) {
@@ -862,88 +1005,5 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Menú Hamburguesa
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const mainNav = document.getElementById('main-nav');
-    const navHomeBtn = document.getElementById('nav-home-btn');
-    const navLogoutBtn = document.getElementById('nav-logout-btn');
-
-    if (hamburgerBtn) {
-        hamburgerBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            mainNav.classList.toggle('show');
-            hamburgerBtn.textContent = mainNav.classList.contains('show') ? '✕' : '☰';
-        });
-    }
-
-    document.addEventListener('click', (e) => {
-        if (mainNav && mainNav.classList.contains('show')) {
-            if (!mainNav.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-                mainNav.classList.remove('show');
-                hamburgerBtn.textContent = '☰';
-            }
-        }
-    });
-
-    if (navHomeBtn) {
-        navHomeBtn.addEventListener('click', async () => {
-            mainNav.classList.remove('show');
-            hamburgerBtn.textContent = '☰';
-            
-            if (currentUser && currentUser.isAdmin) {
-                showView('admin-dashboard-section');
-            } else if (currentDog) {
-                showView('dog-selection-dashboard');
-            } else {
-                showView('login-section');
-            }
-        });
-    }
-
-    if (navLogoutBtn) {
-        navLogoutBtn.addEventListener('click', () => {
-            mainNav.classList.remove('show');
-            hamburgerBtn.textContent = '☰';
-            
-            currentUser = null;
-            currentDog = null;
-            hasPlayedWelcome = false;
-            backStack = [];
-            
-            if (carouselAudio) {
-                carouselAudio.pause();
-                carouselAudio = null;
-            }
-            if (slideInterval) {
-                clearInterval(slideInterval);
-            }
-            isPlaying = false;
-            
-            showView('login-section');
-            showToast('👋 Sesión cerrada', 'info');
-        });
-    }
-});
-
-window.onload = async () => {
-    await loadExampleDogs();
-    document.getElementById('loading-overlay').style.display = 'none';
-    showView('login-section');
-    
-    const audioToggle = document.getElementById('audio-toggle');
-    const savedAudio = localStorage.getItem('paseoDogAudio');
-    if (savedAudio === 'off') {
-        isAudioEnabled = false;
-        audioToggle.textContent = '🔇';
-    }
-    audioToggle.onclick = (e) => {
-        isAudioEnabled = !isAudioEnabled;
-        audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
-        localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
-        if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
-    };
-    
-    document.addEventListener('click', () => {
-        if (!userHasInteracted) userHasInteracted = true;
-    }, { once: true });
-};
+    // Lógica Menú Hamburguesa
+    const hamburgerBtn = document
