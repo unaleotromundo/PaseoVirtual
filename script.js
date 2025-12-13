@@ -917,7 +917,7 @@ window.delWalk = (walkIndex) => {
 };
 
 
-    }
+   
 
     // Cerrar menú al hacer clic fuera
     document.addEventListener('click', (e) => {
