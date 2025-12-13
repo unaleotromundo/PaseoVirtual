@@ -727,7 +727,7 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
             email: email,
             password: TEMP_PASSWORD,
             options: {
-               { 
+                data: {  // <--- CORRECCIÓN: Se agregó 'data:'
                     full_name: ownerName,
                     phone: phone,
                     created_by_admin: true
