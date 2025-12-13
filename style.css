@@ -639,60 +639,15 @@ button.ripple { position: relative; overflow: hidden; }
 }
 .carousel-action-btn:hover { background: var(--primary); }
 
-/* /* =========================================
-   PANTALLA COMPLETA (ESCRITORIO/API)
-   ========================================= */
-
-/* 1. Al activar fullscreen, afectamos al WRAPPER */
-#carousel-wrapper:fullscreen,
-#carousel-wrapper:-webkit-full-screen,
-#carousel-wrapper:-moz-full-screen {
-    background-color: #000; /* Base negra */
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    /* IMPORTANTE: Mantener la imagen dinámica del JS */
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
+/* Pantalla Completa Carrusel */
+#carousel-container:fullscreen,
+#carousel-container:-webkit-full-screen {
+    background: #000;
+    display: flex; align-items: center; justify-content: center;
 }
-
-/* 2. El efecto borroso (Blur) en fullscreen */
-#carousel-wrapper:fullscreen::before,
-#carousel-wrapper:-webkit-full-screen::before,
-#carousel-wrapper:-moz-full-screen::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Oscurecer fondo */
-    backdrop-filter: blur(30px); /* Blur intenso */
-    -webkit-backdrop-filter: blur(30px);
-    z-index: -1;
-}
-
-/* 3. La imagen central en fullscreen */
-#carousel-wrapper:fullscreen #carousel-img,
-#carousel-wrapper:-webkit-full-screen #carousel-img,
-#carousel-wrapper:-moz-full-screen #carousel-img {
-    max-width: 90vw;
-    max-height: 90vh;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 0 60px rgba(0,0,0,0.8); /* Sombra para resaltar */
-}
-
-/* 4. Ajustar controles para que no queden pegados al borde */
-#carousel-wrapper:fullscreen .carousel-controls,
-#carousel-wrapper:-webkit-full-screen .carousel-controls {
-    bottom: 30px;
-    background: rgba(0,0,0,0.6);
-    padding: 10px 20px;
-}
+#carousel-container:fullscreen #carousel-img { width: 100vw; height: 100vh; }
+#carousel-container:fullscreen .carousel-nav { position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; }
+#carousel-container:fullscreen .carousel-controls { position: fixed; bottom: 30px; }
 
 /* =========================================
    8. MODALES Y EXTRAS
