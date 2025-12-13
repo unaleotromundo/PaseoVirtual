@@ -917,7 +917,7 @@ window.delWalk = (walkIndex) => {
 };
 
 
-   
+    }
 
     // Cerrar menú al hacer clic fuera
     document.addEventListener('click', (e) => {
@@ -968,7 +968,8 @@ window.delWalk = (walkIndex) => {
             showView('login-section');
             showToast('👋 Sesión cerrada', 'info');
         });
-
+    }
+});
 // === INIT DOM ===
 document.addEventListener('DOMContentLoaded', () => {
     // Foto de perfil
