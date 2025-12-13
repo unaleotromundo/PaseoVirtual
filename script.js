@@ -149,7 +149,7 @@ async function updateRealDogProfile(dogId, newPerfil) {
     if (error) throw error;
 }
 
-// === SUBIR FOTO PERFIL (CON EFECTO FILL) ===
+// === SUBIR FOTO PERFIL (CON EFECTO FILL Y REINTENTOS) ===
 async function uploadProfilePhoto(file) {
     if (!currentDog || currentDog.isExample) {
         showToast('ℹ️ Solo se pueden subir fotos de perros reales', 'info');
@@ -160,6 +160,12 @@ async function uploadProfilePhoto(file) {
     const allowedTypes = ['jpg', 'jpeg', 'png', 'webp'];
     if (!allowedTypes.includes(extension)) {
         showToast('❌ Solo se permiten JPG, PNG o WebP', 'error');
+        return;
+    }
+
+    // Validar tamaño (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('❌ La foto debe pesar menos de 5MB', 'error');
         return;
     }
 
@@ -175,42 +181,106 @@ async function uploadProfilePhoto(file) {
     uploadInput.disabled = true;
 
     const fileName = `perfil_${currentDog.id}_${Date.now()}.${extension}`;
-    const filePath = fileName;
+
+    // Función de reintento
+    const uploadWithRetry = async (maxRetries = 3) => {
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                loadingOverlay.innerHTML = `<span style="color:white; font-weight:bold;">⬆️ Subiendo... (${attempt}/${maxRetries})</span>`;
+                
+                // Verificar bucket existe
+                const { data: buckets } = await supabaseClient.storage.listBuckets();
+                const bucketExists = buckets?.some(b => b.name === 'paseodog-photos');
+                
+                if (!bucketExists) {
+                    throw new Error('Bucket no configurado. Contacta al administrador.');
+                }
+
+                // Subir archivo
+                const { data, error: uploadError } = await supabaseClient
+                    .storage
+                    .from('paseodog-photos')
+                    .upload(fileName, file, { 
+                        cacheControl: '3600',
+                        upsert: false 
+                    });
+
+                if (uploadError) {
+                    // Si el archivo ya existe, usar upsert
+                    if (uploadError.message?.includes('already exists')) {
+                        const { error: upsertError } = await supabaseClient
+                            .storage
+                            .from('paseodog-photos')
+                            .upload(fileName, file, { 
+                                cacheControl: '3600',
+                                upsert: true 
+                            });
+                        if (upsertError) throw upsertError;
+                    } else {
+                        throw uploadError;
+                    }
+                }
+
+                // Actualizar DB
+                const newPerfil = { ...currentDog.perfil, foto_id: fileName };
+                await updateRealDogProfile(currentDog.id, newPerfil);
+
+                // Actualizar UI
+                REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
+                currentDog = { ...currentDog, perfil: newPerfil };
+                
+                // Obtener URL pública
+                const { data: urlData } = supabaseClient
+                    .storage
+                    .from('paseodog-photos')
+                    .getPublicUrl(fileName);
+
+                const img = document.getElementById('profile-photo');
+                const newSrc = urlData.publicUrl + `?t=${Date.now()}`;
+                
+                // Precargar imagen
+                const tempImg = new Image();
+                tempImg.src = newSrc;
+                tempImg.onload = () => {
+                    img.src = newSrc;
+                    showToast('✅ Foto actualizada con éxito', 'success');
+                    loadingOverlay.remove(); 
+                    uploadInput.disabled = false;
+                };
+                tempImg.onerror = () => {
+                    throw new Error('No se pudo cargar la imagen subida');
+                };
+
+                return; // Éxito, salir del loop
+
+            } catch (err) {
+                console.error(`Intento ${attempt} falló:`, err);
+                
+                if (attempt === maxRetries) {
+                    throw err; // Último intento, lanzar error
+                }
+                
+                // Esperar antes del siguiente intento (1s, 2s, 3s)
+                await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+            }
+        }
+    };
 
     try {
-        // 2. SUBIR A SUPABASE
-        const { error: uploadError } = await supabaseClient
-            .storage
-            .from('paseodog-photos')
-            .upload(filePath, file, { cacheControl: '0', upsert: false });
-
-        if (uploadError) throw uploadError;
-
-        // 3. ACTUALIZAR DB
-        const newPerfil = { ...currentDog.perfil, foto_id: fileName };
-        await updateRealDogProfile(currentDog.id, newPerfil);
-
-        // 4. ACTUALIZAR UI
-        REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
-        currentDog = { ...currentDog, perfil: newPerfil };
-        
-        // Forzar recarga con timestamp
-        const img = document.getElementById('profile-photo');
-        const newSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
-        
-        // Precargar imagen
-        const tempImg = new Image();
-        tempImg.src = newSrc;
-        tempImg.onload = () => {
-            img.src = newSrc;
-            showToast('✅ Foto actualizada con éxito', 'success');
-            loadingOverlay.remove(); 
-            uploadInput.disabled = false;
-        };
-
+        await uploadWithRetry();
     } catch (err) {
-        console.error('Error subida:', err);
-        showToast('❌ Error al subir: ' + err.message, 'error');
+        console.error('Error subida final:', err);
+        let errorMsg = 'Error al subir la foto';
+        
+        if (err.message?.includes('Bucket no configurado')) {
+            errorMsg = '⚙️ Storage no configurado en Supabase';
+        } else if (err.message?.includes('520')) {
+            errorMsg = '🔄 Servidor temporalmente no disponible. Intenta en unos segundos.';
+        } else if (err.message) {
+            errorMsg = `❌ ${err.message}`;
+        }
+        
+        showToast(errorMsg, 'error');
         loadingOverlay.remove();
         uploadInput.disabled = false;
     }
