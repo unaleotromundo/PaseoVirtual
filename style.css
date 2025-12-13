@@ -507,11 +507,12 @@ button.ripple { position: relative; overflow: hidden; }
 /* =========================================
    7. CARRUSEL MODERNO (YOUTUBE STYLE)
    ========================================= */
+/* === CARRUSEL ESTILO INSTAGRAM (Fondo Borroso) === */
 #carousel-wrapper {
     position: relative;
     width: 100%;
-    height: 350px;
-    background: #000;
+    height: 400px; /* Un poco más alto para lucir mejor */
+    background-color: #000; /* Color de respaldo */
     border-radius: var(--radius-lg);
     overflow: hidden;
     margin-bottom: 30px;
@@ -519,13 +520,43 @@ button.ripple { position: relative; overflow: hidden; }
     align-items: center;
     justify-content: center;
     box-shadow: var(--shadow);
+    
+    /* Configuración para la imagen de fondo dinámica */
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: 1;
 }
-#carousel-container { position: relative; width: 100%; height: 100%; }
-#carousel-img {
+
+/* Capa oscura y borrosa sobre el fondo */
+#carousel-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.4); /* Oscurece el fondo para resaltar la foto principal */
+    backdrop-filter: blur(20px); /* DESENFOQUE FUERTE */
+    -webkit-backdrop-filter: blur(20px); /* Para Safari */
+    z-index: -1; /* Se queda atrás */
+}
+
+#carousel-container {
+    position: relative;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2; /* Por encima del fondo borroso */
+}
+
+#carousel-img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;  /* Importante para no estirar */
+    height: auto; /* Importante para no estirar */
+    object-fit: contain; /* Muestra la foto entera */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5); /* Sombra para separar del fondo */
+    border-radius: 4px;
 }
 
 .carousel-play-large {

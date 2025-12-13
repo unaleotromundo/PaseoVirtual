@@ -332,9 +332,18 @@ function initCarousel() {
     const counter = document.getElementById('carousel-counter');
     
     const showSlide = () => {
+        const wrapper = document.getElementById('carousel-wrapper'); // Referencia al wrapper
+        const photoUrl = getPhotoUrl(slides[idx], 800, 500); // Obtenemos la URL
+        
         img.style.opacity = 0;
+        
         setTimeout(() => {
-            img.src = getPhotoUrl(slides[idx], 800, 500);
+            img.src = photoUrl;
+            
+            // --- NUEVO: Poner la misma foto de fondo en el wrapper ---
+            wrapper.style.backgroundImage = `url('${photoUrl}')`;
+            // ---------------------------------------------------------
+            
             img.onload = () => { img.style.opacity = 1; };
             counter.textContent = `${idx + 1} / ${slides.length}`;
         }, 200);
