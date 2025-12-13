@@ -1006,4 +1006,99 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Lógica Menú Hamburguesa
-    const hamburgerBtn = document
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const mainNav = document.getElementById('main-nav');
+    const navHomeBtn = document.getElementById('nav-home-btn');
+    const navLogoutBtn = document.getElementById('nav-logout-btn');
+
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mainNav.classList.toggle('show');
+            hamburgerBtn.textContent = mainNav.classList.contains('show') ? '✕' : '☰';
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (mainNav && mainNav.classList.contains('show')) {
+            if (!mainNav.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                mainNav.classList.remove('show');
+                hamburgerBtn.textContent = '☰';
+            }
+        }
+    });
+
+    if (navHomeBtn) {
+        navHomeBtn.addEventListener('click', () => {
+            mainNav.classList.remove('show');
+            hamburgerBtn.textContent = '☰';
+            
+            if (currentUser && currentUser.isAdmin) {
+                showView('admin-dashboard-section');
+            } else if (currentDog) {
+                showView('dog-selection-dashboard');
+            } else {
+                showView('login-section');
+            }
+        });
+    }
+
+    if (navLogoutBtn) {
+        navLogoutBtn.addEventListener('click', () => {
+            mainNav.classList.remove('show');
+            hamburgerBtn.textContent = '☰';
+            
+            currentUser = null;
+            currentDog = null;
+            hasPlayedWelcome = false;
+            backStack = [];
+            
+            if (carouselAudio) {
+                carouselAudio.pause();
+                carouselAudio = null;
+            }
+            if (slideInterval) {
+                clearInterval(slideInterval);
+            }
+            isPlaying = false;
+            
+            showView('login-section');
+            showToast('👋 Sesión cerrada', 'info');
+        });
+    }
+});
+
+// INITIAL LOAD BLINDADO
+window.onload = async () => {
+    try {
+        await loadExampleDogs();
+    } catch (e) {
+        console.error("Error cargando datos locales:", e);
+    } finally {
+        // SIEMPRE Ocultar Loading para no bloquear
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+    
+    showView('login-section');
+    
+    // Config Audio
+    const audioToggle = document.getElementById('audio-toggle');
+    const savedAudio = localStorage.getItem('paseoDogAudio');
+    if (savedAudio === 'off') {
+        isAudioEnabled = false;
+        if(audioToggle) audioToggle.textContent = '🔇';
+    }
+    if(audioToggle) {
+        audioToggle.onclick = (e) => {
+            isAudioEnabled = !isAudioEnabled;
+            audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
+            localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
+            if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
+        };
+    }
+    
+    document.addEventListener('click', () => {
+        if (!userHasInteracted) userHasInteracted = true;
+    }, { once: true });
+};
