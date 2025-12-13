@@ -207,7 +207,7 @@ async function uploadProfilePhoto(file) {
 
     // 4. UI de carga (Fill Effect)
     const container = document.getElementById('profile-photo-container');
-    if (container.querySelector('.uploading-fill')) return; // Ya está subiendo
+    if (container.querySelector('.uploading-fill')) return; 
     
     const loadingOverlay = document.createElement('div');
     loadingOverlay.className = 'uploading-fill';
@@ -240,7 +240,6 @@ async function uploadProfilePhoto(file) {
         const img = document.getElementById('profile-photo');
         const newSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}`;
         
-        // Pre-carga para evitar parpadeo
         const tempImg = new Image();
         tempImg.src = newSrc;
         tempImg.onload = () => {
@@ -249,7 +248,6 @@ async function uploadProfilePhoto(file) {
             cleanup();
         };
         tempImg.onerror = () => {
-            // A veces tarda en propagarse la URL pública
             img.src = newSrc;
             showToast('✅ Subida (refresca si no se ve)', 'warning');
             cleanup();
@@ -264,7 +262,7 @@ async function uploadProfilePhoto(file) {
     function cleanup() {
         if(loadingOverlay) loadingOverlay.remove();
         uploadInput.disabled = false;
-        uploadInput.value = ''; // Reset input
+        uploadInput.value = ''; 
     }
 }
 
@@ -407,11 +405,18 @@ function updateWhatsApp() {
 }
 
 async function showView(id, dogId = null) {
-    // Si vamos al dashboard principal, recargamos la lista completa para tener datos frescos
     const allDogs = await loadAllDogs();
     
     if(id !== currentView) backStack.push(currentView);
     currentView = id;
+
+    // --- MANEJO DE VISIBILIDAD HEADER (LOGIN) ---
+    // Si estamos en login, quitamos la clase. Si estamos dentro, la ponemos.
+    if (id === 'login-section') {
+        document.body.classList.remove('user-logged-in');
+    } else {
+        document.body.classList.add('user-logged-in');
+    }
 
     // Detener música si salimos del dashboard del perro
     if (currentView !== 'dog-selection-dashboard') {
@@ -437,7 +442,6 @@ async function showView(id, dogId = null) {
         if(id === 'create-walk-section') {
             document.getElementById('walk-form').reset();
             document.getElementById('walk-date').valueAsDate = new Date();
-            // Limpiar estado
             currentWalkFiles = [];
             document.getElementById('photo-preview').innerHTML = '';
             loadMultiDog();
@@ -491,13 +495,14 @@ document.getElementById('login-form').onsubmit = async (e) => {
 
     if(em === ADMIN_USER.email && pw === ADMIN_USER.password){
         currentUser = { email: em, isAdmin: true };
+        document.body.classList.add('user-logged-in'); // ACTIVAR HEADER
         showView('admin-dashboard-section');
     } else {
         const d = allDogs.find(x => x.dueno_email === em);
-        // Contraseña hardcodeada para demo: '123456'
         if(d && pw === '123456'){
             currentUser = { email: em, isAdmin: false };
             currentDog = d;
+            document.body.classList.add('user-logged-in'); // ACTIVAR HEADER
             showView('dog-selection-dashboard');
         } else {
             showToast('Credenciales incorrectas', 'error');
@@ -554,7 +559,6 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
                 sexo: document.getElementById('new-dog-sex').value,
                 dueno: document.getElementById('new-dog-owner').value,
                 telefono: document.getElementById('new-dog-phone').value,
-                // Foto por defecto
                 foto_id: '1581268694', 
                 edad: '?', peso: '?', alergias: 'Ninguna', energia: 'Media', social: '?'
             },
@@ -583,7 +587,6 @@ function loadProfile(d) {
     document.getElementById('profile-photo').src = photoSrc;
     document.getElementById('profile-dog-name-display').textContent = d.nombre;
     
-    // Solo permitir edición si es admin y NO es ejemplo
     const canEdit = currentUser?.isAdmin && !d.isExample;
     document.getElementById('edit-photo-btn').style.display = (isEditing && canEdit) ? 'block' : 'none';
     
@@ -616,7 +619,6 @@ function loadProfile(d) {
             try {
                 await updateRealDogProfile(currentDog.id, updatedPerfil);
                 currentDog.perfil = updatedPerfil;
-                // Actualizar array local
                 const idx = REAL_DOGS.findIndex(x => x.id === currentDog.id);
                 if(idx !== -1) REAL_DOGS[idx] = currentDog;
                 
@@ -718,7 +720,6 @@ document.getElementById('walk-form').onsubmit = async (e) => {
     try {
         const uploadedPhotos = [];
 
-        // PASO A: Subir fotos
         if (currentWalkFiles.length > 0) {
             for (let i = 0; i < currentWalkFiles.length; i++) {
                 const file = currentWalkFiles[i];
@@ -743,7 +744,6 @@ document.getElementById('walk-form').onsubmit = async (e) => {
 
         submitBtn.innerHTML = '💾 Guardando datos...';
 
-        // PASO B: Guardar paseo
         const w = {
             fecha: document.getElementById('walk-date').value,
             duracion_minutos: parseInt(document.getElementById('walk-duration').value),
@@ -754,16 +754,13 @@ document.getElementById('walk-form').onsubmit = async (e) => {
             fotos: uploadedPhotos 
         };
 
-        // Primero al perro actual
         let updatedWalks = [w, ...(currentDog.walks || [])];
         await updateRealDogWalks(currentDog.id, updatedWalks);
         currentDog.walks = updatedWalks;
 
-        // Luego a los otros perros seleccionados (Multi-Dog)
         const others = document.querySelectorAll('#multi-dog-container input:checked');
         for (const chk of others) {
             const otherDogId = chk.value;
-            // Buscar al otro perro en los reales
             const otherDog = REAL_DOGS.find(d => String(d.id) === String(otherDogId));
             if(otherDog) {
                 const otherWalks = [w, ...(otherDog.walks || [])];
@@ -834,8 +831,6 @@ window.openLightbox = (id) => {
 };
 document.getElementById('close-lightbox').onclick = () => document.getElementById('lightbox').style.display = 'none';
 
-// --- EDICIÓN DE PASEO ---
-
 window.openEditWalk = (walkIndex) => {
     if (!currentDog || currentDog.isExample) return;
     editWalkIdx = walkIndex;
@@ -851,9 +846,7 @@ window.openEditWalk = (walkIndex) => {
     editWalkPhotos = [...(walk.fotos || [])];
     renderEditPhotos();
     
-    // Resetear input file oculto
     document.getElementById('edit-walk-upload-input').value = '';
-    
     document.getElementById('edit-walk-modal').style.display = 'flex';
 };
 
@@ -885,12 +878,10 @@ function renderEditPhotos() {
     });
 }
 
-// FUNCIÓN PARA DISPARAR EL INPUT OCULTO
 window.triggerEditUpload = () => {
     document.getElementById('edit-walk-upload-input').click();
 };
 
-// LISTENER PARA SUBIR FOTO EN EL MODAL DE EDICIÓN
 const editFileInput = document.getElementById('edit-walk-upload-input');
 if(editFileInput) {
     editFileInput.addEventListener('change', async (e) => {
@@ -908,7 +899,6 @@ if(editFileInput) {
             const ext = file.name.split('.').pop().toLowerCase();
             const fileName = `walk_edit_${Date.now()}.${ext}`;
 
-            // Subida a Supabase
             const { error } = await supabaseClient
                 .storage
                 .from('paseodog-photos')
@@ -916,7 +906,6 @@ if(editFileInput) {
 
             if (error) throw error;
 
-            // Agregar a la lista temporal de edición
             editWalkPhotos.push({
                 id: fileName,
                 comentario: 'Foto agregada en edición'
@@ -930,7 +919,7 @@ if(editFileInput) {
         } finally {
             btn.disabled = false;
             btn.innerHTML = originalText;
-            e.target.value = ''; // Limpiar para permitir subir de nuevo
+            e.target.value = ''; 
         }
     });
 }
@@ -982,7 +971,6 @@ window.delWalk = (walkIndex) => {
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Listener para foto de perfil
     const photoInput = document.getElementById('photo-upload-input');
     if (photoInput) {
         photoInput.addEventListener('change', (e) => {
@@ -990,7 +978,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Listener para fotos de NUEVO paseo
     const addBtn = document.getElementById('add-walk-photo-btn');
     const walkInput = document.getElementById('walk-photo-input');
     if (addBtn && walkInput) {
@@ -1005,7 +992,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Lógica Menú Hamburguesa
     const hamburgerBtn = document.getElementById('hamburger-btn');
     const mainNav = document.getElementById('main-nav');
     const navHomeBtn = document.getElementById('nav-home-btn');
@@ -1053,6 +1039,8 @@ document.addEventListener('DOMContentLoaded', () => {
             hasPlayedWelcome = false;
             backStack = [];
             
+            document.body.classList.remove('user-logged-in'); // OCULTAR HEADER
+            
             if (carouselAudio) {
                 carouselAudio.pause();
                 carouselAudio = null;
@@ -1068,21 +1056,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// INITIAL LOAD BLINDADO
 window.onload = async () => {
     try {
         await loadExampleDogs();
     } catch (e) {
         console.error("Error cargando datos locales:", e);
     } finally {
-        // SIEMPRE Ocultar Loading para no bloquear
         const overlay = document.getElementById('loading-overlay');
         if (overlay) overlay.style.display = 'none';
     }
     
+    // Asegurar estado inicial limpio
+    document.body.classList.remove('user-logged-in');
     showView('login-section');
     
-    // Config Audio
     const audioToggle = document.getElementById('audio-toggle');
     const savedAudio = localStorage.getItem('paseoDogAudio');
     if (savedAudio === 'off') {
