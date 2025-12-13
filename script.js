@@ -567,7 +567,7 @@ document.getElementById('login-form').onsubmit = async (e) => {
     // Agrega aquí los emails que quieres que sean ADMIN (todo en minúsculas)
     const ADMIN_EMAILS = [
         'admin@paseos.com', 
-        'tu_email_real@gmail.com' // <--- ¡PON TU EMAIL AQUÍ!
+        'otromundoale@gmail.com' // <--- ¡PON TU EMAIL AQUÍ!
     ];
     // --------------------------------
 
