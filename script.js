@@ -916,26 +916,7 @@ window.delWalk = (walkIndex) => {
         .catch(err => showToast('❌ Error al eliminar', 'error'));
 };
 
-// === INIT ===
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('photo-upload-input').addEventListener('change', (e) => {
-        if(e.target.files[0]) uploadProfilePhoto(e.target.files[0]);
-    });
-});
-// === MENÚ HAMBURGUESA ===
-document.addEventListener('DOMContentLoaded', () => {
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const mainNav = document.getElementById('main-nav');
-    const navHomeBtn = document.getElementById('nav-home-btn');
-    const navLogoutBtn = document.getElementById('nav-logout-btn');
 
-    // Toggle menú
-    if (hamburgerBtn) {
-        hamburgerBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            mainNav.classList.toggle('show');
-            hamburgerBtn.textContent = mainNav.classList.contains('show') ? '✕' : '☰';
-        });
     }
 
     // Cerrar menú al hacer clic fuera
@@ -989,7 +970,90 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+// === INIT DOM ===
+document.addEventListener('DOMContentLoaded', () => {
+    // Foto de perfil
+    document.getElementById('photo-upload-input').addEventListener('change', (e) => {
+        if(e.target.files[0]) uploadProfilePhoto(e.target.files[0]);
+    });
 
+    // Fotos de paseos
+    const addBtn = document.getElementById('add-walk-photo-btn');
+    const walkInput = document.getElementById('walk-photo-input');
+    if (addBtn && walkInput) {
+        addBtn.onclick = () => walkInput.click();
+        walkInput.onchange = (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                const newFiles = Array.from(e.target.files);
+                currentWalkFiles = [...currentWalkFiles, ...newFiles];
+                renderWalkPreview();
+            }
+            e.target.value = '';
+        };
+    }
+
+    // Menú Hamburguesa
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const mainNav = document.getElementById('main-nav');
+    const navHomeBtn = document.getElementById('nav-home-btn');
+    const navLogoutBtn = document.getElementById('nav-logout-btn');
+
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mainNav.classList.toggle('show');
+            hamburgerBtn.textContent = mainNav.classList.contains('show') ? '✕' : '☰';
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (mainNav && mainNav.classList.contains('show')) {
+            if (!mainNav.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                mainNav.classList.remove('show');
+                hamburgerBtn.textContent = '☰';
+            }
+        }
+    });
+
+    if (navHomeBtn) {
+        navHomeBtn.addEventListener('click', async () => {
+            mainNav.classList.remove('show');
+            hamburgerBtn.textContent = '☰';
+            
+            if (currentUser && currentUser.isAdmin) {
+                showView('admin-dashboard-section');
+            } else if (currentDog) {
+                showView('dog-selection-dashboard');
+            } else {
+                showView('login-section');
+            }
+        });
+    }
+
+    if (navLogoutBtn) {
+        navLogoutBtn.addEventListener('click', () => {
+            mainNav.classList.remove('show');
+            hamburgerBtn.textContent = '☰';
+            
+            currentUser = null;
+            currentDog = null;
+            hasPlayedWelcome = false;
+            backStack = [];
+            
+            if (carouselAudio) {
+                carouselAudio.pause();
+                carouselAudio = null;
+            }
+            if (slideInterval) {
+                clearInterval(slideInterval);
+            }
+            isPlaying = false;
+            
+            showView('login-section');
+            showToast('👋 Sesión cerrada', 'info');
+        });
+    }
+});
 window.onload = async () => {
     await loadExampleDogs();
     document.getElementById('loading-overlay').style.display = 'none';
