@@ -552,51 +552,67 @@ function updateLoginForm(step) {
 }
 
 // === LOGIN ===
+// === LOGIN (MODIFICADO PARA ADMINS REALES) ===
 document.getElementById('toggle-password').onclick = () => {
     const p = document.getElementById('password');
     p.type = p.type === 'password' ? 'text' : 'password';
 };
+
 document.getElementById('login-form').onsubmit = async (e) => {
     e.preventDefault();
     const btn = e.target.querySelector('button[type="submit"]');
     const errorMsg = document.getElementById('error-message');
+    
+    // --- LISTA DE ADMINISTRADORES ---
+    // Agrega aquí los emails que quieres que sean ADMIN (todo en minúsculas)
+    const ADMIN_EMAILS = [
+        'admin@paseos.com', 
+        'tu_email_real@gmail.com' // <--- ¡PON TU EMAIL AQUÍ!
+    ];
+    // --------------------------------
+
     btn.disabled = true;
     const originalText = btn.innerHTML;
     errorMsg.style.display = 'none';
+
     try {
+        // PASO 1: VERIFICAR EMAIL (UX)
         if (loginStep === 'email') {
             const email = document.getElementById('email').value.toLowerCase().trim();
             currentEmailLogin = email;
             btn.innerHTML = '🔍 Verificando...';
-            // Verificar existencia en dogs_real
+            
+            // Si es un email de admin, lo dejamos pasar directo al password
+            if (ADMIN_EMAILS.includes(email)) {
+                loginStep = 'password';
+                updateLoginForm('password');
+                return;
+            }
+
+            // Si es cliente, verificamos si tiene perro asignado en la BD
             const allDogs = await loadAllDogs();
             const dogInDb = allDogs.find(d => d.dueno_email.toLowerCase() === email);
+            
             if (!dogInDb) {
-                errorMsg.textContent = '❌ Este email no está registrado. Contacta al paseador.';
+                // Si no es admin ni tiene perro, mostramos error
+                errorMsg.textContent = '❌ Este email no está registrado como cliente.';
                 errorMsg.style.display = 'block';
                 return;
             }
+            
             loginStep = 'password';
             updateLoginForm('password');
+
+        // PASO 2: VERIFICAR PASSWORD Y ROL
         } else if (loginStep === 'password') {
             const pw = document.getElementById('password').value;
             btn.innerHTML = '🔐 Iniciando...';
 
-            // Admin
-            if (currentEmailLogin === ADMIN_USER.email && pw === ADMIN_USER.password) {
-                currentUser = { email: currentEmailLogin, isAdmin: true };
-                showToast('👋 ¡Hola Paseador!', 'success');
-                showView('admin-dashboard-section');
-                loginStep = 'email';
-                updateLoginForm('email');
-                updateNavButtons();
-                return;
-            }
-
-            // Demo
+            // A) ACCESO DEMO (Solo para mostrar a terceros, opcional)
             const allDogs = await loadAllDogs();
             let dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === currentEmailLogin);
-            if (dogFound && pw === '123456') {
+            
+            if (dogFound && pw === '123456' && !ADMIN_EMAILS.includes(currentEmailLogin)) {
                 currentUser = { email: currentEmailLogin, isAdmin: false };
                 currentDog = dogFound;
                 showToast('👋 Acceso Demo', 'info');
@@ -607,45 +623,61 @@ document.getElementById('login-form').onsubmit = async (e) => {
                 return;
             }
 
-            // Login real
+            // B) LOGIN REAL CON SUPABASE
             const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
                 email: currentEmailLogin,
                 password: pw
             });
 
-            if (!authError && authData.user) {
+            if (authError) throw new Error('Contraseña incorrecta');
+
+            if (authData.user) {
+                // Determinamos si es Admin buscando en la lista
+                const isUserAdmin = ADMIN_EMAILS.includes(authData.user.email.toLowerCase());
+
                 currentUser = { 
                     email: authData.user.email, 
-                    isAdmin: false,
+                    isAdmin: isUserAdmin, // <--- Aquí se define el rol
                     id: authData.user.id,
                     name: authData.user.user_metadata.full_name
                 };
 
-                // ✅ ¿Es la contraseña temporal?
+                // CASO 1: Contraseña temporal (Primer acceso)
                 if (pw === '111111') {
-                    showToast('🔐 Detectamos que es tu primera vez. Elige una contraseña segura.', 'info');
+                    showToast('🔐 Primera vez: Por favor cambia tu contraseña.', 'info');
                     loginStep = 'set-password';
                     updateLoginForm('set-password');
                     return;
                 }
 
-                // Login normal
-                dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === currentEmailLogin);
-                if (dogFound) {
-                    currentDog = dogFound;
-                    showToast(`👋 Bienvenido ${currentUser.name || 'Cliente'}`, 'success');
-                    showView('dog-selection-dashboard');
-                } else {
-                    errorMsg.innerHTML = "Tu cuenta existe, pero el paseador aún no ha registrado a tu perro.";
-                    errorMsg.style.display = 'block';
+                // CASO 2: Es Administrador
+                if (isUserAdmin) {
+                    showToast('👋 ¡Hola Admin!', 'success');
+                    showView('admin-dashboard-section'); // Va al panel de admin
+                } 
+                // CASO 3: Es Cliente
+                else {
+                    if (dogFound) {
+                        currentDog = dogFound;
+                        showToast(`👋 Bienvenido ${currentUser.name || 'Cliente'}`, 'success');
+                        showView('dog-selection-dashboard'); // Va al panel de su perro
+                    } else {
+                        // Usuario logueado pero sin perro asignado
+                        errorMsg.innerHTML = "Tu usuario es válido, pero no tienes perro asignado.";
+                        errorMsg.style.display = 'block';
+                        await supabaseClient.auth.signOut(); // Lo sacamos por seguridad
+                        return;
+                    }
                 }
+
+                // Limpieza final
                 loginStep = 'email';
                 updateLoginForm('email');
                 updateNavButtons();
                 return;
             }
-            throw new Error('Contraseña incorrecta');
         } else if (loginStep === 'set-password') {
+            // ... (El código de cambio de contraseña se mantiene igual)
             const newPass = document.getElementById('password').value;
             const confirmPass = document.getElementById('password-confirm').value;
             if (newPass !== confirmPass) {
@@ -654,16 +686,14 @@ document.getElementById('login-form').onsubmit = async (e) => {
                 return;
             }
             if (newPass.length < 6) {
-                errorMsg.textContent = '❌ La contraseña debe tener al menos 6 caracteres.';
+                errorMsg.textContent = '❌ Mínimo 6 caracteres.';
                 errorMsg.style.display = 'block';
                 return;
             }
-            btn.innerHTML = '💾 Guardando contraseña...';
-            const { error: updateError } = await supabaseClient.auth.updateUser({
-                password: newPass
-            });
+            btn.innerHTML = '💾 Guardando...';
+            const { error: updateError } = await supabaseClient.auth.updateUser({ password: newPass });
             if (updateError) throw updateError;
-            showToast('✅ ¡Contraseña actualizada! Ahora inicia sesión con ella.', 'success');
+            showToast('✅ Contraseña actualizada.', 'success');
             await supabaseClient.auth.signOut();
             currentUser = null;
             loginStep = 'password';
@@ -671,7 +701,7 @@ document.getElementById('login-form').onsubmit = async (e) => {
         }
     } catch (err) {
         console.error(err);
-        errorMsg.textContent = '❌ ' + (err.message || 'Error al procesar la solicitud');
+        errorMsg.textContent = '❌ ' + (err.message || 'Error al procesar');
         errorMsg.style.display = 'block';
     } finally {
         btn.disabled = false;
