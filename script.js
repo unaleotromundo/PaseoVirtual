@@ -922,6 +922,73 @@ document.addEventListener('DOMContentLoaded', () => {
         if(e.target.files[0]) uploadProfilePhoto(e.target.files[0]);
     });
 });
+// === MENÚ HAMBURGUESA ===
+document.addEventListener('DOMContentLoaded', () => {
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const mainNav = document.getElementById('main-nav');
+    const navHomeBtn = document.getElementById('nav-home-btn');
+    const navLogoutBtn = document.getElementById('nav-logout-btn');
+
+    // Toggle menú
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mainNav.classList.toggle('show');
+            hamburgerBtn.textContent = mainNav.classList.contains('show') ? '✕' : '☰';
+        });
+    }
+
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (mainNav && mainNav.classList.contains('show')) {
+            if (!mainNav.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                mainNav.classList.remove('show');
+                hamburgerBtn.textContent = '☰';
+            }
+        }
+    });
+
+    // Botón Inicio
+    if (navHomeBtn) {
+        navHomeBtn.addEventListener('click', async () => {
+            mainNav.classList.remove('show');
+            hamburgerBtn.textContent = '☰';
+            
+            if (currentUser && currentUser.isAdmin) {
+                showView('admin-dashboard-section');
+            } else if (currentDog) {
+                showView('dog-selection-dashboard');
+            } else {
+                showView('login-section');
+            }
+        });
+    }
+
+    // Botón Cerrar Sesión
+    if (navLogoutBtn) {
+        navLogoutBtn.addEventListener('click', () => {
+            mainNav.classList.remove('show');
+            hamburgerBtn.textContent = '☰';
+            
+            currentUser = null;
+            currentDog = null;
+            hasPlayedWelcome = false;
+            backStack = [];
+            
+            if (carouselAudio) {
+                carouselAudio.pause();
+                carouselAudio = null;
+            }
+            if (slideInterval) {
+                clearInterval(slideInterval);
+            }
+            isPlaying = false;
+            
+            showView('login-section');
+            showToast('👋 Sesión cerrada', 'info');
+        });
+    }
+});
 
 window.onload = async () => {
     await loadExampleDogs();

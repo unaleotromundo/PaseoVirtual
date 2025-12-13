@@ -1253,9 +1253,8 @@ header {
 #theme-toggle {
     position: absolute;
     top: 0;
-    left: 0;  /* Fijo a la izquierda */
-    right: auto; /* Anulamos cualquier estilo previo de derecha */
-    /* Mantenemos tus estilos originales del botón */
+    left: 0;
+    right: auto;
     background: var(--bg-card);
     border: 2px solid var(--border);
     border-radius: 50%;
@@ -1275,7 +1274,7 @@ header {
 #main-nav {
     position: absolute;
     top: 10px;
-    right: 0; /* Pegado a la derecha */
+    right: 0;
     left: auto;
     display: flex;
     gap: 10px;
@@ -1314,37 +1313,42 @@ header {
     display: none; 
     position: absolute;
     top: 5px;
-    right: 0; /* Pegado a la derecha */
+    right: 0;
     left: auto;
     background: none;
     border: none;
     font-size: 2rem;
     color: var(--text-primary);
     cursor: pointer;
-    z-index: 200;
+    z-index: 5001;
     padding: 5px;
+    width: 40px;
+    height: 40px;
 }
 
 /* === ESTILOS MÓVIL (Menú desplegable) === */
 @media (max-width: 768px) {
     #hamburger-btn {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     #main-nav {
         display: none;
         flex-direction: column;
-        top: 60px;
-        right: 0; /* El menú cae alineado a la derecha */
+        position: fixed;
+        top: 70px;
+        right: 10px;
         left: auto;
         background: var(--bg-card);
         padding: 15px;
         border-radius: var(--radius);
         box-shadow: var(--shadow-lg);
-        border: 1px solid var(--border);
+        border: 2px solid var(--border);
         min-width: 200px;
         animation: fadeInRight 0.3s ease;
-        z-index: 3000;
+        z-index: 5000;
     }
 
     #main-nav.show {
@@ -1357,6 +1361,10 @@ header {
         margin-bottom: 8px;
         font-size: 1rem;
         padding: 12px;
+    }
+    
+    .nav-link:last-child {
+        margin-bottom: 0;
     }
 }
 
