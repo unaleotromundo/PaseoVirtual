@@ -552,163 +552,132 @@ function updateLoginForm(step) {
 }
 
 // === LOGIN ===
-// === INIT (INICIO DEL SISTEMA) ===
-window.onload = async () => {
-    // 1. LIMPIEZA DE SESIONES CORRUPTAS (Evita el error 400)
-    try {
-        const { data, error } = await supabaseClient.auth.getSession();
-        if (error) {
-            console.warn("Sesión inválida detectada, limpiando...", error);
-            await supabaseClient.auth.signOut();
-            localStorage.clear();
-        }
-    } catch (err) {
-        console.error("Error crítico de auth:", err);
-        localStorage.clear();
-    }
-
-    // 2. CARGA DE DATOS
-    await loadExampleDogs();
-    const loadingOverlay = document.getElementById('loading-overlay');
-    if (loadingOverlay) loadingOverlay.style.display = 'none';
-    
-    // 3. INICIALIZAR VISTA
-    showView('login-section');
-    updateLoginForm('email');
-    updateNavButtons();
-
-    // 4. CONFIGURAR AUDIO
-    const audioToggle = document.getElementById('audio-toggle');
-    if (audioToggle) {
-        const savedAudio = localStorage.getItem('paseoDogAudio');
-        if (savedAudio === 'off') {
-            isAudioEnabled = false;
-            audioToggle.textContent = '🔇';
-        }
-        audioToggle.onclick = (e) => {
-            isAudioEnabled = !isAudioEnabled;
-            audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
-            localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
-            if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
-        };
-    }
-
-    // 5. DETECTAR INTERACCIÓN (Para reproducir audio después)
-    document.addEventListener('click', () => {
-        if (!userHasInteracted) userHasInteracted = true;
-    }, { once: true });
+document.getElementById('toggle-password').onclick = () => {
+    const p = document.getElementById('password');
+    p.type = p.type === 'password' ? 'text' : 'password';
 };
-
-// === EVENTOS DEL DOM (MENÚ, REGISTRO, ETC) ===
-document.addEventListener('DOMContentLoaded', () => {
-    const nav = document.getElementById('main-nav');
-    const burger = document.getElementById('hamburger-btn');
-    const btnHome = document.getElementById('nav-home-btn');
-    const btnLogout = document.getElementById('nav-logout-btn');
-
-    // Menú Hamburguesa
-    if (burger) {
-        burger.onclick = (e) => {
-            e.stopPropagation();
-            if (nav) {
-                nav.classList.toggle('show');
-                burger.textContent = nav.classList.contains('show') ? '✕' : '☰';
-            }
-        };
-    }
-
-    // Cerrar menú al hacer click fuera
-    document.addEventListener('click', (e) => {
-        if (nav && nav.classList.contains('show') && !nav.contains(e.target) && e.target !== burger) {
-            nav.classList.remove('show');
-            if (burger) burger.textContent = '☰';
-        }
-    });
-
-    // Botón Inicio
-    if (btnHome) {
-        btnHome.onclick = () => {
-            if (nav) nav.classList.remove('show');
-            if (burger) burger.textContent = '☰';
-            
-            if (!currentUser) {
-                showView('login-section');
+document.getElementById('login-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const errorMsg = document.getElementById('error-message');
+    btn.disabled = true;
+    const originalText = btn.innerHTML;
+    errorMsg.style.display = 'none';
+    try {
+        if (loginStep === 'email') {
+            const email = document.getElementById('email').value.toLowerCase().trim();
+            currentEmailLogin = email;
+            btn.innerHTML = '🔍 Verificando...';
+            // Verificar existencia en dogs_real
+            const allDogs = await loadAllDogs();
+            const dogInDb = allDogs.find(d => d.dueno_email.toLowerCase() === email);
+            if (!dogInDb) {
+                errorMsg.textContent = '❌ Este email no está registrado. Contacta al paseador.';
+                errorMsg.style.display = 'block';
                 return;
             }
-            if (currentUser.isAdmin) {
-                showView('admin-dashboard-section');
-            } else {
-                if (currentDog) {
-                    showView('dog-selection-dashboard');
-                } else {
-                    showView('login-section');
-                }
-            }
-        };
-    }
+            loginStep = 'password';
+            updateLoginForm('password');
+        } else if (loginStep === 'password') {
+            const pw = document.getElementById('password').value;
+            btn.innerHTML = '🔐 Iniciando...';
 
-    // Botón Cerrar Sesión
-    if (btnLogout) {
-        btnLogout.onclick = () => {
-            if(confirm('¿Cerrar sesión?')) {
-                if (nav) nav.classList.remove('show');
-                if (burger) burger.textContent = '☰';
-                
-                currentUser = null;
-                currentDog = null;
-                currentWalkFiles = [];
+            // Admin
+            if (currentEmailLogin === ADMIN_USER.email && pw === ADMIN_USER.password) {
+                currentUser = { email: currentEmailLogin, isAdmin: true };
+                showToast('👋 ¡Hola Paseador!', 'success');
+                showView('admin-dashboard-section');
                 loginStep = 'email';
-                
-                showToast('👋 ¡Hasta luego!', 'info');
-                showView('login-section');
                 updateLoginForm('email');
                 updateNavButtons();
+                return;
             }
-        };
-    }
 
-    // FORMULARIO DE REGISTRO (NUEVO CLIENTE)
-    const regForm = document.getElementById('register-form');
-    if (regForm) {
-        regForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            const phone = document.getElementById('reg-phone').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
-            const passConf = document.getElementById('reg-pass-conf').value;
-            const btn = e.target.querySelector('button[type="submit"]');
-
-            if (pass !== passConf) return showToast('❌ Las contraseñas no coinciden', 'error');
-            if (pass.length < 6) return showToast('❌ La contraseña es muy corta (mínimo 6)', 'error');
-
-            btn.disabled = true;
-            btn.innerHTML = '⏳ Creando usuario...';
-            
-            try {
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email: email,
-                    password: pass,
-                    options: {
-                        data: { full_name: name, phone: phone }
-                    }
-                });
-
-                if (error) throw error;
-                showToast('✅ ¡Cuenta creada! Por favor inicia sesión.', 'success');
-                regForm.reset();
-                showView('login-section');
-            } catch (err) {
-                let msg = err.message;
-                if(msg.includes('already registered')) msg = 'Este correo ya está registrado.';
-                showToast('❌ Error: ' + msg, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '✅ Crear Cuenta';
+            // Demo
+            const allDogs = await loadAllDogs();
+            let dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === currentEmailLogin);
+            if (dogFound && pw === '123456') {
+                currentUser = { email: currentEmailLogin, isAdmin: false };
+                currentDog = dogFound;
+                showToast('👋 Acceso Demo', 'info');
+                showView('dog-selection-dashboard');
+                loginStep = 'email';
+                updateLoginForm('email');
+                updateNavButtons();
+                return;
             }
-        };
+
+            // Login real
+            const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+                email: currentEmailLogin,
+                password: pw
+            });
+
+            if (!authError && authData.user) {
+                currentUser = { 
+                    email: authData.user.email, 
+                    isAdmin: false,
+                    id: authData.user.id,
+                    name: authData.user.user_metadata.full_name
+                };
+
+                // ✅ ¿Es la contraseña temporal?
+                if (pw === '111111') {
+                    showToast('🔐 Detectamos que es tu primera vez. Elige una contraseña segura.', 'info');
+                    loginStep = 'set-password';
+                    updateLoginForm('set-password');
+                    return;
+                }
+
+                // Login normal
+                dogFound = allDogs.find(x => x.dueno_email.toLowerCase() === currentEmailLogin);
+                if (dogFound) {
+                    currentDog = dogFound;
+                    showToast(`👋 Bienvenido ${currentUser.name || 'Cliente'}`, 'success');
+                    showView('dog-selection-dashboard');
+                } else {
+                    errorMsg.innerHTML = "Tu cuenta existe, pero el paseador aún no ha registrado a tu perro.";
+                    errorMsg.style.display = 'block';
+                }
+                loginStep = 'email';
+                updateLoginForm('email');
+                updateNavButtons();
+                return;
+            }
+            throw new Error('Contraseña incorrecta');
+        } else if (loginStep === 'set-password') {
+            const newPass = document.getElementById('password').value;
+            const confirmPass = document.getElementById('password-confirm').value;
+            if (newPass !== confirmPass) {
+                errorMsg.textContent = '❌ Las contraseñas no coinciden.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            if (newPass.length < 6) {
+                errorMsg.textContent = '❌ La contraseña debe tener al menos 6 caracteres.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+            btn.innerHTML = '💾 Guardando contraseña...';
+            const { error: updateError } = await supabaseClient.auth.updateUser({
+                password: newPass
+            });
+            if (updateError) throw updateError;
+            showToast('✅ ¡Contraseña actualizada! Ahora inicia sesión con ella.', 'success');
+            await supabaseClient.auth.signOut();
+            currentUser = null;
+            loginStep = 'password';
+            updateLoginForm('password');
+        }
+    } catch (err) {
+        console.error(err);
+        errorMsg.textContent = '❌ ' + (err.message || 'Error al procesar la solicitud');
+        errorMsg.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     }
-});
+};
 
 // === ADMIN DASHBOARD ===
 async function loadAdminDashboard() {
@@ -1121,85 +1090,51 @@ window.delWalk = (walkIndex) => {
         .catch(err => showToast('❌ Error al eliminar', 'error'));
 };
 
-// === INIT (INICIO DEL SISTEMA) ===
+// === INIT ===
 window.onload = async () => {
-    // 1. LIMPIEZA DE SESIONES CORRUPTAS (Evita el error 400)
-    try {
-        const { data, error } = await supabaseClient.auth.getSession();
-        if (error) {
-            console.warn("Sesión inválida detectada, limpiando...", error);
-            await supabaseClient.auth.signOut();
-            localStorage.clear();
-        }
-    } catch (err) {
-        console.error("Error crítico de auth:", err);
-        localStorage.clear();
-    }
-
-    // 2. CARGA DE DATOS
     await loadExampleDogs();
-    const loadingOverlay = document.getElementById('loading-overlay');
-    if (loadingOverlay) loadingOverlay.style.display = 'none';
-    
-    // 3. INICIALIZAR VISTA
+    document.getElementById('loading-overlay').style.display = 'none';
     showView('login-section');
     updateLoginForm('email');
     updateNavButtons();
-
-    // 4. CONFIGURAR AUDIO
     const audioToggle = document.getElementById('audio-toggle');
-    if (audioToggle) {
-        const savedAudio = localStorage.getItem('paseoDogAudio');
-        if (savedAudio === 'off') {
-            isAudioEnabled = false;
-            audioToggle.textContent = '🔇';
-        }
-        audioToggle.onclick = (e) => {
-            isAudioEnabled = !isAudioEnabled;
-            audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
-            localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
-            if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
-        };
+    const savedAudio = localStorage.getItem('paseoDogAudio');
+    if (savedAudio === 'off') {
+        isAudioEnabled = false;
+        audioToggle.textContent = '🔇';
     }
-
-    // 5. DETECTAR INTERACCIÓN (Para reproducir audio después)
+    audioToggle.onclick = (e) => {
+        isAudioEnabled = !isAudioEnabled;
+        audioToggle.textContent = isAudioEnabled ? '🔊' : '🔇';
+        localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
+        if(!isAudioEnabled && carouselAudio) { carouselAudio.pause(); isPlaying=false; }
+    };
     document.addEventListener('click', () => {
         if (!userHasInteracted) userHasInteracted = true;
     }, { once: true });
 };
-
-// === EVENTOS DEL DOM (MENÚ, REGISTRO, ETC) ===
 document.addEventListener('DOMContentLoaded', () => {
     const nav = document.getElementById('main-nav');
     const burger = document.getElementById('hamburger-btn');
     const btnHome = document.getElementById('nav-home-btn');
     const btnLogout = document.getElementById('nav-logout-btn');
-
-    // Menú Hamburguesa
     if (burger) {
         burger.onclick = (e) => {
             e.stopPropagation();
-            if (nav) {
-                nav.classList.toggle('show');
-                burger.textContent = nav.classList.contains('show') ? '✕' : '☰';
-            }
+            nav.classList.toggle('show');
+            burger.textContent = nav.classList.contains('show') ? '✕' : '☰';
         };
     }
-
-    // Cerrar menú al hacer click fuera
     document.addEventListener('click', (e) => {
         if (nav && nav.classList.contains('show') && !nav.contains(e.target) && e.target !== burger) {
             nav.classList.remove('show');
-            if (burger) burger.textContent = '☰';
+            burger.textContent = '☰';
         }
     });
-
-    // Botón Inicio
     if (btnHome) {
         btnHome.onclick = () => {
-            if (nav) nav.classList.remove('show');
-            if (burger) burger.textContent = '☰';
-            
+            nav.classList.remove('show');
+            burger.textContent = '☰';
             if (!currentUser) {
                 showView('login-section');
                 return;
@@ -1215,19 +1150,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
-
-    // Botón Cerrar Sesión
     if (btnLogout) {
         btnLogout.onclick = () => {
             if(confirm('¿Cerrar sesión?')) {
-                if (nav) nav.classList.remove('show');
-                if (burger) burger.textContent = '☰';
-                
+                nav.classList.remove('show');
+                burger.textContent = '☰';
                 currentUser = null;
                 currentDog = null;
                 currentWalkFiles = [];
                 loginStep = 'email';
-                
                 showToast('👋 ¡Hasta luego!', 'info');
                 showView('login-section');
                 updateLoginForm('email');
@@ -1235,46 +1166,37 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
-
-    // FORMULARIO DE REGISTRO (NUEVO CLIENTE)
-    const regForm = document.getElementById('register-form');
-    if (regForm) {
-        regForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            const phone = document.getElementById('reg-phone').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
-            const passConf = document.getElementById('reg-pass-conf').value;
-            const btn = e.target.querySelector('button[type="submit"]');
-
-            if (pass !== passConf) return showToast('❌ Las contraseñas no coinciden', 'error');
-            if (pass.length < 6) return showToast('❌ La contraseña es muy corta (mínimo 6)', 'error');
-
-            btn.disabled = true;
-            btn.innerHTML = '⏳ Creando usuario...';
-            
-            try {
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email: email,
-                    password: pass,
-                    options: {
-                        data: { full_name: name, phone: phone }
-                    }
-                });
-
-                if (error) throw error;
-                showToast('✅ ¡Cuenta creada! Por favor inicia sesión.', 'success');
-                regForm.reset();
-                showView('login-section');
-            } catch (err) {
-                let msg = err.message;
-                if(msg.includes('already registered')) msg = 'Este correo ya está registrado.';
-                showToast('❌ Error: ' + msg, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '✅ Crear Cuenta';
-            }
-        };
-    }
+    document.getElementById('register-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('reg-name').value;
+        const phone = document.getElementById('reg-phone').value;
+        const email = document.getElementById('reg-email').value;
+        const pass = document.getElementById('reg-pass').value;
+        const passConf = document.getElementById('reg-pass-conf').value;
+        const btn = e.target.querySelector('button[type="submit"]');
+        if (pass !== passConf) return showToast('❌ Las contraseñas no coinciden', 'error');
+        if (pass.length < 6) return showToast('❌ La contraseña es muy corta (mínimo 6)', 'error');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Creando usuario...';
+        try {
+            const { data, error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: pass,
+                options: {
+                    data: { full_name: name, phone: phone }
+                }
+            });
+            if (error) throw error;
+            showToast('✅ ¡Cuenta creada! Por favor inicia sesión.', 'success');
+            document.getElementById('register-form').reset();
+            showView('login-section');
+        } catch (err) {
+            let msg = err.message;
+            if(msg.includes('already registered')) msg = 'Este correo ya está registrado.';
+            showToast('❌ Error: ' + msg, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '✅ Crear Cuenta';
+        }
+    };
 });
