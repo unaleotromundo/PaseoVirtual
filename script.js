@@ -163,7 +163,12 @@ async function uploadProfilePhoto(file) {
         return;
     }
 
-    // 1. CREAR Y MOSTRAR EFECTO DE CARGA (FILL)
+    // Validar tamaño (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('❌ La foto debe pesar menos de 5MB', 'error');
+        return;
+    }
+
     const container = document.getElementById('profile-photo-container');
     if (container.querySelector('.uploading-fill')) return;
     
@@ -175,30 +180,29 @@ async function uploadProfilePhoto(file) {
     uploadInput.disabled = true;
 
     const fileName = `perfil_${currentDog.id}_${Date.now()}.${extension}`;
-    const filePath = fileName;
 
     try {
-        // 2. SUBIR A SUPABASE
+        loadingOverlay.innerHTML = '<span style="color:white; font-weight:bold;">⬆️ Subiendo...</span>';
+        
+        // Subir archivo directamente (sin validar bucket)
         const { error: uploadError } = await supabaseClient
             .storage
             .from('paseodog-photos')
-            .upload(filePath, file, { cacheControl: '0', upsert: false });
+            .upload(fileName, file, { cacheControl: '3600', upsert: true });
 
         if (uploadError) throw uploadError;
 
-        // 3. ACTUALIZAR DB
+        // Actualizar DB
         const newPerfil = { ...currentDog.perfil, foto_id: fileName };
         await updateRealDogProfile(currentDog.id, newPerfil);
 
-        // 4. ACTUALIZAR UI
+        // Actualizar UI
         REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
         currentDog = { ...currentDog, perfil: newPerfil };
         
-        // Forzar recarga con timestamp
         const img = document.getElementById('profile-photo');
         const newSrc = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}?t=${Date.now()}`;
         
-        // Precargar imagen
         const tempImg = new Image();
         tempImg.src = newSrc;
         tempImg.onload = () => {
@@ -207,10 +211,16 @@ async function uploadProfilePhoto(file) {
             loadingOverlay.remove(); 
             uploadInput.disabled = false;
         };
+        tempImg.onerror = () => {
+            img.src = newSrc;
+            showToast('✅ Foto subida (puede tardar en cargar)', 'success');
+            loadingOverlay.remove();
+            uploadInput.disabled = false;
+        };
 
     } catch (err) {
         console.error('Error subida:', err);
-        showToast('❌ Error al subir: ' + err.message, 'error');
+        showToast('❌ Error: ' + (err.message || 'Desconocido'), 'error');
         loadingOverlay.remove();
         uploadInput.disabled = false;
     }
@@ -579,23 +589,7 @@ function randomizeProfilePhoto(){
 
 // === CREATE WALK (LOGICA SUBIDA FOTOS) ===
 
-// 1. Listeners para input de fotos
-document.addEventListener('DOMContentLoaded', () => {
-    const addBtn = document.getElementById('add-walk-photo-btn');
-    const walkInput = document.getElementById('walk-photo-input');
 
-    if (addBtn && walkInput) {
-        addBtn.onclick = () => walkInput.click();
-        walkInput.onchange = (e) => {
-            if (e.target.files && e.target.files.length > 0) {
-                const newFiles = Array.from(e.target.files);
-                currentWalkFiles = [...currentWalkFiles, ...newFiles];
-                renderWalkPreview();
-            }
-            e.target.value = '';
-        };
-    }
-});
 
 // 2. Renderizar miniaturas
 function renderWalkPreview() {
@@ -846,11 +840,89 @@ window.delWalk = (walkIndex) => {
         .catch(err => showToast('❌ Error al eliminar', 'error'));
 };
 
-// === INIT ===
+// === INIT DOM ===
 document.addEventListener('DOMContentLoaded', () => {
+    // Foto de perfil
     document.getElementById('photo-upload-input').addEventListener('change', (e) => {
         if(e.target.files[0]) uploadProfilePhoto(e.target.files[0]);
     });
+
+    // Fotos de paseos
+    const addBtn = document.getElementById('add-walk-photo-btn');
+    const walkInput = document.getElementById('walk-photo-input');
+    if (addBtn && walkInput) {
+        addBtn.onclick = () => walkInput.click();
+        walkInput.onchange = (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                const newFiles = Array.from(e.target.files);
+                currentWalkFiles = [...currentWalkFiles, ...newFiles];
+                renderWalkPreview();
+            }
+            e.target.value = '';
+        };
+    }
+
+    // Menú Hamburguesa
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const mainNav = document.getElementById('main-nav');
+    const navHomeBtn = document.getElementById('nav-home-btn');
+    const navLogoutBtn = document.getElementById('nav-logout-btn');
+
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mainNav.classList.toggle('show');
+            hamburgerBtn.textContent = mainNav.classList.contains('show') ? '✕' : '☰';
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (mainNav && mainNav.classList.contains('show')) {
+            if (!mainNav.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                mainNav.classList.remove('show');
+                hamburgerBtn.textContent = '☰';
+            }
+        }
+    });
+
+    if (navHomeBtn) {
+        navHomeBtn.addEventListener('click', async () => {
+            mainNav.classList.remove('show');
+            hamburgerBtn.textContent = '☰';
+            
+            if (currentUser && currentUser.isAdmin) {
+                showView('admin-dashboard-section');
+            } else if (currentDog) {
+                showView('dog-selection-dashboard');
+            } else {
+                showView('login-section');
+            }
+        });
+    }
+
+    if (navLogoutBtn) {
+        navLogoutBtn.addEventListener('click', () => {
+            mainNav.classList.remove('show');
+            hamburgerBtn.textContent = '☰';
+            
+            currentUser = null;
+            currentDog = null;
+            hasPlayedWelcome = false;
+            backStack = [];
+            
+            if (carouselAudio) {
+                carouselAudio.pause();
+                carouselAudio = null;
+            }
+            if (slideInterval) {
+                clearInterval(slideInterval);
+            }
+            isPlaying = false;
+            
+            showView('login-section');
+            showToast('👋 Sesión cerrada', 'info');
+        });
+    }
 });
 
 window.onload = async () => {
