@@ -968,7 +968,7 @@ window.delWalk = (walkIndex) => {
             showView('login-section');
             showToast('👋 Sesión cerrada', 'info');
         });
-    });
+    );
 // === INIT DOM ===
 document.addEventListener('DOMContentLoaded', () => {
     // Foto de perfil
