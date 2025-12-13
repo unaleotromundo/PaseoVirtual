@@ -397,6 +397,7 @@ function initCarousel() {
     updatePlayBtnState();
 }
 
+
 // ==========================================
 // 7. UI, TEMA Y NAVEGACIÓN
 // ==========================================
