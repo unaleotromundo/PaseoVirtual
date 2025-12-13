@@ -839,3 +839,66 @@ button.ripple { position: relative; overflow: hidden; }
 }
 
 @keyframes fadeInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+/* =========================================
+   10. VISIBILIDAD DE CONTROLES (LOGIN/LOGOUT)
+   ========================================= */
+
+/* POR DEFECTO: Ocultar controles del header */
+#theme-toggle,
+#hamburger-btn,
+#main-nav {
+    display: none !important;
+}
+
+/* CUANDO ESTÁ LOGUEADO: Mostrar botón de tema */
+body.user-logged-in #theme-toggle {
+    display: flex !important;
+}
+
+/* CUANDO ESTÁ LOGUEADO (PC): Mostrar menú, ocultar hamburguesa */
+@media (min-width: 769px) {
+    body.user-logged-in #main-nav {
+        display: flex !important;
+    }
+    body.user-logged-in #hamburger-btn {
+        display: none !important;
+    }
+}
+
+/* CUANDO ESTÁ LOGUEADO (MÓVIL): Mostrar hamburguesa */
+@media (max-width: 768px) {
+    body.user-logged-in #hamburger-btn {
+        display: block !important;
+    }
+    /* El menú sigue oculto hasta que se pulse la hamburguesa (.show) */
+    body.user-logged-in #main-nav {
+        display: none !important;
+    }
+    body.user-logged-in #main-nav.show {
+        display: flex !important;
+    }
+}
+/* CUANDO ESTÁ LOGUEADO (PC): Mostrar menú, ocultar hamburguesa */
+@media (min-width: 769px) {
+    body.user-logged-in #main-nav {
+        display: flex !important;
+    }
+    body.user-logged-in #hamburger-btn {
+        display: none !important;
+    }
+}
+
+/* CUANDO ESTÁ LOGUEADO (MÓVIL): Mostrar hamburguesa */
+@media (max-width: 768px) {
+    body.user-logged-in #hamburger-btn {
+        display: block !important;
+    }
+    /* El menú sigue oculto hasta que se pulse la hamburguesa (.show) */
+    body.user-logged-in #main-nav {
+        display: none !important;
+    }
+    body.user-logged-in #main-nav.show {
+        display: flex !important;
+    }
+}
