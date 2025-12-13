@@ -380,6 +380,18 @@ function initCarousel() {
         if (!document.fullscreenElement) elem.requestFullscreen().catch(err => {});
         else document.exitFullscreen();
     };
+// --- NUEVO: Recalcular al girar la pantalla ---
+    window.addEventListener('resize', () => {
+        if(currentView === 'dog-selection-dashboard') {
+            // Esto fuerza al navegador a repintar el contenedor correctamente
+            const wrapper = document.getElementById('carousel-wrapper');
+            if(wrapper) {
+                wrapper.style.height = (window.innerHeight < 600 && window.innerWidth > window.innerHeight) 
+                    ? '100vh' // En horizontal
+                    : '400px'; // En vertical (o lo que tengas en CSS)
+            }
+        }
+    });
 
     showSlide();
     updatePlayBtnState();
