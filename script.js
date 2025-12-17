@@ -495,9 +495,45 @@ async function showView(id, dogId = null) {
     window.scrollTo(0,0);
 }
 
-function goBack(){
-    if(backStack.length) showView(backStack.pop());
-    else showView('login-section');
+/* --- REEMPLAZAR LA FUNCIÓN goBack() EN SCRIPT.JS --- */
+
+function goBack() {
+    // Lógica inteligente de retorno según dónde estemos
+    switch (currentView) {
+        // 1. Si estamos en cualquier sub-sección del perro, volvemos a su Dashboard
+        case 'create-walk-section':
+        case 'walks-history-section':
+        case 'profile-section':
+            // IMPORTANTE: Pasamos el ID del perro actual para que no se pierda
+            showView('dog-selection-dashboard', currentDog ? currentDog.id : null);
+            break;
+
+        // 2. Si estamos creando un perro, volvemos al panel de Admin
+        case 'create-dog-section':
+            showView('admin-dashboard-section');
+            break;
+
+        // 3. Si estamos en el Dashboard del Perro
+        case 'dog-selection-dashboard':
+            if (currentUser && currentUser.isAdmin) {
+                // Si soy admin, vuelvo a mi lista de perros
+                showView('admin-dashboard-section');
+            } else {
+                // Si soy dueño, volver significa Salir/Login
+                showView('login-section');
+            }
+            break;
+
+        // 4. Si estamos en el panel de Admin
+        case 'admin-dashboard-section':
+            showView('login-section');
+            break;
+
+        // 5. Caso por defecto (Login o cualquier error)
+        default:
+            showView('login-section');
+            break;
+    }
 }
 
 function playWelcomeSound() {
