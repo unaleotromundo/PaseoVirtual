@@ -173,7 +173,7 @@
         "telefono": "5491155550000",
         "energia": "Media-Alta",
         "social": "Selectivo pero leal con conocidos",
-        "foto_id": "1625440398165-2a5d10a7d4b9"
+        "foto_id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/rootweilet_resultado.webp"
       },
       "walks": [
         {
@@ -184,8 +184,8 @@
           "comportamiento_problemas": false,
           "incidentes_salud": "",
           "fotos": [
-            {"id": "1625440398165-2a5d10a7d4b9", "comentario": "Rocky en su mejor pose de guardian"},
-            {"id": "1518020382338-a7de69f01b71", "comentario": "Momento de descanso merecido"}
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/rootweilet2_resultado.webp", "comentario": "Rocky en su mejor pose de guardian"},
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/rootweilet3_resultado.webp", "comentario": "Momento de descanso merecido"}
           ]
         }
       ]
