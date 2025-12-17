@@ -444,7 +444,6 @@ function updateWhatsApp() {
 async function showView(id, dogId = null) {
     const allDogs = await loadAllDogs();
     
-    if(id !== currentView) backStack.push(currentView);
     currentView = id;
 
     // --- MANEJO DE VISIBILIDAD HEADER (LOGIN) ---
