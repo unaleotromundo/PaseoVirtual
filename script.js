@@ -265,7 +265,35 @@ async function uploadProfilePhoto(file) {
         uploadInput.value = ''; 
     }
 }
+// --- DENTRO DE loadProfile(d) ---
 
+    // ... (código anterior donde se genera el HTML del perfil) ...
+
+    // AGREGAR ESTO AL FINAL DE LA FUNCIÓN loadProfile, PERO ANTES DEL CIERRE }:
+    
+    // Solo mostrar el botón de borrar si es ADMIN y NO es un ejemplo
+    if (currentUser && currentUser.isAdmin && !d.isExample) {
+        // Agregamos el botón al final del contenedor visual
+        const container = document.getElementById('profile-details-view');
+        
+        // Creamos un div separador para que no quede pegado
+        const deleteContainer = document.createElement('div');
+        deleteContainer.style.marginTop = "40px";
+        deleteContainer.style.borderTop = "2px dashed var(--danger-light)";
+        deleteContainer.style.paddingTop = "20px";
+        deleteContainer.style.textAlign = "center";
+
+        deleteContainer.innerHTML = `
+            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:10px;">Zona de Peligro</p>
+            <button id="btn-delete-dog" onclick="deleteCurrentDog()" class="ripple" style="background-color: var(--danger); color: white; width: 100%; font-weight: bold;">
+                🗑️ ELIMINAR MIMOSO
+            </button>
+        `;
+        
+        // Lo añadimos al final de la vista de detalles
+        container.appendChild(deleteContainer);
+    }
+} // <--- Cierre de la función loadProfile
 // ==========================================
 // 6. AUDIO Y CARRUSEL
 // ==========================================
@@ -1160,4 +1188,57 @@ window.onload = async () => {
     document.addEventListener('click', () => {
         if (!userHasInteracted) userHasInteracted = true;
     }, { once: true });
+};
+
+/* --- AGREGAR AL FINAL DE SCRIPT.JS --- */
+
+window.deleteCurrentDog = async () => {
+    // 1. Protección para datos de ejemplo
+    if (!currentDog || currentDog.isExample) {
+        showToast('🔒 No puedes eliminar los datos de ejemplo.', 'info');
+        return;
+    }
+
+    // 2. Primera Confirmación
+    const confirm1 = confirm(`⚠️ ¿Estás seguro de que quieres ELIMINAR a ${currentDog.nombre}?\n\nSe borrará su perfil y todo su historial de paseos.`);
+    if (!confirm1) return;
+
+    // 3. Segunda Confirmación (Seguridad)
+    const confirm2 = confirm(`🔴 ÚLTIMA ADVERTENCIA\n\nEsta acción es IRREVERSIBLE.\n¿Realmente deseas eliminar este mimoso de la base de datos?`);
+    if (!confirm2) return;
+
+    // 4. Proceso de eliminado
+    try {
+        const btn = document.getElementById('btn-delete-dog');
+        if(btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Eliminando...';
+        }
+
+        // Borrar de Supabase
+        const { error } = await supabaseClient
+            .from('dogs_real')
+            .delete()
+            .eq('id', currentDog.id);
+
+        if (error) throw error;
+
+        // Éxito
+        showToast('🗑️ Mimoso eliminado correctamente', 'success');
+        
+        // Actualizar lista local para que desaparezca sin recargar
+        REAL_DOGS = REAL_DOGS.filter(d => d.id !== currentDog.id);
+        
+        // Volver al panel de admin
+        showView('admin-dashboard-section');
+
+    } catch (err) {
+        console.error(err);
+        showToast('❌ Error al eliminar: ' + err.message, 'error');
+        const btn = document.getElementById('btn-delete-dog');
+        if(btn) {
+            btn.disabled = false;
+            btn.innerHTML = '🗑️ ELIMINAR MIMOSO (Cuidado)';
+        }
+    }
 };
