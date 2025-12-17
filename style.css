@@ -975,3 +975,18 @@ body.user-logged-in #theme-toggle {
         display: flex !important;
     }
 }
+/* --- AGREGAR EN style.css --- */
+
+/* Clase base para el emoji */
+.paw-icon {
+    display: inline-block; /* Permite transformaciones si quisieras animarlo */
+    transition: filter 0.3s ease;
+}
+
+/* SOLO en MODO OSCURO: Volver las patitas blancas */
+[data-theme="dark"] .paw-icon {
+    color: #ffffff; /* Para navegadores de PC */
+    
+    /* TRUCO: Para que funcione en móviles (iPhone/Android) donde el emoji tiene color propio */
+    filter: brightness(0) invert(1); 
+}
