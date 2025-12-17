@@ -40,7 +40,7 @@ const FALLBACK_DB = {
     { "id": 999, "nombre": "Rocky (Ejemplo)", "dueno_email": "rocky@paseos.com", "perfil": { "raza": "Rottweiler", "foto_id": "1561037404-61cd46aa615b", "telefono": "5491155550000" }, "walks": [] }
   ],
   "admin": { "email": "admin@paseos.com", "password": "admin123" }
-};
+}
 
 const DB_URL = 'paseoDogDB.json';
 let TRAINER_PHONE = "5491100000000";
