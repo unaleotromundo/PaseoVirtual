@@ -141,8 +141,8 @@
           "comportamiento_problemas": false,
           "incidentes_salud": "",
           "fotos": [
-            {"id": "1537151608828-ea2b11777ee8", "comentario": "Bella olfateando rastros interesantes"},
-            {"id": "1543466835-00a7907e9de1", "comentario": "Encontró algo fascinante en el pasto"}
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/beagle1.webp", "comentario": "Bella olfateando rastros interesantes"},
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/beagle3.webp", "comentario": "Encontró algo fascinante en el pasto"}
           ]
         },
         {
@@ -153,8 +153,8 @@
           "comportamiento_problemas": false,
           "incidentes_salud": "",
           "fotos": [
-            {"id": "1587300003388-5920dcc28193", "comentario": "Jugando con sus nuevos amigos"},
-            {"id": "1537151608828-ea2b11777ee8", "comentario": "Feliz después del juego"}
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/beagle2.webp", "comentario": "Jugando con sus nuevos amigos"},
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/beagle4.webp", "comentario": "Feliz después del juego"}
           ]
         }
       ]
