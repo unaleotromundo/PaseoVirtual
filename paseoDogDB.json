@@ -25,7 +25,7 @@
           "comportamiento_problemas": false,
           "incidentes_salud": "",
           "fotos": [
-            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/pastor4.webp", "comentario": "Fido corriendo feliz en el parque"},
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/pastor4.jpg", "comentario": "Fido corriendo feliz en el parque"},
             {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/pastor3.webp", "comentario": "Momento de descanso bajo la sombra"}
           ]
         },
