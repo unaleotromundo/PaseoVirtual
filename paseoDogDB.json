@@ -38,7 +38,6 @@
           "incidentes_salud": "",
           "fotos": [
             {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/pastor4.jpg", "comentario": "Concentrado en el entrenamiento"}
-	    {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/pastor1.webp", "comentario": "Concentrado en el entrenamiento"}
           ]
         }
       ]
