@@ -67,8 +67,8 @@
           "comportamiento_problemas": false,
           "incidentes_salud": "Necesitó descansar a la sombra 3 veces por el calor.",
           "fotos": [
-            {"id": "1583511655857-d19b40a7a54e", "comentario": "Luna descansando en la sombra"},
-            {"id": "1587300003388-5920dcc28193", "comentario": "Olfateando las flores con curiosidad"}
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/Bulldog2.webp", "comentario": "Luna descansando en la sombra"},
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/Bulldog3.webp", "comentario": "Olfateando las flores con curiosidad"}
           ]
         }
       ]
