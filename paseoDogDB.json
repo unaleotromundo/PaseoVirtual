@@ -98,8 +98,8 @@
           "comportamiento_problemas": false,
           "incidentes_salud": "",
           "fotos": [
-            {"id": "1633722715463-d30f4f325e24", "comentario": "Max nadando feliz en el mar"},
-            {"id": "1543466835-00a7907e9de1", "comentario": "Corriendo por la arena mojada"}
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/golden1_resultado.webp", "comentario": "Max nadando feliz en el mar"},
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/golden2_resultado.webp", "comentario": "Corriendo por la arena mojada"}
           ]
         },
         {
@@ -110,8 +110,8 @@
           "comportamiento_problemas": false,
           "incidentes_salud": "",
           "fotos": [
-            {"id": "1518020382338-a7de69f01b71", "comentario": "Explorando el sendero del bosque"},
-            {"id": "1507146426996-ef05306b995a", "comentario": "Bebiendo agua fresca del arroyo"}
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/golden3_resultado.webp", "comentario": "Explorando el sendero del bosque"},
+            {"id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/golden_resultado.webp", "comentario": "Bebiendo agua fresca del arroyo"}
           ]
         }
       ]
