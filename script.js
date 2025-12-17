@@ -24,7 +24,33 @@ try {
 
 const FALLBACK_DB = {
   "dogs": [
-    { "id": 995, "nombre": "Fido (Ejemplo)", "dueno_email": "cliente@paseos.com", "perfil": { "raza": "Pastor Alemán", "foto_id": "1589941013453-ec89f33b5e95", "telefono": "5491155550000" }, "walks": [] },
+    { "id": 995, "nombre": "Fido (Ejemplo)", "dueno_email": "cliente@paseos.com", "perfil": { "raza": "Pastor Alemán", "foto_id": "1589941013453-ec89f33b5e95", "telefono": "5491155550000" }, "walks": [
+	{
+          "fecha": "2023-12-01",
+          "duracion_minutos": 45,
+          "distancia_km": 3.0,
+          "resumen_diario": "Paseo de prueba con fotos",
+          "fotos": [
+              // Foto 1 del Carrusel (Puedes usar enlaces o archivos locales)
+              { "id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/pastor1.webp" },
+              
+              // Foto 2 del Carrusel
+              { "id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/pastor3.webp" }
+          ]
+      },
+      {
+          "fecha": "2023-12-05",
+          "duracion_minutos": 60,
+          "resumen_diario": "Otro paseo",
+          "fotos": [
+               // Foto 3 del Carrusel
+               { "id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/pastor4.jpg" }
+		// Foto 4 del Carrusel
+               { "id": "https://asejbhohkbcoixiwdhcq.supabase.co/storage/v1/object/public/ejemplos/pastor4.webp" }
+          ]
+      }
+  ] 
+},
     { "id": 996, "nombre": "Luna (Ejemplo)", "dueno_email": "luna@paseos.com", "perfil": { "raza": "Bulldog", "foto_id": "1583511655857-d19b40a7a54e", "telefono": "5491155550000" }, "walks": [] },
     { "id": 997, "nombre": "Max (Ejemplo)", "dueno_email": "max@paseos.com", "perfil": { "raza": "Golden Retriever", "foto_id": "1633722715463-d30f4f325e24", "telefono": "5491155550000" }, "walks": [] },
     { "id": 998, "nombre": "Bella (Ejemplo)", "dueno_email": "bella@paseos.com", "perfil": { "raza": "Beagle", "foto_id": "1537151608828-ea2b11777ee8", "telefono": "5491155550000" }, "walks": [] },
