@@ -293,7 +293,7 @@ async function uploadProfilePhoto(file) {
         // Lo añadimos al final de la vista de detalles
         container.appendChild(deleteContainer);
     }
-} // <--- Cierre de la función loadProfile
+
 // ==========================================
 // 6. AUDIO Y CARRUSEL
 // ==========================================
