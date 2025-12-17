@@ -639,15 +639,57 @@ button.ripple { position: relative; overflow: hidden; }
 }
 .carousel-action-btn:hover { background: var(--primary); }
 
-/* Pantalla Completa Carrusel */
-#carousel-container:fullscreen,
-#carousel-container:-webkit-full-screen {
-    background: #000;
-    display: flex; align-items: center; justify-content: center;
+/* --- REEMPLAZAR EN style.css (Al final de la sección 7) --- */
+
+/* Pantalla Completa Carrusel - APLICADO AL WRAPPER AHORA */
+#carousel-wrapper:fullscreen,
+#carousel-wrapper:-webkit-full-screen {
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
 }
-#carousel-container:fullscreen #carousel-img { width: 100vw; height: 100vh; }
-#carousel-container:fullscreen .carousel-nav { position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; }
-#carousel-container:fullscreen .carousel-controls { position: fixed; bottom: 30px; }
+
+/* El pseudo-elemento borroso debe cubrir toda la pantalla */
+#carousel-wrapper:fullscreen::before,
+#carousel-wrapper:-webkit-full-screen::before {
+    width: 100%;
+    height: 100%;
+}
+
+/* Ajuste de la imagen interna en pantalla completa */
+#carousel-wrapper:fullscreen #carousel-img,
+#carousel-wrapper:-webkit-full-screen #carousel-img { 
+    max-width: 95vw; 
+    max-height: 95vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Ajuste de controles para que floten sobre el fondo completo */
+#carousel-wrapper:fullscreen .carousel-nav,
+#carousel-wrapper:-webkit-full-screen .carousel-nav { 
+    position: fixed; 
+    width: 100vw; 
+    height: 100vh; 
+    top: 0; 
+    left: 0; 
+    z-index: 150;
+}
+
+#carousel-wrapper:fullscreen .carousel-controls,
+#carousel-wrapper:-webkit-full-screen .carousel-controls { 
+    position: fixed; 
+    bottom: 30px; 
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 160;
+}
 
 /* =========================================
    8. MODALES Y EXTRAS

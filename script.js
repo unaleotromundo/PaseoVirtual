@@ -375,10 +375,25 @@ function initCarousel() {
         }
     };
 
+    /* --- REEMPLAZAR EN script.js (Dentro de la función initCarousel) --- */
+
     window.toggleFullscreen = () => {
-        const elem = document.getElementById('carousel-container');
-        if (!document.fullscreenElement) elem.requestFullscreen().catch(err => {});
-        else document.exitFullscreen();
+        // CAMBIO IMPORTANTE: Ahora apuntamos al wrapper (que tiene el fondo), no al container
+        const elem = document.getElementById('carousel-wrapper');
+        
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => console.log(err));
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
     };
 // --- NUEVO: Recalcular al girar la pantalla ---
     window.addEventListener('resize', () => {
