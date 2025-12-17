@@ -24,7 +24,16 @@ try {
 
 const FALLBACK_DB = {
   "dogs": [
-    { "id": 995, "nombre": "Fido (Ejemplo)", "dueno_email": "cliente@paseos.com", "perfil": { "raza": "Pastor Alemán", "foto_id": "1589941013453-ec89f33b5e95", "telefono": "5491155550000" }, "walks": [] },
+    { "id": 995, "nombre": "Fido (Ejemplo)", "dueno_email": "cliente@paseos.com", "perfil": { "raza": "Pastor Alemán", "foto_id": "1589941013453-ec89f33b5e95", "telefono": "5491155550000" }, "walks": [{
+          "fecha": "2025-10-28",
+          "resumen_diario": "¡Fido tuvo un día fantástico! Exploramos el nuevo parque al sur y corrió por todas partes.",
+          "duracion_minutos": 75,
+          "distancia_km": 4.8,
+          "comportamiento_problemas": false,
+          "incidentes_salud": "",
+          "fotos": [
+            {"id": "1543466835-00a7907e9de1", "comentario": "Fido corriendo feliz en el parque"},
+            {"id": "1592194996308-7b43878e84a6", "comentario": "Momento de descanso bajo la sombra"}] },
     { "id": 996, "nombre": "Luna (Ejemplo)", "dueno_email": "luna@paseos.com", "perfil": { "raza": "Bulldog", "foto_id": "1583511655857-d19b40a7a54e", "telefono": "5491155550000" }, "walks": [] },
     { "id": 997, "nombre": "Max (Ejemplo)", "dueno_email": "max@paseos.com", "perfil": { "raza": "Golden Retriever", "foto_id": "1633722715463-d30f4f325e24", "telefono": "5491155550000" }, "walks": [] },
     { "id": 998, "nombre": "Bella (Ejemplo)", "dueno_email": "bella@paseos.com", "perfil": { "raza": "Beagle", "foto_id": "1537151608828-ea2b11777ee8", "telefono": "5491155550000" }, "walks": [] },
