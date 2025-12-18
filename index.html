@@ -5,32 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PaseoVirtual - Sistema Profesional</title>
     
-    <!-- 1. FAVICON (Pestaña del navegador): Usamos el ORIGINAL -->
-    <link rel="icon" type="image/png" href="paseodog-logo.png">
+    <!-- FAVICON (Navegador): Usamos el blanco -->
+    <link rel="icon" type="image/png" href="paseovirtualapp.png">
     
-    <!-- 2. ICONO DE APP (Celular/Instalado): Usamos el NUEVO (Negro) -->
+    <!-- ICONO APPLE (Instalado): Usamos el blanco -->
     <link rel="apple-touch-icon" href="paseovirtualapp.png">
+    
+    <!-- PANTALLA DE CARGA APPLE: Usamos el NEGRO -->
+    <link rel="apple-touch-startup-image" href="paseovirtualappn.png">
+    
     <meta name="apple-mobile-web-app-title" content="PaseoVirtual">
-    
-    <!-- El manifest controla el icono en Android -->
     <link rel="manifest" href="manifest.json">
-    
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <!-- ESTILOS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- FONDO DE PARTÍCULAS -->
+    <!-- ... (Particles y Toast siguen igual) ... -->
     <div id="particles-container"></div>
-    
-    <!-- TOAST NOTIFICATIONS -->
     <div id="toast-container"></div>
-    
-    <!-- LOADING -->
+
+    <!-- PANTALLA DE CARGA (Aquí hacemos el truco del fondo negro) -->
     <div id="loading-overlay">
+        <!-- Imagen Negra de Carga -->
+        <img src="paseovirtualappn.png" alt="Cargando..." class="loading-logo">
         <div class="spinner"></div>
         <p>Conectando con el servidor...</p>
     </div>
