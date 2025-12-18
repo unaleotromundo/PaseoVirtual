@@ -597,11 +597,24 @@ async function loadAdminDashboard() {
     
     allDogs.forEach((d, i) => {
         const suffix = d.isExample ? ' (ejemplo)' : '';
+        
+        // 1. Obtenemos la URL de la foto pequeña (60x60px es suficiente)
+        const photoUrl = getPhotoUrl(d.perfil.foto_id, 60, 60);
+
         const card = document.createElement('div');
         card.className = 'dog-card';
         card.style.setProperty('--i', i);
+
+        // 2. Creamos el HTML con la etiqueta <img> en lugar del emoji 🐶
+        // Usamos un div flexible para alinear foto y texto a la izquierda
         card.innerHTML = `
-            <span>🐶 <strong>${d.nombre}</strong> <small style="color:var(--text-secondary)">(${d.perfil.raza})${suffix}</small></span>
+            <div style="display:flex; align-items:center;">
+                <img src="${photoUrl}" class="dog-list-thumb" alt="${d.nombre}" onerror="this.src='https://via.placeholder.com/50?text=🐶'">
+                <div>
+                    <strong style="font-size:1.1rem; display:block; line-height:1.2;">${d.nombre}</strong>
+                    <small style="color:var(--text-secondary)">${d.perfil.raza}${suffix}</small>
+                </div>
+            </div>
             <button class="ripple" onclick="showView('dog-selection-dashboard', '${d.id}')">Gestionar</button>
         `;
         c.appendChild(card);
