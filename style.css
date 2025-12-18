@@ -990,3 +990,21 @@ body.user-logged-in #theme-toggle {
     /* TRUCO: Para que funcione en móviles (iPhone/Android) donde el emoji tiene color propio */
     filter: brightness(0) invert(1); 
 }
+/* --- AGREGAR EN style.css --- */
+
+.dog-list-thumb {
+    width: 50px;       /* Tamaño pequeño */
+    height: 50px;      /* Cuadrado perfecto */
+    border-radius: 50%; /* Lo hace redondo */
+    object-fit: cover; /* Evita que la foto se deforme */
+    margin-right: 15px; /* Espacio entre foto y texto */
+    border: 2px solid var(--border); /* Borde sutil */
+    background-color: var(--bg-body);
+    transition: transform 0.2s;
+}
+
+/* Efecto al pasar el mouse por encima de la tarjeta */
+.dog-card:hover .dog-list-thumb {
+    transform: scale(1.1);
+    border-color: var(--primary);
+}
