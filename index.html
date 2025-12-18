@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PaseoVirtual - Sistema Profesional</title>
-    <!-- FAVICON -->
-    <link rel="icon" type="image/png" href="paseodog-logo.png">
+    
+    <!-- FAVICON E ICONOS (Actualizado a paseovirtualapp.png) -->
+    <link rel="icon" type="image/png" href="paseovirtualapp.png">
+    <link rel="apple-touch-icon" href="paseovirtualapp.png">
+    <meta name="apple-mobile-web-app-title" content="PaseoVirtual">
+    
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="PaseoVirtual">
-    <link rel="apple-touch-icon" href="paseodog-logo.png">
+    
     <!-- ESTILOS -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -35,7 +38,7 @@
     <button id="audio-toggle" class="audio-float" title="Silenciar sonido">🔊</button>
 
     <header>
-        <!-- BOTÓN HAMBURGUESA (Solo visible en móvil) -->
+        <!-- BOTÓN HAMBURGUESA -->
         <button id="hamburger-btn" aria-label="Menu">☰</button>
         
         <!-- MENÚ DE NAVEGACIÓN -->
@@ -52,7 +55,7 @@
     </header>
 
     <main id="app-container">
-        <!-- LOGIN (LIMPIO) -->
+        <!-- LOGIN -->
         <section id="login-section">
             <h2>🔐 Acceso al Sistema</h2>
             <form id="login-form">
@@ -64,9 +67,7 @@
                     <button type="button" class="password-toggle" id="toggle-password">👁️</button>
                 </div>
                 <button type="submit">Iniciar Sesión</button>
-                
                 <p id="error-message" class="error" style="display:none;"></p>
-                
                 <p id="demo-status" style="text-align: center; margin-top: 12px; color: var(--text-secondary); font-size: 0.9rem;">
                     Estado: <strong id="demo-status-text">Cargando...</strong>
                 </p>
@@ -147,17 +148,14 @@
                 <label>⏱️ Duración (min)</label><input type="number" id="walk-duration" value="60" required>
                 <label>📏 Distancia (km)</label><input type="number" id="walk-distance" step="0.1" value="3.5">
                 <label>📝 Resumen</label><textarea id="walk-summary" required></textarea>
-                
                 <div class="checkbox-group">
                     <input type="checkbox" id="comportamiento-problemas">
                     <label>⚠️ Problemas de comportamiento</label>
                 </div>
-                
                 <label>🩺 Notas de Salud</label><textarea id="incidentes-salud"></textarea>
                 
                 <h3>📸 Fotos del Paseo</h3>
                 <div id="photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
-                
                 <input type="file" id="walk-photo-input" accept="image/*" multiple style="display:none;">
                 <button type="button" id="add-walk-photo-btn" class="nav-button ripple" style="background: var(--secondary); display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px;">
                     ➕ Subir Fotos Reales
@@ -214,15 +212,10 @@
                 
                 <h3>Gestionar Fotos</h3>
                 <div id="edit-photo-preview" style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;"></div>
-                
-                <!-- INPUT OCULTO PARA EDICIÓN -->
                 <input type="file" id="edit-walk-upload-input" accept="image/*" style="display:none;">
-                
-                <!-- BOTÓN SUBIDA REAL -->
-                <button type="button" id="btn-add-edit-photo" onclick="triggerEditUpload()" class="edit-btn ripple" style="background:var(--secondary); width:100%; margin-bottom:15px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <button type="button" id="btn-add-edit-photo" onclick="triggerEditUpload()" class="edit-btn ripple" style="background:var(--secondary); width:100%; margin-bottom:15px;">
                     ➕ Subir Nueva Foto
                 </button>
-                
                 <div style="display:flex; gap:10px;">
                     <button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>
                     <button type="button" class="nav-button ripple" onclick="document.getElementById('edit-walk-modal').style.display='none'" style="background:var(--text-secondary);">Cancelar</button>
@@ -231,12 +224,23 @@
         </div>
     </div>
 
-    <!-- INPUT OCULTO PARA SUBIR FOTO DE PERFIL -->
-    <input type="file" id="photo-upload-input" accept="image/*" style="display:none;">
+    <!-- MODAL DE INSTALACIÓN AUTOMÁTICA (NUEVO) -->
+    <div id="install-modal" class="install-modal-overlay" style="display: none;">
+        <div class="install-card">
+            <div class="install-icon-wrapper" style="margin-bottom: 15px;">
+                <img src="paseovirtualapp.png" alt="PaseoVirtual Logo" style="width: 70px; height: 70px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            </div>
+            <h3>Instalar PaseoVirtual</h3>
+            <p>Accede más rápido y usa la app sin conexión a internet.</p>
+            <div class="install-actions">
+                <button id="btn-install-yes" class="ripple">📲 INSTALAR AHORA</button>
+                <button id="btn-install-no" class="btn-text" style="background:none; border:none; color:var(--text-secondary); padding:10px;">Ahora no</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- SUPABASE SDK -->
+    <input type="file" id="photo-upload-input" accept="image/*" style="display:none;">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- SCRIPT PRINCIPAL -->
     <script src="script.js"></script>
 </body>
 </html>
