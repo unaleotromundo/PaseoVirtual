@@ -1,19 +1,21 @@
 {
-  "name": "PaseoDog",
-  "short_name": "PaseoDog",
-  "description": "Gestión profesional de paseos para perros",
-  "start_url": "./",
+  "name": "PaseoVirtual",
+  "short_name": "PaseoVirtual",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0F0F1B",
-  "theme_color": "#D4AF37",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "paseodog-logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "paseovirtualapp.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "paseovirtualapp.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
-  ],
-  "orientation": "any",
-  "lang": "es"
+  ]
 }
