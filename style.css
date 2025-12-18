@@ -80,12 +80,12 @@ body {
 }
 
 /* =========================================
-   3. HEADER Y NAVEGACIÓN (CORREGIDO)
+   3. HEADER Y NAVEGACIÓN
    ========================================= */
 header {
     text-align: center;
     margin-bottom: 40px;
-    position: relative; /* Contexto para elementos absolutos */
+    position: relative;
     padding-top: 10px;
     z-index: 100;
     animation: fadeInDown 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
@@ -100,13 +100,23 @@ h1 {
     animation: heartbeatGlow 4s ease-in-out 1.5s infinite;
 }
 
+/* --- LOGO PATITAS (Estilo especial) --- */
+.paw-icon {
+    display: inline-block;
+    transition: filter 0.3s ease;
+}
+[data-theme="dark"] .paw-icon {
+    color: #ffffff;
+    filter: brightness(0) invert(1); /* Truco para móviles */
+}
+
 #saludo-usuario {
     color: var(--text-secondary);
     font-size: 1.1rem;
     font-weight: 500;
 }
 
-/* BOTÓN TEMA (Izquierda) */
+/* BOTÓN TEMA */
 #theme-toggle {
     position: absolute;
     top: 0;
@@ -123,15 +133,15 @@ h1 {
     justify-content: center;
     box-shadow: var(--shadow);
     transition: var(--transition);
-    z-index: 200; /* Por encima de todo */
-    pointer-events: auto; /* Asegurar clic */
+    z-index: 200;
+    pointer-events: auto;
 }
 #theme-toggle:hover {
     transform: scale(1.1);
     border-color: var(--primary);
 }
 
-/* MENÚ DE NAVEGACIÓN (Derecha PC) */
+/* MENÚ DE NAVEGACIÓN (PC) */
 #main-nav {
     position: absolute;
     top: 10px;
@@ -168,7 +178,7 @@ h1 {
 
 /* BOTÓN HAMBURGUESA (Móvil) */
 #hamburger-btn {
-    display: none; /* Oculto en PC */
+    display: none;
     position: absolute;
     top: 5px;
     right: 0;
@@ -341,6 +351,22 @@ button.ripple { position: relative; overflow: hidden; }
 .dog-card span { font-size: 1.1rem; color: var(--text-primary); }
 .dog-card button { width: auto; margin: 0; }
 
+/* Miniatura de Perro en la Lista */
+.dog-list-thumb {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+    border: 2px solid var(--border);
+    background-color: var(--bg-body);
+    transition: transform 0.2s;
+}
+.dog-card:hover .dog-list-thumb {
+    transform: scale(1.1);
+    border-color: var(--primary);
+}
+
 /* Sesión de Paseo (Historial) */
 .walk-session {
     background: var(--bg-card);
@@ -507,12 +533,11 @@ button.ripple { position: relative; overflow: hidden; }
 /* =========================================
    7. CARRUSEL MODERNO (YOUTUBE STYLE)
    ========================================= */
-/* === CARRUSEL ESTILO INSTAGRAM (Fondo Borroso) === */
 #carousel-wrapper {
     position: relative;
     width: 100%;
-    height: 400px; /* Un poco más alto para lucir mejor */
-    background-color: #000; /* Color de respaldo */
+    height: 400px;
+    background-color: #000;
     border-radius: var(--radius-lg);
     overflow: hidden;
     margin-bottom: 30px;
@@ -520,8 +545,6 @@ button.ripple { position: relative; overflow: hidden; }
     align-items: center;
     justify-content: center;
     box-shadow: var(--shadow);
-    
-    /* Configuración para la imagen de fondo dinámica */
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -533,10 +556,10 @@ button.ripple { position: relative; overflow: hidden; }
     content: '';
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.4); /* Oscurece el fondo para resaltar la foto principal */
-    backdrop-filter: blur(20px); /* DESENFOQUE FUERTE */
-    -webkit-backdrop-filter: blur(20px); /* Para Safari */
-    z-index: -1; /* Se queda atrás */
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: -1;
 }
 
 #carousel-container {
@@ -546,16 +569,16 @@ button.ripple { position: relative; overflow: hidden; }
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2; /* Por encima del fondo borroso */
+    z-index: 2;
 }
 
 #carousel-img {
     max-width: 100%;
     max-height: 100%;
-    width: auto;  /* Importante para no estirar */
-    height: auto; /* Importante para no estirar */
-    object-fit: contain; /* Muestra la foto entera */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5); /* Sombra para separar del fondo */
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     border-radius: 4px;
 }
 
@@ -639,9 +662,7 @@ button.ripple { position: relative; overflow: hidden; }
 }
 .carousel-action-btn:hover { background: var(--primary); }
 
-/* --- REEMPLAZAR EN style.css (Al final de la sección 7) --- */
-
-/* Pantalla Completa Carrusel - APLICADO AL WRAPPER AHORA */
+/* Pantalla Completa Carrusel (WRAPPER) */
 #carousel-wrapper:fullscreen,
 #carousel-wrapper:-webkit-full-screen {
     background-position: center;
@@ -653,42 +674,23 @@ button.ripple { position: relative; overflow: hidden; }
     width: 100vw;
     height: 100vh;
 }
-
-/* El pseudo-elemento borroso debe cubrir toda la pantalla */
 #carousel-wrapper:fullscreen::before,
 #carousel-wrapper:-webkit-full-screen::before {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
 }
-
-/* Ajuste de la imagen interna en pantalla completa */
 #carousel-wrapper:fullscreen #carousel-img,
 #carousel-wrapper:-webkit-full-screen #carousel-img { 
-    max-width: 95vw; 
-    max-height: 95vh;
-    width: auto;
-    height: auto;
+    max-width: 95vw; max-height: 95vh;
+    width: auto; height: auto;
     object-fit: contain;
 }
-
-/* Ajuste de controles para que floten sobre el fondo completo */
 #carousel-wrapper:fullscreen .carousel-nav,
 #carousel-wrapper:-webkit-full-screen .carousel-nav { 
-    position: fixed; 
-    width: 100vw; 
-    height: 100vh; 
-    top: 0; 
-    left: 0; 
-    z-index: 150;
+    position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; z-index: 150;
 }
-
 #carousel-wrapper:fullscreen .carousel-controls,
 #carousel-wrapper:-webkit-full-screen .carousel-controls { 
-    position: fixed; 
-    bottom: 30px; 
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 160;
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 160;
 }
 
 /* =========================================
@@ -827,11 +829,9 @@ button.ripple { position: relative; overflow: hidden; }
     z-index: 9999;
     align-items: center; justify-content: center;
     flex-direction: column; gap: 20px;
-    pointer-events: none; /* Importante para que no bloquee si falla JS */
+    pointer-events: none;
 }
-#loading-overlay .spinner, #loading-overlay p {
-    pointer-events: auto; 
-}
+#loading-overlay .spinner, #loading-overlay p { pointer-events: auto; }
 .spinner {
     border: 5px solid rgba(255, 255, 255, 0.3);
     border-top: 5px solid var(--primary);
@@ -857,9 +857,14 @@ button.ripple { position: relative; overflow: hidden; }
     50% { text-shadow: 0 0 24px rgba(212, 175, 55, 0.8), 0 0 36px rgba(212, 175, 55, 0.6); }
 }
 
+@keyframes fadeInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+
 /* =========================================
-   9. MEDIA QUERIES (MÓVIL)
+   9. MEDIA QUERIES (MÓVIL & RESPONSIVE)
    ========================================= */
+
+/* A) FUNCIONALIDAD MÓVIL (Menú, Hamburguesa) - Aplica a Vertical y Horizontal */
 @media (max-width: 768px) {
     /* Header Ajustes */
     header { margin-bottom: 24px; padding-top: 5px; }
@@ -883,10 +888,10 @@ button.ripple { position: relative; overflow: hidden; }
     #main-nav.show { display: flex; }
     .nav-link { width: 100%; text-align: left; margin-bottom: 8px; padding: 12px; }
 
-    /* Ajuste Toast (Para no tapar menú) */
+    /* Ajuste Toast */
     #toast-container { top: 70px; right: 10px; }
     
-    /* Layout */
+    /* Layout Básico */
     body { padding: 12px; font-size: 1rem; }
     #app-container { padding: 24px; }
     
@@ -895,26 +900,83 @@ button.ripple { position: relative; overflow: hidden; }
     #profile-photo { max-width: 200px; height: 200px; }
     .detail-row { flex-direction: column; align-items: flex-start; gap: 5px; }
     
-    /* Carrusel Móvil */
-    #carousel-wrapper { height: 260px; }
-    .carousel-play-large { width: 60px; height: 60px; font-size: 1.5rem; }
-    
     /* Cards */
     .dog-card { flex-direction: column; align-items: flex-start; gap: 12px; }
     .dog-card button { width: 100%; }
-    
-    /* Floats */
-    .whatsapp-float { right: 16px; bottom: 24px; width: 55px; height: 55px; font-size: 30px; }
-    .audio-float { right: 85px; bottom: 24px; }
     
     /* Modal */
     .modal-content { padding: 20px; width: 95%; max-height: 85vh; }
 }
 
-@keyframes fadeInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+/* B) DISEÑO APP NATIVA (Solo Vertical - Portrait) */
+@media (max-width: 768px) and (orientation: portrait) {
+    /* Aprovechar toda la pantalla */
+    body {
+        padding: 0; 
+        background: var(--bg-card); 
+    }
+
+    #app-container {
+        padding: 20px; 
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0; 
+        box-shadow: none; 
+        min-height: 100vh; 
+        margin: 0;
+    }
+
+    /* Textos más grandes */
+    header { margin-bottom: 20px; padding-top: 10px; padding-bottom: 10px; }
+    h1 { font-size: 2.4rem; }
+    h2 { font-size: 1.8rem; margin-bottom: 20px; }
+    p, label, span, div { font-size: 1.05rem; }
+
+    /* Inputs y Botones Gigantes (Dedo-friendly) */
+    input, select, textarea {
+        padding: 16px; 
+        font-size: 1.1rem; 
+        margin-bottom: 12px;
+    }
+    
+    button {
+        padding: 18px; 
+        font-size: 1.15rem;
+        margin-top: 5px;
+    }
+
+    /* Foto Lista más grande */
+    .dog-card { padding: 15px; gap: 15px; }
+    .dog-list-thumb {
+        width: 70px; height: 70px;
+        margin-right: 15px;
+    }
+
+    /* Botones Flotantes */
+    .whatsapp-float { 
+        width: 65px; height: 65px; font-size: 35px;
+        right: 20px; bottom: 20px; 
+    }
+    .audio-float { 
+        width: 50px; height: 50px; font-size: 24px;
+        right: 100px; bottom: 25px; 
+    }
+    
+    /* Hamburguesa más grande */
+    #hamburger-btn { font-size: 2.5rem; top: 15px; right: 15px; }
+
+    /* Carrusel y Modal */
+    #carousel-wrapper { height: 300px; margin-bottom: 20px; }
+    .modal-content { width: 100%; height: 100%; border-radius: 0; padding: 25px; max-height: 100vh; }
+    
+    /* Toast Ancho */
+    #toast-container { left: 10px; right: 10px; top: 80px; }
+    .toast { max-width: 100%; }
+}
+
 
 /* =========================================
-   10. VISIBILIDAD DE CONTROLES (LOGIN/LOGOUT)
+   10. VISIBILIDAD DE CONTROLES (LOGIC)
    ========================================= */
 
 /* POR DEFECTO: Ocultar controles del header */
@@ -931,80 +993,14 @@ body.user-logged-in #theme-toggle {
 
 /* CUANDO ESTÁ LOGUEADO (PC): Mostrar menú, ocultar hamburguesa */
 @media (min-width: 769px) {
-    body.user-logged-in #main-nav {
-        display: flex !important;
-    }
-    body.user-logged-in #hamburger-btn {
-        display: none !important;
-    }
+    body.user-logged-in #main-nav { display: flex !important; }
+    body.user-logged-in #hamburger-btn { display: none !important; }
 }
 
 /* CUANDO ESTÁ LOGUEADO (MÓVIL): Mostrar hamburguesa */
 @media (max-width: 768px) {
-    body.user-logged-in #hamburger-btn {
-        display: block !important;
-    }
-    /* El menú sigue oculto hasta que se pulse la hamburguesa (.show) */
-    body.user-logged-in #main-nav {
-        display: none !important;
-    }
-    body.user-logged-in #main-nav.show {
-        display: flex !important;
-    }
-}
-/* CUANDO ESTÁ LOGUEADO (PC): Mostrar menú, ocultar hamburguesa */
-@media (min-width: 769px) {
-    body.user-logged-in #main-nav {
-        display: flex !important;
-    }
-    body.user-logged-in #hamburger-btn {
-        display: none !important;
-    }
-}
-
-/* CUANDO ESTÁ LOGUEADO (MÓVIL): Mostrar hamburguesa */
-@media (max-width: 768px) {
-    body.user-logged-in #hamburger-btn {
-        display: block !important;
-    }
-    /* El menú sigue oculto hasta que se pulse la hamburguesa (.show) */
-    body.user-logged-in #main-nav {
-        display: none !important;
-    }
-    body.user-logged-in #main-nav.show {
-        display: flex !important;
-    }
-}
-/* --- AGREGAR EN style.css --- */
-
-/* Clase base para el emoji */
-.paw-icon {
-    display: inline-block; /* Permite transformaciones si quisieras animarlo */
-    transition: filter 0.3s ease;
-}
-
-/* SOLO en MODO OSCURO: Volver las patitas blancas */
-[data-theme="dark"] .paw-icon {
-    color: #ffffff; /* Para navegadores de PC */
-    
-    /* TRUCO: Para que funcione en móviles (iPhone/Android) donde el emoji tiene color propio */
-    filter: brightness(0) invert(1); 
-}
-/* --- AGREGAR EN style.css --- */
-
-.dog-list-thumb {
-    width: 50px;       /* Tamaño pequeño */
-    height: 50px;      /* Cuadrado perfecto */
-    border-radius: 50%; /* Lo hace redondo */
-    object-fit: cover; /* Evita que la foto se deforme */
-    margin-right: 15px; /* Espacio entre foto y texto */
-    border: 2px solid var(--border); /* Borde sutil */
-    background-color: var(--bg-body);
-    transition: transform 0.2s;
-}
-
-/* Efecto al pasar el mouse por encima de la tarjeta */
-.dog-card:hover .dog-list-thumb {
-    transform: scale(1.1);
-    border-color: var(--primary);
+    body.user-logged-in #hamburger-btn { display: block !important; }
+    /* Menú oculto hasta clic */
+    body.user-logged-in #main-nav { display: none !important; }
+    body.user-logged-in #main-nav.show { display: flex !important; }
 }
