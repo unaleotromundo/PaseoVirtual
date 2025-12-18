@@ -265,34 +265,6 @@ async function uploadProfilePhoto(file) {
         uploadInput.value = ''; 
     }
 }
-// --- DENTRO DE loadProfile(d) ---
-
-    // ... (código anterior donde se genera el HTML del perfil) ...
-
-    // AGREGAR ESTO AL FINAL DE LA FUNCIÓN loadProfile, PERO ANTES DEL CIERRE }:
-    
-    // Solo mostrar el botón de borrar si es ADMIN y NO es un ejemplo
-    if (currentUser && currentUser.isAdmin && !d.isExample) {
-        // Agregamos el botón al final del contenedor visual
-        const container = document.getElementById('profile-details-view');
-        
-        // Creamos un div separador para que no quede pegado
-        const deleteContainer = document.createElement('div');
-        deleteContainer.style.marginTop = "40px";
-        deleteContainer.style.borderTop = "2px dashed var(--danger-light)";
-        deleteContainer.style.paddingTop = "20px";
-        deleteContainer.style.textAlign = "center";
-
-        deleteContainer.innerHTML = `
-            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:10px;">Zona de Peligro</p>
-            <button id="btn-delete-dog" onclick="deleteCurrentDog()" class="ripple" style="background-color: var(--danger); color: white; width: 100%; font-weight: bold;">
-                🗑️ ELIMINAR MIMOSO
-            </button>
-        `;
-        
-        // Lo añadimos al final de la vista de detalles
-        container.appendChild(deleteContainer);
-    }
 
 // ==========================================
 // 6. AUDIO Y CARRUSEL
@@ -701,14 +673,27 @@ function loadProfile(d) {
     const v = document.getElementById('profile-details-view');
     
     if (isEditing && !d.isExample) {
+        // VISTA DE EDICIÓN
         v.innerHTML = `<form id="profile-edit-form"></form>`;
         const form = document.getElementById('profile-edit-form');
+        
+        // (Aquí está el código que ya tienes que genera los inputs...)
         const fields = ['raza','edad','sexo','peso','alergias','dueno','telefono','energia','social'];
         fields.forEach(k => {
             form.innerHTML += `<label>${k.charAt(0).toUpperCase() + k.slice(1)}</label>
                               <input type="text" name="${k}" value="${p[k] || ''}">`;
         });
         form.innerHTML += '<button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>';
+if (currentUser && currentUser.isAdmin) {
+            form.innerHTML += `
+                <div style="margin-top: 30px; border-top: 2px dashed var(--danger-light); padding-top: 20px;">
+                    <p style="color:var(--text-secondary); text-align:center; font-size:0.85rem; margin-bottom:10px;">Zona de Peligro</p>
+                    <button type="button" id="btn-delete-dog" onclick="deleteCurrentDog()" class="ripple" style="background-color: var(--danger); color: white; width: 100%;">
+                        🗑️ ELIMINAR MIMOSO
+                    </button>
+                </div>
+            `;
+        }
         
         form.onsubmit = async (e) => {
             e.preventDefault();
