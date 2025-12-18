@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PaseoVirtual - Sistema Profesional</title>
     
-    <!-- FAVICON E ICONOS (Actualizado a paseovirtualapp.png) -->
-    <link rel="icon" type="image/png" href="paseovirtualapp.png">
+    <!-- 1. FAVICON (Pestaña del navegador): Usamos el ORIGINAL -->
+    <link rel="icon" type="image/png" href="paseodog-logo.png">
+    
+    <!-- 2. ICONO DE APP (Celular/Instalado): Usamos el NUEVO (Negro) -->
     <link rel="apple-touch-icon" href="paseovirtualapp.png">
     <meta name="apple-mobile-web-app-title" content="PaseoVirtual">
     
+    <!-- El manifest controla el icono en Android -->
     <link rel="manifest" href="manifest.json">
+    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,8 +25,10 @@
 <body>
     <!-- FONDO DE PARTÍCULAS -->
     <div id="particles-container"></div>
+    
     <!-- TOAST NOTIFICATIONS -->
     <div id="toast-container"></div>
+    
     <!-- LOADING -->
     <div id="loading-overlay">
         <div class="spinner"></div>
@@ -67,7 +73,9 @@
                     <button type="button" class="password-toggle" id="toggle-password">👁️</button>
                 </div>
                 <button type="submit">Iniciar Sesión</button>
+                
                 <p id="error-message" class="error" style="display:none;"></p>
+                
                 <p id="demo-status" style="text-align: center; margin-top: 12px; color: var(--text-secondary); font-size: 0.9rem;">
                     Estado: <strong id="demo-status-text">Cargando...</strong>
                 </p>
@@ -102,14 +110,17 @@
         <!-- DOG DASHBOARD -->
         <section id="dog-selection-dashboard" style="display:none;">
             <h2>🐕 Dashboard de <span class="dog-name-placeholder"></span></h2>
+            
             <div id="carousel-wrapper" style="display:none;">
                 <div id="carousel-container">
                     <img id="carousel-img" src="" alt="Diapositiva">
                     <button id="carousel-play-large" class="carousel-play-large" onclick="togglePlay()" style="display:none;">▶</button>
+                    
                     <div class="carousel-nav">
                         <button class="carousel-nav-btn" id="prev-btn" onclick="prevSlide()">‹</button>
                         <button class="carousel-nav-btn" id="next-btn" onclick="nextSlide()">›</button>
                     </div>
+                    
                     <div class="carousel-controls">
                         <span id="carousel-counter"></span>
                         <div class="carousel-actions">
@@ -119,6 +130,7 @@
                     </div>
                 </div>
             </div>
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 24px;">
                 <button id="admin-create-walk-btn" class="admin-action-button ripple" style="display:none;" onclick="showView('create-walk-section')">
                     ➕ Crear Nuevo Paseo
@@ -130,6 +142,7 @@
                     📋 Ver/Editar Perfil
                 </button>
             </div>
+            
             <button class="nav-button ripple" onclick="goBack()" style="background: var(--text-secondary); margin-top: 16px;">
                 ⬅️ Volver
             </button>
@@ -148,14 +161,17 @@
                 <label>⏱️ Duración (min)</label><input type="number" id="walk-duration" value="60" required>
                 <label>📏 Distancia (km)</label><input type="number" id="walk-distance" step="0.1" value="3.5">
                 <label>📝 Resumen</label><textarea id="walk-summary" required></textarea>
+                
                 <div class="checkbox-group">
                     <input type="checkbox" id="comportamiento-problemas">
                     <label>⚠️ Problemas de comportamiento</label>
                 </div>
+                
                 <label>🩺 Notas de Salud</label><textarea id="incidentes-salud"></textarea>
                 
                 <h3>📸 Fotos del Paseo</h3>
                 <div id="photo-preview" style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"></div>
+                
                 <input type="file" id="walk-photo-input" accept="image/*" multiple style="display:none;">
                 <button type="button" id="add-walk-photo-btn" class="nav-button ripple" style="background: var(--secondary); display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px;">
                     ➕ Subir Fotos Reales
@@ -212,10 +228,12 @@
                 
                 <h3>Gestionar Fotos</h3>
                 <div id="edit-photo-preview" style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;"></div>
+                
                 <input type="file" id="edit-walk-upload-input" accept="image/*" style="display:none;">
-                <button type="button" id="btn-add-edit-photo" onclick="triggerEditUpload()" class="edit-btn ripple" style="background:var(--secondary); width:100%; margin-bottom:15px;">
+                <button type="button" id="btn-add-edit-photo" onclick="triggerEditUpload()" class="edit-btn ripple" style="background:var(--secondary); width:100%; margin-bottom:15px; display:flex; align-items:center; justify-content:center; gap:8px;">
                     ➕ Subir Nueva Foto
                 </button>
+                
                 <div style="display:flex; gap:10px;">
                     <button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>
                     <button type="button" class="nav-button ripple" onclick="document.getElementById('edit-walk-modal').style.display='none'" style="background:var(--text-secondary);">Cancelar</button>
@@ -224,10 +242,11 @@
         </div>
     </div>
 
-    <!-- MODAL DE INSTALACIÓN AUTOMÁTICA (NUEVO) -->
+    <!-- MODAL DE INSTALACIÓN AUTOMÁTICA -->
     <div id="install-modal" class="install-modal-overlay" style="display: none;">
         <div class="install-card">
             <div class="install-icon-wrapper" style="margin-bottom: 15px;">
+                <!-- Aquí mostramos el icono NUEVO, invitando a instalar la app -->
                 <img src="paseovirtualapp.png" alt="PaseoVirtual Logo" style="width: 70px; height: 70px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
             </div>
             <h3>Instalar PaseoVirtual</h3>
@@ -239,7 +258,10 @@
         </div>
     </div>
 
+    <!-- INPUT OCULTO PARA SUBIR FOTO DE PERFIL -->
     <input type="file" id="photo-upload-input" accept="image/*" style="display:none;">
+
+    <!-- LIBRERÍAS Y SCRIPT -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 </body>
