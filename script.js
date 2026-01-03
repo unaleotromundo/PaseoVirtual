@@ -81,25 +81,26 @@ function createRipple(event, element) {
     button.appendChild(circle);
 }
 
+// FUNCIÓN CORREGIDA: getPhotoUrl
 function getPhotoUrl(id, w = 400, h = 400) {
-    if(!id) return 'https://via.placeholder.com/400?text=No+Foto';
+    if(!id) return 'https://via.placeholder.com/50?text=🐶';
     
-    // Si es un enlace completo de internet (http/https)
-    if(id.startsWith('http')) {
+    // 1. Si es un enlace absoluto (http/https), usarlo directamente
+    if(id.toString().startsWith('http')) {
         return id;
     }
-    
-    // Si contiene prefijos de Supabase Storage (perfil_ o walk_), construir URL de Supabase
-    if (id.includes('perfil_') || id.includes('walk_')) { 
-        return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
+
+    // 2. Si es una foto de Supabase (contiene prefijos perfil_ o walk_)
+    if (id.toString().includes('perfil_') || id.toString().includes('walk_')) { 
+       return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
     }
-    
-    // Si es una ruta local completa (empieza con ./ o / o contiene extensión pero no es de Supabase)
-    if (id.startsWith('./') || id.startsWith('/') || (id.includes('.') && !id.includes('perfil_') && !id.includes('walk_'))) {
+
+    // 3. Si contiene un punto pero no prefijos, asumimos archivo local (solo si es necesario)
+    if (id.toString().includes('.')) {
         return id;
     }
-    
-    // Si es un ID simple (números), asumimos que es de Unsplash (para datos de ejemplo)
+
+    // 4. Si es un ID de Unsplash (ejemplos antiguos)
     return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
 }
 
@@ -190,21 +191,17 @@ async function updateRealDogProfile(dogId, newPerfil) {
 // ==========================================
 
 async function uploadProfilePhoto(file) {
-    // 1. Validar Conexión
     if (!supabaseClient) {
         showToast('❌ Error de conexión con la base de datos', 'error');
         return;
     }
 
-    // 2. Validar que no sea Ejemplo
     if (!currentDog || currentDog.isExample) {
-        showToast('ℹ️ Los perros de ejemplo no se guardan en la nube. Crea uno nuevo.', 'info');
+        showToast('ℹ️ Los perros de ejemplo no se guardan en la nube.', 'info');
         return;
     }
 
-    // 3. Validar Archivo
     const extension = file.name.split('.').pop().toLowerCase();
-    // 4. UI de carga (Fill Effect)
     const fileName = `perfil_${currentDog.id}_${Date.now()}.${extension}`;
     const container = document.getElementById('profile-photo-container');
     const loadingOverlay = document.createElement('div');
@@ -212,7 +209,6 @@ async function uploadProfilePhoto(file) {
     container.appendChild(loadingOverlay);
 
     try {
-        // 5. Subida a Storage
         const { error: uploadError } = await supabaseClient
             .storage
             .from('paseodog-photos')
@@ -220,17 +216,14 @@ async function uploadProfilePhoto(file) {
 
         if (uploadError) throw uploadError;
 
-        // 6. Actualizar DB
         const newPerfil = { ...currentDog.perfil, foto_id: fileName };
         await updateRealDogProfile(currentDog.id, newPerfil);
 
-        // 7. Actualizar Estado Local
         REAL_DOGS = REAL_DOGS.map(d => d.id === currentDog.id ? { ...d, perfil: newPerfil } : d);
         currentDog.perfil = newPerfil;
         
-        // 8. Refrescar imagen visualmente
         const img = document.getElementById('profile-photo');
-        img.src = `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${fileName}`;
+        img.src = getPhotoUrl(fileName);
         showToast('✅ Foto actualizada', 'success');
 
     } catch (err) {
@@ -388,14 +381,12 @@ async function showView(id, dogId = null) {
     const allDogs = await loadAllDogs();
     currentView = id;
 
-    // --- MANEJO DE VISIBILIDAD HEADER (LOGIN) ---
     if (id === 'login-section') {
         document.body.classList.remove('user-logged-in');
     } else {
         document.body.classList.add('user-logged-in');
     }
 
-    // Detener música si salimos del dashboard del perro
     if (currentView !== 'dog-selection-dashboard') {
         if(slideInterval) clearInterval(slideInterval);
         if(carouselAudio) { carouselAudio.pause(); isPlaying=false; }
@@ -436,7 +427,6 @@ async function showView(id, dogId = null) {
 }
 
 function goBack() {
-    // Lógica inteligente de retorno según dónde estemos
     switch (currentView) {
         case 'create-walk-section':
         case 'walks-history-section':
@@ -616,7 +606,6 @@ function loadProfile(d) {
         });
         form.innerHTML += '<button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>';
         
-        // ZONA DE PELIGRO (BORRAR)
         if (currentUser && currentUser.isAdmin) {
             form.innerHTML += `
                 <div style="margin-top: 30px; border-top: 2px dashed var(--danger-light); padding-top: 20px;">
@@ -681,17 +670,14 @@ function randomizeProfilePhoto(){
 }
 
 window.deleteCurrentDog = async () => {
-    // 1. Verificaciones de seguridad
     if (!currentDog || currentDog.isExample) return showToast('🔒 No puedes borrar ejemplos', 'info');
     
-    // 2. DOBLE CONFIRMACIÓN
     const c1 = confirm(`⚠️ ¿Eliminar a ${currentDog.nombre}?\nSe borrará todo su historial.`);
     if (!c1) return;
 
-    const c2 = confirm(`🔴 ÚLTIMA ADVERTENCIA\n\n¿Realmente quieres eliminarlo de la base de datos?\nEsta acción no se puede deshacer.`);
+    const c2 = confirm(`🔴 ÚLTIMA ADVERTENCIA\n\n¿Realmente quieres eliminarlo?\nEsta acción no se puede deshacer.`);
     if (!c2) return;
 
-    // 3. Proceso de borrado
     try {
         const btn = document.getElementById('btn-delete-dog');
         if(btn) btn.innerText = "⏳ Eliminando...";
@@ -700,8 +686,8 @@ window.deleteCurrentDog = async () => {
         if (error) throw error;
 
         showToast('🗑️ Mimoso eliminado', 'success');
-        REAL_DOGS = REAL_DOGS.filter(d => d.id !== currentDog.id); // Actualizar lista local
-        showView('admin-dashboard-section'); // Volver al admin
+        REAL_DOGS = REAL_DOGS.filter(d => d.id !== currentDog.id); 
+        showView('admin-dashboard-section'); 
     } catch (err) {
         showToast('❌ Error: ' + err.message, 'error');
     }
@@ -1032,7 +1018,7 @@ document.addEventListener('DOMContentLoaded', () => {
         navHomeBtn.addEventListener('click', () => {
             mainNav.classList.remove('show');
             hamburgerBtn.textContent = '☰';
-            goBack(); // Usamos la función inteligente
+            goBack(); 
         });
     }
 
@@ -1100,32 +1086,26 @@ window.onload = async () => {
 // 14. PWA & INSTALACIÓN (MODAL AUTOMÁTICO)
 // ==========================================
 
-// 1. Registrar Service Worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(err => console.log('Error SW:', err));
 }
 
-// 2. Lógica de Instalación Automática
 let deferredPrompt;
 const installModal = document.getElementById('install-modal');
 const btnYes = document.getElementById('btn-install-yes');
 const btnNo = document.getElementById('btn-install-no');
 
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevenir que Chrome muestre la barra mini inferior
     e.preventDefault();
     deferredPrompt = e;
 
-    // Verificar si el usuario ya dijo "Ahora no"
     if (!sessionStorage.getItem('installDeclined')) {
-        // MOSTRAR EL MODAL AUTOMÁTICAMENTE TRAS 2 SEGUNDOS
         setTimeout(() => {
             if(installModal) installModal.style.display = 'flex';
         }, 2000); 
     }
 });
 
-// Click en "INSTALAR AHORA"
 if(btnYes) {
     btnYes.addEventListener('click', async () => {
         if(installModal) installModal.style.display = 'none';
@@ -1133,21 +1113,18 @@ if(btnYes) {
         if (deferredPrompt) {
             deferredPrompt.prompt(); 
             const { outcome } = await deferredPrompt.userChoice;
-            console.log(`Usuario eligió: ${outcome}`);
             deferredPrompt = null;
         }
     });
 }
 
-// Click en "Ahora no"
 if(btnNo) {
     btnNo.addEventListener('click', () => {
         if(installModal) installModal.style.display = 'none';
-        sessionStorage.setItem('installDeclined', 'true'); // Guardar elección
+        sessionStorage.setItem('installDeclined', 'true'); 
     });
 }
 
-// Si ya se instaló
 window.addEventListener('appinstalled', () => {
     if(installModal) installModal.style.display = 'none';
     showToast('🎉 ¡App instalada con éxito!', 'success');
