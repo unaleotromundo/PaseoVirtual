@@ -84,19 +84,22 @@ function createRipple(event, element) {
 function getPhotoUrl(id, w = 400, h = 400) {
     if(!id) return 'https://via.placeholder.com/400?text=No+Foto';
     
-    // Si es un enlace de internet (http/https)
+    // Si es un enlace completo de internet (http/https)
     if(id.startsWith('http')) {
         return id;
     }
-    // Si contiene puntos (extensión) o prefijos conocidos, es de Supabase o local
-    if (id.includes('perfil_') || id.includes('walk_') || id.includes('.')) { 
-       if(id.includes('.')) {
-           return id; // Archivo local
-       }
-       // Construir URL pública de Supabase
-       return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
+    
+    // Si contiene prefijos de Supabase Storage (perfil_ o walk_), construir URL de Supabase
+    if (id.includes('perfil_') || id.includes('walk_')) { 
+        return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
     }
-    // Si es un ID simple, asumimos Unsplash (para datos de ejemplo)
+    
+    // Si es una ruta local completa (empieza con ./ o / o contiene extensión pero no es de Supabase)
+    if (id.startsWith('./') || id.startsWith('/') || (id.includes('.') && !id.includes('perfil_') && !id.includes('walk_'))) {
+        return id;
+    }
+    
+    // Si es un ID simple (números), asumimos que es de Unsplash (para datos de ejemplo)
     return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
 }
 
