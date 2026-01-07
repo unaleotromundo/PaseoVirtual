@@ -960,6 +960,37 @@ window.addEventListener('appinstalled', () => {
     if(installModal) installModal.style.display = 'none';
     showToast('🎉 ¡App instalada con éxito!', 'success');
 });
+
+// ==========================================
+// 15. ESTILOS CSS ADICIONALES
+// ==========================================
+
+// Agregar estilos dinámicamente para el botón de eliminar
+const additionalStyles = document.createElement('style');
+additionalStyles.textContent = `
+    .dog-card button { 
+        width: auto; 
+        margin: 0; 
+    }
+    
+    .dog-card-delete-btn { 
+        transition: all 0.2s ease; 
+        font-size: 1.2rem;
+    }
+    
+    .dog-card-delete-btn:hover { 
+        background-color: #dc2626 !important; 
+        transform: scale(1.05); 
+        box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3); 
+    }
+
+    .dog-card > div:last-child {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+`;
+document.head.appendChild(additionalStyles);
                 showView('admin-dashboard-section');
             } else {
                 showView('login-section');
