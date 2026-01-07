@@ -359,7 +359,7 @@ if (themeToggle) {
         createRipple(e, themeToggle);
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        themeToggle.textContent = isDark ? '🕐🦺' : '🩶';
+        themeToggle.textContent = isDark ? '🐕‍🦺' : '🐩';
     };
 }
 
@@ -535,68 +535,6 @@ async function loadAdminDashboard() {
     });
 }
 
-// Función para generar email único basado en nombre del perro
-async function generateUniqueEmail(dogName) {
-    if (!supabaseClient) throw new Error("Sin conexión a base de datos");
-    
-    // Limpiar nombre: minúsculas, sin espacios, sin caracteres especiales
-    const cleanName = dogName.toLowerCase()
-        .trim()
-        .replace(/\s+/g, '')
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quitar acentos
-        .replace(/[^a-z0-9]/g, ''); // solo letras y números
-    
-    if (!cleanName) throw new Error("Nombre inválido");
-    
-    // Verificar si el email base ya existe
-    let baseEmail = `${cleanName}@paseos.com`;
-    let finalEmail = baseEmail;
-    let counter = 1;
-    
-    // Buscar en la base de datos si existe
-    while (true) {
-        const { data, error } = await supabaseClient
-            .from('dogs_real')
-            .select('dueno_email')
-            .eq('dueno_email', finalEmail)
-            .single();
-        
-        // Si no existe (error PGRST116), usamos este email
-        if (error && error.code === 'PGRST116') {
-            break;
-        }
-        
-        // Si existe, probar con número
-        if (data) {
-            finalEmail = `${cleanName}${counter}@paseos.com`;
-            counter++;
-        } else {
-            break;
-        }
-    }
-    
-    return finalEmail;
-}
-
-// Función para crear usuario en Supabase Auth
-async function createAuthUser(email, password = '123456') {
-    if (!supabaseClient) throw new Error("Sin conexión a base de datos");
-    
-    const { data, error } = await supabaseClient.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-            emailRedirectTo: window.location.origin,
-            data: {
-                user_type: 'dog_owner'
-            }
-        }
-    });
-    
-    if (error) throw error;
-    return data;
-}
-
 document.getElementById('create-dog-form').onsubmit = async (e) => {
     e.preventDefault();
     if (!supabaseClient) {
@@ -608,30 +546,11 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
     if(submitBtn.disabled) return;
     
     submitBtn.disabled = true;
-    submitBtn.textContent = '⏳ Creando usuario y registrando...';
     
     try {
-        const dogName = document.getElementById('new-dog-name').value;
-        
-        // 1. Generar email único basado en nombre del perro
-        const generatedEmail = await generateUniqueEmail(dogName);
-        
-        // 2. Crear usuario en Authentication
-        try {
-            await createAuthUser(generatedEmail, '123456');
-            showToast(`✅ Usuario creado: ${generatedEmail}`, 'success');
-        } catch (authError) {
-            // Si el usuario ya existe en Auth pero no en la DB, continuar
-            if (!authError.message.includes('already registered')) {
-                throw authError;
-            }
-            console.log('Usuario ya existe en Auth, continuando...');
-        }
-        
-        // 3. Crear registro del perro
         const nd = {
-            nombre: dogName,
-            dueno_email: generatedEmail,
+            nombre: document.getElementById('new-dog-name').value,
+            dueno_email: document.getElementById('new-dog-email').value.toLowerCase(),
             perfil: {
                 raza: document.getElementById('new-dog-breed').value,
                 sexo: document.getElementById('new-dog-sex').value,
@@ -642,19 +561,14 @@ document.getElementById('create-dog-form').onsubmit = async (e) => {
             },
             walks: []
         };
-        
         await saveRealDog(nd);
-        showToast(`✅ Perro registrado con éxito`, 'success');
-        showToast(`🔑 Credenciales: ${generatedEmail} / 123456`, 'info');
-        
+        showToast('✅ Perro registrado con éxito', 'success');
         document.getElementById('create-dog-form').reset();
         showView('admin-dashboard-section');
     } catch (err) {
-        console.error('Error completo:', err);
         showToast('❌ Error: ' + (err.message || 'Desconocido'), 'error');
     } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = '💾 Guardar en Base de Datos';
     }
 };
 
@@ -916,7 +830,7 @@ function loadHistory(d) {
             <div class="walk-details">
                 <div class="walk-metrics">
                     <span>⏱️ ${w.duracion_minutos} min</span>
-                    <span>📍 ${w.distancia_km} km</span>
+                    <span>📏 ${w.distancia_km} km</span>
                     <span>📸 ${(w.fotos||[]).length} fotos</span>
                 </div>
                 <p><strong>Resumen:</strong> ${w.resumen_diario}</p>
