@@ -359,7 +359,7 @@ if (themeToggle) {
         createRipple(e, themeToggle);
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        themeToggle.textContent = isDark ? '🕐🦺' : '🩶';
+        themeToggle.textContent = isDark ? '🐕‍🦺' : '🐩';
     };
 }
 
@@ -438,6 +438,175 @@ function goBack() {
             break;
         case 'dog-selection-dashboard':
             if (currentUser && currentUser.isAdmin) {
+                showView('admin-dashboard-section');
+            } else {
+                showView('login-section');
+            }
+            break;
+        case 'admin-dashboard-section':
+            showView('login-section');
+            break;
+        default:
+            showView('login-section');
+            break;
+    }
+}
+
+function playWelcomeSound() {
+    if (!isAudioEnabled || hasPlayedWelcome) return;
+    hasPlayedWelcome = true;
+    const o = audioContext.createOscillator();
+    const g = audioContext.createGain();
+    o.connect(g);
+    g.connect(audioContext.destination);
+    o.frequency.value = 660;
+    g.gain.setValueAtTime(0.05, audioContext.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+    o.start();
+    o.stop(audioContext.currentTime + 0.3);
+}
+
+// ==========================================
+// 8. LOGIN Y REGISTRO
+// ==========================================
+
+document.getElementById('toggle-password').onclick = () => {
+    const p = document.getElementById('password');
+    p.type = p.type === 'password' ? 'text' : 'password';
+};
+
+document.getElementById('login-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const em = document.getElementById('email').value.toLowerCase();
+    const pw = document.getElementById('password').value;
+    
+    const allDogs = await loadAllDogs();
+
+    if(em === ADMIN_USER.email && pw === ADMIN_USER.password){
+        currentUser = { email: em, isAdmin: true };
+        document.body.classList.add('user-logged-in'); 
+        showView('admin-dashboard-section');
+    } else {
+        const d = allDogs.find(x => x.dueno_email === em);
+        if(d && pw === '123456'){
+            currentUser = { email: em, isAdmin: false };
+            currentDog = d;
+            document.body.classList.add('user-logged-in');
+            showView('dog-selection-dashboard');
+        } else {
+            showToast('Credenciales incorrectas', 'error');
+        }
+    }
+};
+
+// ==========================================
+// 9. ADMIN DASHBOARD Y CREAR PERRO
+// ==========================================
+
+async function loadAdminDashboard() {
+    const allDogs = await loadAllDogs();
+    const c = document.getElementById('dog-list-container');
+    c.innerHTML = '';
+    const statusText = document.getElementById('demo-status-text');
+    if(statusText) statusText.textContent = `${allDogs.length} perros en sistema`;
+    
+    if(!allDogs.length) return c.innerHTML = '<p class="info-text">Sin perros registrados.</p>';
+    
+    allDogs.forEach((d, i) => {
+        const suffix = d.isExample ? ' (ejemplo)' : '';
+        const photoUrl = getPhotoUrl(d.perfil.foto_id, 60, 60);
+
+        const card = document.createElement('div');
+        card.className = 'dog-card';
+        card.style.setProperty('--i', i);
+
+        card.innerHTML = `
+            <div style="display:flex; align-items:center;">
+                <img src="${photoUrl}" class="dog-list-thumb" alt="${d.nombre}" onerror="this.src='https://via.placeholder.com/50?text=🐶'">
+                <div>
+                    <strong style="font-size:1.1rem; display:block; line-height:1.2;">${d.nombre}</strong>
+                    <small style="color:var(--text-secondary)">${d.perfil.raza}${suffix}</small>
+                </div>
+            </div>
+            <button class="ripple" onclick="showView('dog-selection-dashboard', '${d.id}')">Gestionar</button>
+        `;
+        c.appendChild(card);
+        card.querySelector('button').addEventListener('click', (e) => createRipple(e));
+    });
+}
+
+document.getElementById('create-dog-form').onsubmit = async (e) => {
+    e.preventDefault();
+    if (!supabaseClient) {
+        showToast('❌ Error: No hay conexión con la base de datos.', 'error');
+        return;
+    }
+
+    const submitBtn = document.querySelector('#create-dog-form .save-btn');
+    if(submitBtn.disabled) return;
+    
+    submitBtn.disabled = true;
+    
+    try {
+        const nd = {
+            nombre: document.getElementById('new-dog-name').value,
+            dueno_email: document.getElementById('new-dog-email').value.toLowerCase(),
+            perfil: {
+                raza: document.getElementById('new-dog-breed').value,
+                sexo: document.getElementById('new-dog-sex').value,
+                dueno: document.getElementById('new-dog-owner').value,
+                telefono: document.getElementById('new-dog-phone').value,
+                foto_id: '1581268694', 
+                edad: '?', peso: '?', alergias: 'Ninguna', energia: 'Media', social: '?'
+            },
+            walks: []
+        };
+        await saveRealDog(nd);
+        showToast('✅ Perro registrado con éxito', 'success');
+        document.getElementById('create-dog-form').reset();
+        showView('admin-dashboard-section');
+    } catch (err) {
+        showToast('❌ Error: ' + (err.message || 'Desconocido'), 'error');
+    } finally {
+        submitBtn.disabled = false;
+    }
+};
+
+// ==========================================
+// 10. PERFIL Y EDICIÓN
+// ==========================================
+
+function loadProfile(d) {
+    const p = d.perfil;
+    let photoSrc = getPhotoUrl(p.foto_id, 300, 300);
+    
+    document.getElementById('profile-photo').src = photoSrc;
+    document.getElementById('profile-dog-name-display').textContent = d.nombre;
+    
+    const canEdit = currentUser?.isAdmin && !d.isExample;
+    document.getElementById('edit-photo-btn').style.display = (isEditing && canEdit) ? 'block' : 'none';
+    
+    const toggleBtn = document.getElementById('toggle-edit-btn');
+    if (!canEdit) {
+        toggleBtn.style.display = 'none';
+    } else {
+        toggleBtn.style.display = 'block';
+        toggleBtn.textContent = isEditing ? '❌ Cancelar' : '✏️ Editar Perfil';
+    }
+    
+    const v = document.getElementById('profile-details-view');
+    
+    if (isEditing && !d.isExample) {
+        v.innerHTML = `<form id="profile-edit-form"></form>`;
+        const form = document.getElementById('profile-edit-form');
+        const fields = ['raza','edad','sexo','peso','alergias','dueno','telefono','energia','social'];
+        fields.forEach(k => {
+            form.innerHTML += `<label>${k.charAt(0).toUpperCase() + k.slice(1)}</label>
+                              <input type="text" name="${k}" value="${p[k] || ''}">`;
+        });
+        form.innerHTML += '<button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>';
+        
+        if (currentUser && currentUser.isAdmin) {
             form.innerHTML += `
                 <div style="margin-top: 30px; border-top: 2px dashed var(--danger-light); padding-top: 20px;">
                     <p style="color:var(--text-secondary); text-align:center; font-size:0.85rem; margin-bottom:10px;">Zona de Peligro</p>
@@ -661,7 +830,7 @@ function loadHistory(d) {
             <div class="walk-details">
                 <div class="walk-metrics">
                     <span>⏱️ ${w.duracion_minutos} min</span>
-                    <span>📍 ${w.distancia_km} km</span>
+                    <span>📏 ${w.distancia_km} km</span>
                     <span>📸 ${(w.fotos||[]).length} fotos</span>
                 </div>
                 <p><strong>Resumen:</strong> ${w.resumen_diario}</p>
@@ -960,334 +1129,3 @@ window.addEventListener('appinstalled', () => {
     if(installModal) installModal.style.display = 'none';
     showToast('🎉 ¡App instalada con éxito!', 'success');
 });
-
-// ==========================================
-// 15. ESTILOS CSS ADICIONALES
-// ==========================================
-
-// Agregar estilos dinámicamente para el botón de eliminar
-const additionalStyles = document.createElement('style');
-additionalStyles.textContent = `
-    .dog-card button { 
-        width: auto; 
-        margin: 0; 
-    }
-    
-    .dog-card-delete-btn { 
-        transition: all 0.2s ease; 
-        font-size: 1.2rem;
-    }
-    
-    .dog-card-delete-btn:hover { 
-        background-color: #dc2626 !important; 
-        transform: scale(1.05); 
-        box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3); 
-    }
-
-    .dog-card > div:last-child {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-    }
-`;
-document.head.appendChild(additionalStyles);
-                showView('admin-dashboard-section');
-            } else {
-                showView('login-section');
-            }
-            break;
-        case 'admin-dashboard-section':
-            showView('login-section');
-            break;
-        default:
-            showView('login-section');
-            break;
-    }
-}
-
-function playWelcomeSound() {
-    if (!isAudioEnabled || hasPlayedWelcome) return;
-    hasPlayedWelcome = true;
-    const o = audioContext.createOscillator();
-    const g = audioContext.createGain();
-    o.connect(g);
-    g.connect(audioContext.destination);
-    o.frequency.value = 660;
-    g.gain.setValueAtTime(0.05, audioContext.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
-    o.start();
-    o.stop(audioContext.currentTime + 0.3);
-}
-
-// ==========================================
-// 8. LOGIN Y REGISTRO
-// ==========================================
-
-document.getElementById('toggle-password').onclick = () => {
-    const p = document.getElementById('password');
-    p.type = p.type === 'password' ? 'text' : 'password';
-};
-
-document.getElementById('login-form').onsubmit = async (e) => {
-    e.preventDefault();
-    const em = document.getElementById('email').value.toLowerCase();
-    const pw = document.getElementById('password').value;
-    
-    const allDogs = await loadAllDogs();
-
-    if(em === ADMIN_USER.email && pw === ADMIN_USER.password){
-        currentUser = { email: em, isAdmin: true };
-        document.body.classList.add('user-logged-in'); 
-        showView('admin-dashboard-section');
-    } else {
-        const d = allDogs.find(x => x.dueno_email === em);
-        if(d && pw === '123456'){
-            currentUser = { email: em, isAdmin: false };
-            currentDog = d;
-            document.body.classList.add('user-logged-in');
-            showView('dog-selection-dashboard');
-        } else {
-            showToast('Credenciales incorrectas', 'error');
-        }
-    }
-};
-
-// ==========================================
-// 9. ADMIN DASHBOARD Y CREAR PERRO
-// ==========================================
-
-async function loadAdminDashboard() {
-    const allDogs = await loadAllDogs();
-    const c = document.getElementById('dog-list-container');
-    c.innerHTML = '';
-    const statusText = document.getElementById('demo-status-text');
-    if(statusText) statusText.textContent = `${allDogs.length} perros en sistema`;
-    
-    if(!allDogs.length) return c.innerHTML = '<p class="info-text">Sin perros registrados.</p>';
-    
-    allDogs.forEach((d, i) => {
-        const suffix = d.isExample ? ' (ejemplo)' : '';
-        const photoUrl = getPhotoUrl(d.perfil.foto_id, 60, 60);
-
-        const card = document.createElement('div');
-        card.className = 'dog-card';
-        card.style.setProperty('--i', i);
-
-        // Botones: Gestionar y Eliminar (solo para perros reales)
-        const deleteBtn = d.isExample ? '' : `
-            <button class="ripple dog-card-delete-btn" onclick="deleteDogFromDashboard('${d.id}', '${d.nombre}')" style="background-color: var(--danger); color: white; padding: 10px 16px; margin-left: 8px;">
-                🗑️
-            </button>
-        `;
-
-        card.innerHTML = `
-            <div style="display:flex; align-items:center;">
-                <img src="${photoUrl}" class="dog-list-thumb" alt="${d.nombre}" onerror="this.src='https://via.placeholder.com/50?text=🐶'">
-                <div>
-                    <strong style="font-size:1.1rem; display:block; line-height:1.2;">${d.nombre}</strong>
-                    <small style="color:var(--text-secondary)">${d.perfil.raza}${suffix}</small>
-                </div>
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <button class="ripple" onclick="showView('dog-selection-dashboard', '${d.id}')">Gestionar</button>
-                ${deleteBtn}
-            </div>
-        `;
-        c.appendChild(card);
-        card.querySelectorAll('button').forEach(btn => btn.addEventListener('click', (e) => createRipple(e, btn)));
-    });
-}
-
-// Función para eliminar perro desde el dashboard
-window.deleteDogFromDashboard = async (dogId, dogName) => {
-    // Primera confirmación
-    const c1 = confirm(`⚠️ ¿Estás seguro de eliminar a ${dogName}?\n\nSe borrará:\n• Su perfil completo\n• Todo su historial de paseos\n• Todas sus fotos\n\nEsta acción NO se puede deshacer.`);
-    if (!c1) return;
-
-    // Segunda confirmación (más seria)
-    const c2 = confirm(`🔴 ÚLTIMA ADVERTENCIA 🔴\n\n¿REALMENTE quieres ELIMINAR PERMANENTEMENTE a ${dogName}?\n\nEscribe mentalmente "SÍ" para confirmar.\n\nNo hay vuelta atrás.`);
-    if (!c2) return;
-
-    try {
-        if (!supabaseClient) throw new Error("Sin conexión a base de datos");
-
-        // Eliminar de Supabase
-        const { error } = await supabaseClient
-            .from('dogs_real')
-            .delete()
-            .eq('id', dogId);
-        
-        if (error) throw error;
-
-        // Actualizar estado local
-        REAL_DOGS = REAL_DOGS.filter(d => d.id !== dogId);
-        
-        showToast(`🗑️ ${dogName} ha sido eliminado del sistema`, 'success');
-        
-        // Recargar el dashboard
-        await loadAdminDashboard();
-
-    } catch (err) {
-        console.error('Error eliminando perro:', err);
-        showToast('❌ Error: ' + err.message, 'error');
-    }
-};
-
-// Función para generar email único basado en nombre del perro
-async function generateUniqueEmail(dogName) {
-    if (!supabaseClient) throw new Error("Sin conexión a base de datos");
-    
-    // Limpiar nombre: minúsculas, sin espacios, sin caracteres especiales
-    const cleanName = dogName.toLowerCase()
-        .trim()
-        .replace(/\s+/g, '')
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quitar acentos
-        .replace(/[^a-z0-9]/g, ''); // solo letras y números
-    
-    if (!cleanName) throw new Error("Nombre inválido");
-    
-    // Verificar si el email base ya existe
-    let baseEmail = `${cleanName}@paseos.com`;
-    let finalEmail = baseEmail;
-    let counter = 1;
-    
-    // Buscar en la base de datos si existe
-    while (true) {
-        const { data, error } = await supabaseClient
-            .from('dogs_real')
-            .select('dueno_email')
-            .eq('dueno_email', finalEmail)
-            .single();
-        
-        // Si no existe (error PGRST116), usamos este email
-        if (error && error.code === 'PGRST116') {
-            break;
-        }
-        
-        // Si existe, probar con número
-        if (data) {
-            finalEmail = `${cleanName}${counter}@paseos.com`;
-            counter++;
-        } else {
-            break;
-        }
-    }
-    
-    return finalEmail;
-}
-
-// Función para crear usuario en Supabase Auth
-async function createAuthUser(email, password = '123456') {
-    if (!supabaseClient) throw new Error("Sin conexión a base de datos");
-    
-    const { data, error } = await supabaseClient.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-            emailRedirectTo: window.location.origin,
-            data: {
-                user_type: 'dog_owner'
-            }
-        }
-    });
-    
-    if (error) throw error;
-    return data;
-}
-
-document.getElementById('create-dog-form').onsubmit = async (e) => {
-    e.preventDefault();
-    if (!supabaseClient) {
-        showToast('❌ Error: No hay conexión con la base de datos.', 'error');
-        return;
-    }
-
-    const submitBtn = document.querySelector('#create-dog-form .save-btn');
-    if(submitBtn.disabled) return;
-    
-    submitBtn.disabled = true;
-    submitBtn.textContent = '⏳ Creando usuario y registrando...';
-    
-    try {
-        const dogName = document.getElementById('new-dog-name').value;
-        
-        // 1. Generar email único basado en nombre del perro
-        const generatedEmail = await generateUniqueEmail(dogName);
-        
-        // 2. Crear usuario en Authentication
-        try {
-            await createAuthUser(generatedEmail, '123456');
-            showToast(`✅ Usuario creado: ${generatedEmail}`, 'success');
-        } catch (authError) {
-            // Si el usuario ya existe en Auth pero no en la DB, continuar
-            if (!authError.message.includes('already registered')) {
-                throw authError;
-            }
-            console.log('Usuario ya existe en Auth, continuando...');
-        }
-        
-        // 3. Crear registro del perro
-        const nd = {
-            nombre: dogName,
-            dueno_email: generatedEmail,
-            perfil: {
-                raza: document.getElementById('new-dog-breed').value,
-                sexo: document.getElementById('new-dog-sex').value,
-                dueno: document.getElementById('new-dog-owner').value,
-                telefono: document.getElementById('new-dog-phone').value,
-                foto_id: '1581268694', 
-                edad: '?', peso: '?', alergias: 'Ninguna', energia: 'Media', social: '?'
-            },
-            walks: []
-        };
-        
-        await saveRealDog(nd);
-        showToast(`✅ Perro registrado con éxito`, 'success');
-        showToast(`🔑 Credenciales: ${generatedEmail} / 123456`, 'info');
-        
-        document.getElementById('create-dog-form').reset();
-        showView('admin-dashboard-section');
-    } catch (err) {
-        console.error('Error completo:', err);
-        showToast('❌ Error: ' + (err.message || 'Desconocido'), 'error');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = '💾 Guardar en Base de Datos';
-    }
-};
-
-// ==========================================
-// 10. PERFIL Y EDICIÓN
-// ==========================================
-
-function loadProfile(d) {
-    const p = d.perfil;
-    let photoSrc = getPhotoUrl(p.foto_id, 300, 300);
-    
-    document.getElementById('profile-photo').src = photoSrc;
-    document.getElementById('profile-dog-name-display').textContent = d.nombre;
-    
-    const canEdit = currentUser?.isAdmin && !d.isExample;
-    document.getElementById('edit-photo-btn').style.display = (isEditing && canEdit) ? 'block' : 'none';
-    
-    const toggleBtn = document.getElementById('toggle-edit-btn');
-    if (!canEdit) {
-        toggleBtn.style.display = 'none';
-    } else {
-        toggleBtn.style.display = 'block';
-        toggleBtn.textContent = isEditing ? '❌ Cancelar' : '✏️ Editar Perfil';
-    }
-    
-    const v = document.getElementById('profile-details-view');
-    
-    if (isEditing && !d.isExample) {
-        v.innerHTML = `<form id="profile-edit-form"></form>`;
-        const form = document.getElementById('profile-edit-form');
-        const fields = ['raza','edad','sexo','peso','alergias','dueno','telefono','energia','social'];
-        fields.forEach(k => {
-            form.innerHTML += `<label>${k.charAt(0).toUpperCase() + k.slice(1)}</label>
-                              <input type="text" name="${k}" value="${p[k] || ''}">`;
-        });
-        form.innerHTML += '<button type="submit" class="save-btn ripple">💾 Guardar Cambios</button>';
-        
-        if (currentUser && currentUser.isAdmin) {
