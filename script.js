@@ -42,7 +42,7 @@ const FALLBACK_DB = {
     "admin": { "email": "admin@paseos.com", "password": "admin123" }
 };
 const DB_URL = 'paseoDogDB.json';
-let TRAINER_PHONE = "5491100000000";
+let TRAINER_PHONE = "59896921960";
 let ADMIN_USER = { email: 'admin@paseos.com', password: 'admin123' };
 let EXAMPLE_DOGS = [];
 let REAL_DOGS = [];
