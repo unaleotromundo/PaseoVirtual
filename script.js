@@ -133,7 +133,7 @@ function processLoadedData(data) {
             isExample: true
         };
     });
-    TRAINER_PHONE = data.trainer_phone || "5491100000000";
+    TRAINER_PHONE = data.trainer_phone || "59896921960";
     if(data.admin) ADMIN_USER = data.admin;
     DATABASE = data;
 }
