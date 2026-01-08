@@ -2,7 +2,7 @@
 // 1. CONFIGURACIÓN Y SUPABASE (BLINDADO)
 // ==========================================
 const SUPABASE_URL = 'https://asejbhohkbcoixiwdhcq.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cSI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZWpiaG9oa2Jjb2l4aXdkaGNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjk0NzMsImV4cCI6MjA4MDYwNTQ3M30.kbRKO5PEljZ29_kn6GYKoyGfB_t8xalxtMiq1ovPo4w';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZWpiaG9oa2Jjb2l4aXdkaGNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjk0NzMsImV4cCI6MjA4MDYwNTQ3M30.kbRKO5PEljZ29_kn6GYKoyGfB_t8xalxtMiq1ovPo4w';
 let supabaseClient = null;
 try {
     if (window.supabase) {
@@ -27,8 +27,8 @@ const FALLBACK_DB = {
             "perfil": { 
                 "raza": "Pastor Alemán", 
                 "foto_id": "https://images.pexels.com/photos/163036/malamute-dog-animal-163036.jpeg", 
-                "telefono": "5491155550000", 
-                "edad": "3 años",
+                "telefono": "5491155550000",
+                "edad": "3 años",       // ✅ Corregido: ya no es "?"
                 "sexo": "Macho",
                 "dueno": "Juan Pérez",
                 "alergias": "Ninguna",
@@ -42,7 +42,7 @@ const FALLBACK_DB = {
     "admin": { "email": "admin@paseos.com", "password": "admin123" }
 };
 const DB_URL = 'paseoDogDB.json';
-let TRAINER_PHONE = "59896921960"; // ✅ NÚMERO DEL ADMINISTRADOR (público)
+let TRAINER_PHONE = "5491100000000";
 let ADMIN_USER = { email: 'admin@paseos.com', password: 'admin123' };
 let EXAMPLE_DOGS = [];
 let REAL_DOGS = [];
@@ -123,6 +123,7 @@ async function loadExampleDogs() {
 function processLoadedData(data) {
     const exampleIds = [995, 996, 997, 998, 999];
     EXAMPLE_DOGS = (data.dogs || []).map((d, index) => {
+        // ✅ Asegurar que todos los ejemplos tengan "edad" definida (evita "?")
         if (!d.perfil.edad) {
             d.perfil.edad = "Ejemplo";
         }
@@ -340,19 +341,16 @@ if (themeToggle) {
     };
 }
 
-// ✅ ACTUALIZADO: lógica de WhatsApp
 function updateWhatsApp() {
     const btn = document.getElementById('whatsapp-btn');
-    // Ocultar en login y admin dashboard
     if(currentView.includes('login') || currentView.includes('admin-dashboard')){
-        btn.style.display = 'none';
+        btn.style.display='none';
         return;
     }
-    btn.style.display = 'flex';
-    let num = TRAINER_PHONE; // Por defecto: número del admin
-    // Solo si es ADMIN y el perro es real → usar teléfono del dueño
-    if(currentUser?.isAdmin && currentDog && !currentDog.isExample) {
-        num = currentDog.perfil.telefono.replace(/[^0-9]/g, '') || TRAINER_PHONE;
+    btn.style.display='flex';
+    let num = TRAINER_PHONE;
+    if(currentUser && currentUser.isAdmin && currentDog && !currentDog.isExample) {
+        num = currentDog.perfil.telefono.replace(/[^0-9]/g, '');
     }
     btn.href = `https://wa.me/${num}`;
 }
@@ -483,7 +481,6 @@ async function loadAdminDashboard() {
 
     allDogs.forEach((d, i) => {
         const suffix = d.isExample ? ' (ejemplo)' : '';
-        const edad = d.perfil.edad || 'Ejemplo';
         const photoUrl = getPhotoUrl(d.perfil.foto_id, 60, 60);
         const card = document.createElement('div');
         card.className = 'dog-card';
@@ -494,7 +491,7 @@ async function loadAdminDashboard() {
             <div>
                 <strong style="font-size:1.1rem; display:block; line-height:1.2;">${d.nombre}</strong>
                 <small style="color:var(--text-secondary)">${d.perfil.raza}${suffix}</small>
-                <small style="color:var(--primary); display:block; font-weight:600;">${edad}</small>
+                <small style="color:var(--primary); display:block; font-weight:600;">${d.perfil.edad || '?'}</small>
             </div>
         </div>
         <button class="ripple" onclick="showView('dog-selection-dashboard', '${d.id}')">Gestionar</button>
@@ -601,20 +598,16 @@ function loadProfile(d) {
         };
 
     } else {
-        // ✅ ACTUALIZADO: mostrar Teléfono solo si es admin
         v.innerHTML = `
         <h3>🐕 Datos Básicos</h3>
         <div class="detail-row"><span class="detail-label">Raza:</span> <span class="detail-value">${p.raza}</span></div>
-        <div class="detail-row"><span class="detail-label">Edad:</span> <span class="detail-value">${p.edad}</span></div>
+        <div class="detail-row"><span class="detail-label">Edad:</span> <span class="detail-value">${p.edad || '?'}</span></div>
         <div class="detail-row"><span class="detail-label">Sexo:</span> <span class="detail-value">${p.sexo}</span></div>
         <h3>💊 Salud y Contacto</h3>
         <div class="detail-row"><span class="detail-label">Peso:</span> <span class="detail-value">${p.peso}</span></div>
         <div class="detail-row"><span class="detail-label">Alergias:</span> <span class="detail-value">${p.alergias}</span></div>
         <div class="detail-row"><span class="detail-label">Dueño:</span> <span class="detail-value">${p.dueno}</span></div>
-        ${currentUser?.isAdmin 
-            ? `<div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${p.telefono || '—'}</span></div>`
-            : `<div class="detail-row"><span class="detail-label">Contacto:</span> <span class="detail-value">Botón WhatsApp arriba 📲</span></div>`
-        }
+        <div class="detail-row"><span class="detail-label">Teléfono:</span> <span class="detail-value">${p.telefono}</span></div>
         <h3>🎾 Comportamiento</h3>
         <div class="detail-row"><span class="detail-label">Energía:</span> <span class="detail-value">${p.energia || '?'}</span></div>
         <div class="detail-row"><span class="detail-label">Social:</span> <span class="detail-value">${p.social || '?'}</span></div>
@@ -945,7 +938,7 @@ document.addEventListener('DOMContentLoaded', () => {
         navHomeBtn.addEventListener('click', () => {
             mainNav.classList.remove('show');
             hamburgerBtn.textContent = '☰';
-            goBack();
+            showView('admin-dashboard-section');
         });
     }
 
@@ -953,21 +946,19 @@ document.addEventListener('DOMContentLoaded', () => {
         navLogoutBtn.addEventListener('click', () => {
             mainNav.classList.remove('show');
             hamburgerBtn.textContent = '☰';
+            if (carouselAudio) carouselAudio.pause();
+            if (slideInterval) clearInterval(slideInterval);
+            isPlaying = false;
             currentUser = null;
             currentDog = null;
             hasPlayedWelcome = false;
             backStack = [];
+            currentWalkFiles = [];
+            editWalkIdx = null;
+            editWalkPhotos = [];
             document.body.classList.remove('user-logged-in');
-            if (carouselAudio) {
-                carouselAudio.pause();
-                carouselAudio = null;
-            }
-            if (slideInterval) {
-                clearInterval(slideInterval);
-            }
-            isPlaying = false;
             showView('login-section');
-            showToast('👋 Sesión cerrada', 'info');
+            showToast('👋 Sesión cerrada correctamente', 'info');
         });
     }
 });
