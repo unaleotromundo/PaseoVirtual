@@ -214,7 +214,7 @@ return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${
 }
 
 // ==========================================
-// 5. CARGA DE DATOS
+// 5. CARGA DE DATOS + MIGRACIÓN AUTOMÁTICA
 // ==========================================
 async function loadExampleDogs() {
 try {
@@ -247,7 +247,7 @@ return data.map(d => ({ ...d, isReal: true }));
 async function migrateLegacyAgeFields(dogs) {
     for (const dog of dogs) {
         if (dog.isExample || !dog.perfil || dog.perfil.fecha_nacimiento) continue;
-        const possibleDate = parseAgeInput(dog.perfil.edad);
+        const possibleDate = parseAgeInput(dog.perifestring === 'string' ? dog.perfil.edad : '');
         if (possibleDate) {
             const updatedPerfil = {
                 ...dog.perfil,
@@ -270,7 +270,6 @@ async function migrateLegacyAgeFields(dogs) {
 async function loadAllDogs() {
 const reals = await loadRealDogs();
 REAL_DOGS = reals;
-// Ejecutar migración una sola vez
 await migrateLegacyAgeFields(reals);
 return [...EXAMPLE_DOGS, ...reals];
 }
@@ -293,11 +292,8 @@ if (error) throw error;
 }
 
 // ==========================================
-// 6. GESTIÓN DE FOTOS, AUDIO, UI, LOGIN, ETC. (IGUAL QUE TU ORIGINAL)
+// 6. RESTO DE FUNCIONES (IGUALES A TU ORIGINAL)
 // ==========================================
-// (Todas las funciones siguientes permanecen IGUALES a tu script original,
-// pero con los campos de edad actualizados donde corresponde)
-
 async function uploadProfilePhoto(file) {
 if (!supabaseClient) { showToast('❌ Error de conexión con la base de datos', 'error'); return; }
 if (!currentDog || currentDog.isExample) { showToast('ℹ️ Los perros de ejemplo no se guardan en la nube.', 'info'); return; }
@@ -504,7 +500,7 @@ showToast('Credenciales incorrectas', 'error');
 };
 
 // ==========================================
-// 7. ADMIN DASHBOARD (ACTUALIZADO CON CUMPLEAÑOS)
+// 7. ADMIN DASHBOARD (CON CUMPLEAÑOS)
 // ==========================================
 async function loadAdminDashboard() {
 const allDogs = await loadAllDogs();
@@ -757,10 +753,6 @@ showToast('❌ Error: ' + err.message, 'error');
 // ==========================================
 // 10. RESTO DE FUNCIONES (CREAR PASEO, HISTORIAL, ETC.)
 // ==========================================
-// (Estas funciones permanecen IGUALES a tu script original, ya que no tocan el campo "edad")
-// [Incluye aquí todas las funciones: renderWalkPreview, loadMultiDog, walk-form onsubmit,
-// loadHistory, openLightbox, openEditWalk, delWalk, DOMContentLoaded, onload, PWA, etc.]
-
 function renderWalkPreview() {
 const container = document.getElementById('photo-preview');
 container.innerHTML = '';
