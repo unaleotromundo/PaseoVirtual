@@ -16,22 +16,41 @@ console.error('❌ Error crítico inicializando Supabase:', err);
 }
 
 // ==========================================
-// 2. FUNCIONES DE EDAD INTELIGENTE (NUEVO BLOQUE)
+// 2. FUNCIONES DE EDAD INTELIGENTE (MEJORADA)
 // ==========================================
 
 /**
- * Parsea entrada de edad flexible y retorna fecha de nacimiento estimada
- * Acepta: "3 años", "4 meses", "2 años 5 meses", "20/07/2025", "2025-07-20"
+ * Parsea entrada de edad flexible: acepta "3 años", "20/07/2025", "26 de octubre 2025", etc.
  */
 function parseAgeInput(input) {
     if (!input) return null;
     
     const trimmed = input.trim().toLowerCase();
-    
-    // === PARSEO SEGURO DE FECHAS ===
+
+    // === 1. Fecha en texto natural: "26 de octubre 2025" ===
+    const monthsMap = {
+        'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3,
+        'mayo': 4, 'junio': 5, 'julio': 6, 'agosto': 7,
+        'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
+    };
+    const textDateMatch = trimmed.match(/^(\d{1,2})\s+de\s+([a-záéíóúñ]+)\s+de?\s+(\d{4})$/);
+    if (textDateMatch) {
+        const [, dayStr, monthName, yearStr] = textDateMatch;
+        const day = parseInt(dayStr, 10);
+        const year = parseInt(yearStr, 10);
+        const month = monthsMap[monthName];
+        if (month !== undefined && day >= 1 && day <= 31 && year > 1900 && year < 2100) {
+            const date = new Date(year, month, day);
+            if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
+                return date.toISOString().split('T')[0]; // YYYY-MM-DD
+            }
+        }
+    }
+
+    // === 2. Fechas estándar: DD/MM/YYYY o YYYY-MM-DD ===
     const datePatterns = [
-        /^(\d{4})-(\d{2})-(\d{2})$/,          // ISO: YYYY-MM-DD
-        /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/    // Regional: DD/MM/YYYY
+        /^(\d{4})-(\d{2})-(\d{2})$/,          // ISO
+        /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/    // Regional
     ];
     
     for (let pattern of datePatterns) {
@@ -55,15 +74,12 @@ function parseAgeInput(input) {
         }
     }
 
-    // === PARSEO DE EXPRESIONES RELATIVAS ===
+    // === 3. Expresiones relativas: "3 años", "5 meses" ===
     let totalMonths = 0;
-
     const yearsMatch = trimmed.match(/(\d+)\s*(año|anos|years?|a)/i);
     if (yearsMatch) totalMonths += parseInt(yearsMatch[1]) * 12;
-
     const monthsMatch = trimmed.match(/(\d+)\s*(mes|meses|months?|m)(?!i)/i);
     if (monthsMatch) totalMonths += parseInt(monthsMatch[1]);
-
     const weeksMatch = trimmed.match(/(\d+)\s*(semana|semanas|weeks?|w)/i);
     if (weeksMatch) totalMonths += Math.floor(parseInt(weeksMatch[1]) / 4);
 
@@ -81,35 +97,21 @@ function parseAgeInput(input) {
  */
 function calculateExactAge(birthDateString) {
     if (!birthDateString) return '?';
-    
     const birthDate = new Date(birthDateString);
     if (isNaN(birthDate.getTime())) return '?';
-    
     const today = new Date();
     let years = today.getFullYear() - birthDate.getFullYear();
     let months = today.getMonth() - birthDate.getMonth();
-
-    if (months < 0) {
-        years--;
-        months += 12;
-    }
+    if (months < 0) { years--; months += 12; }
     if (today.getDate() < birthDate.getDate()) {
         months--;
-        if (months < 0) {
-            years--;
-            months += 12;
-        }
+        if (months < 0) { years--; months += 12; }
     }
-
-    if (years === 0) {
-        return months === 1 ? '1 mes' : `${months} meses`;
-    } else if (months === 0) {
-        return years === 1 ? '1 año' : `${years} años`;
-    } else {
-        const yearText = years === 1 ? '1 año' : `${years} años`;
-        const monthText = months === 1 ? '1 mes' : `${months} meses`;
-        return `${yearText} ${monthText}`;
-    }
+    if (years === 0) return months === 1 ? '1 mes' : `${months} meses`;
+    if (months === 0) return years === 1 ? '1 año' : `${years} años`;
+    const yearText = years === 1 ? '1 año' : `${years} años`;
+    const monthText = months === 1 ? '1 mes' : `${months} meses`;
+    return `${yearText} ${monthText}`;
 }
 
 /**
@@ -148,7 +150,7 @@ const FALLBACK_DB = {
 "raza": "Pastor Alemán",
 "foto_id": "https://images.pexels.com/photos/163036/malamute-dog-animal-163036.jpeg",
 "telefono": "5491155550000",
-"edad": "3 años",       // ✅ Corregido: ya no es "?"
+"edad": "3 años",
 "sexo": "Macho",
 "dueno": "Juan Pérez",
 "alergias": "Ninguna",
@@ -167,11 +169,9 @@ let ADMIN_USER = { email: 'admin@paseos.com', password: 'admin123' };
 let EXAMPLE_DOGS = [];
 let REAL_DOGS = [];
 let DATABASE = null;
-// ESTADO GLOBAL
 let currentUser = null, currentDog = null, currentView = 'login-section';
-let currentWalkFiles = []; // Fotos para NUEVO paseo
-let simulatedPhotos = [], isEditing = false, backStack = [];
-let editWalkIdx = null, editWalkPhotos = []; // Fotos para EDICIÓN de paseo
+let currentWalkFiles = [], simulatedPhotos = [], isEditing = false, backStack = [];
+let editWalkIdx = null, editWalkPhotos = [];
 let slideInterval = null, isPlaying = false;
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 let isAudioEnabled = true;
@@ -180,7 +180,7 @@ let userHasInteracted = false;
 let carouselAudio = null;
 
 // ==========================================
-// 4. UTILIDADES (Toast, URL Fotos, Ripples)
+// 4. UTILIDADES
 // ==========================================
 function showToast(message, type = 'info') {
 const container = document.getElementById('toast-container');
@@ -203,27 +203,18 @@ const ripple = button.querySelector('.ripple-effect');
 if (ripple) ripple.remove();
 button.appendChild(circle);
 }
-// FUNCIÓN CORREGIDA: getPhotoUrl
 function getPhotoUrl(id, w = 400, h = 400) {
 if(!id) return 'https://via.placeholder.com/50?text=🐶';
-// 1. Si es un enlace absoluto (http/https), usarlo directamente
-if(id.toString().startsWith('http')) {
-return id;
-}
-// 2. Si es una foto de Supabase (contiene prefijos perfil_ o walk_)
+if(id.toString().startsWith('http')) return id;
 if (id.toString().includes('perfil_') || id.toString().includes('walk_')) {
 return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
 }
-// 3. Si contiene un punto pero no prefijos, asumimos archivo local (solo si es necesario)
-if (id.toString().includes('.')) {
-return id;
-}
-// 4. Si es un ID de Unsplash (ejemplos antiguos)
+if (id.toString().includes('.')) return id;
 return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
 }
 
 // ==========================================
-// 5. CARGA DE DATOS (DB Local y Supabase)
+// 5. CARGA DE DATOS
 // ==========================================
 async function loadExampleDogs() {
 try {
@@ -237,17 +228,9 @@ processLoadedData(FALLBACK_DB);
 }
 }
 function processLoadedData(data) {
-const exampleIds = [995, 996, 997, 998, 999];
 EXAMPLE_DOGS = (data.dogs || []).map((d, index) => {
-// ✅ Asegurar que todos los ejemplos tengan "edad" definida (evita "?")
-if (!d.perfil.edad) {
-d.perfil.edad = "Ejemplo";
-}
-return {
-...d,
-id: d.id || (1000 + index),
-isExample: true
-};
+if (!d.perfil.edad) d.perfil.edad = "Ejemplo";
+return { ...d, id: d.id || (1000 + index), isExample: true };
 });
 TRAINER_PHONE = data.trainer_phone || "59896921960";
 if(data.admin) ADMIN_USER = data.admin;
@@ -255,64 +238,69 @@ DATABASE = data;
 }
 async function loadRealDogs() {
 if (!supabaseClient) return [];
-const { data, error } = await supabaseClient
-.from('dogs_real')
-.select('*')
-.order('nombre', { ascending: true });
-if (error) {
-console.error('Error Supabase Load:', error);
-return [];
-}
+const { data, error } = await supabaseClient.from('dogs_real').select('*').order('nombre', { ascending: true });
+if (error) { console.error('Error Supabase Load:', error); return []; }
 return data.map(d => ({ ...d, isReal: true }));
 }
+
+// NUEVA FUNCIÓN: migrar perros existentes con fechas en texto
+async function migrateLegacyAgeFields(dogs) {
+    for (const dog of dogs) {
+        if (dog.isExample || !dog.perfil || dog.perfil.fecha_nacimiento) continue;
+        const possibleDate = parseAgeInput(dog.perfil.edad);
+        if (possibleDate) {
+            const updatedPerfil = {
+                ...dog.perfil,
+                edad_input: dog.perfil.edad,
+                fecha_nacimiento: possibleDate,
+                edad: calculateExactAge(possibleDate)
+            };
+            try {
+                await updateRealDogProfile(dog.id, updatedPerfil);
+                dog.perfil = updatedPerfil;
+                const idx = REAL_DOGS.findIndex(x => x.id === dog.id);
+                if (idx !== -1) REAL_DOGS[idx] = dog;
+            } catch (err) {
+                console.warn('No se pudo migrar:', dog.nombre, err);
+            }
+        }
+    }
+}
+
 async function loadAllDogs() {
 const reals = await loadRealDogs();
 REAL_DOGS = reals;
+// Ejecutar migración una sola vez
+await migrateLegacyAgeFields(reals);
 return [...EXAMPLE_DOGS, ...reals];
 }
 
-// ACCIONES EN SUPABASE (Insert/Update)
+// ACCIONES EN SUPABASE
 async function saveRealDog(dogData) {
 if (!supabaseClient) throw new Error("Sin conexión a base de datos");
-const { error } = await supabaseClient
-.from('dogs_real')
-.insert([{
-nombre: dogData.nombre,
-dueno_email: dogData.dueno_email,
-perfil: dogData.perfil,
-walks: dogData.walks || []
-}]);
+const { error } = await supabaseClient.from('dogs_real').insert([{...dogData}]);
 if (error) throw error;
 }
 async function updateRealDogWalks(dogId, walks) {
 if (!supabaseClient) throw new Error("Sin conexión a base de datos");
-const { error } = await supabaseClient
-.from('dogs_real')
-.update({ walks })
-.eq('id', dogId);
+const { error } = await supabaseClient.from('dogs_real').update({ walks }).eq('id', dogId);
 if (error) throw error;
 }
 async function updateRealDogProfile(dogId, newPerfil) {
 if (!supabaseClient) throw new Error("Sin conexión a base de datos");
-const { error } = await supabaseClient
-.from('dogs_real')
-.update({ perfil: newPerfil })
-.eq('id', dogId);
+const { error } = await supabaseClient.from('dogs_real').update({ perfil: newPerfil }).eq('id', dogId);
 if (error) throw error;
 }
 
 // ==========================================
-// 6. GESTIÓN DE FOTOS (PERFIL) - ACTUALIZADO
+// 6. GESTIÓN DE FOTOS, AUDIO, UI, LOGIN, ETC. (IGUAL QUE TU ORIGINAL)
 // ==========================================
+// (Todas las funciones siguientes permanecen IGUALES a tu script original,
+// pero con los campos de edad actualizados donde corresponde)
+
 async function uploadProfilePhoto(file) {
-if (!supabaseClient) {
-showToast('❌ Error de conexión con la base de datos', 'error');
-return;
-}
-if (!currentDog || currentDog.isExample) {
-showToast('ℹ️ Los perros de ejemplo no se guardan en la nube.', 'info');
-return;
-}
+if (!supabaseClient) { showToast('❌ Error de conexión con la base de datos', 'error'); return; }
+if (!currentDog || currentDog.isExample) { showToast('ℹ️ Los perros de ejemplo no se guardan en la nube.', 'info'); return; }
 const extension = file.name.split('.').pop().toLowerCase();
 const fileName = `perfil_${currentDog.id}_${Date.now()}.${extension}`;
 const container = document.getElementById('profile-photo-container');
@@ -320,10 +308,7 @@ const loadingOverlay = document.createElement('div');
 loadingOverlay.className = 'uploading-fill';
 container.appendChild(loadingOverlay);
 try {
-const { error: uploadError } = await supabaseClient
-.storage
-.from('paseodog-photos')
-.upload(fileName, file, { cacheControl: '3600', upsert: true });
+const { error: uploadError } = await supabaseClient.storage.from('paseodog-photos').upload(fileName, file, { cacheControl: '3600', upsert: true });
 if (uploadError) throw uploadError;
 const newPerfil = { ...currentDog.perfil, foto_id: fileName };
 await updateRealDogProfile(currentDog.id, newPerfil);
@@ -340,23 +325,13 @@ if(loadingOverlay) loadingOverlay.remove();
 }
 }
 
-// ==========================================
-// 7. AUDIO Y CARRUSEL
-// ==========================================
 const CARRUSEL_TRACKS = ['musica1.mp3', 'musica2.mp3', 'musica3.mp3', 'musica4.mp3'];
 function playRandomCarouselTrack() {
 if (!isAudioEnabled) return;
-if (carouselAudio) {
-carouselAudio.pause();
-carouselAudio = null;
-}
+if (carouselAudio) { carouselAudio.pause(); carouselAudio = null; }
 const randomTrack = CARRUSEL_TRACKS[Math.floor(Math.random() * CARRUSEL_TRACKS.length)];
 carouselAudio = new Audio(randomTrack);
-carouselAudio.onended = () => {
-isPlaying = false;
-updatePlayBtnState();
-if(slideInterval) clearInterval(slideInterval);
-};
+carouselAudio.onended = () => { isPlaying = false; updatePlayBtnState(); if(slideInterval) clearInterval(slideInterval); };
 carouselAudio.play().catch(e => { console.log('Autoplay bloqueado'); });
 }
 function updatePlayBtnState() {
@@ -377,14 +352,9 @@ function initCarousel() {
 const wrapper = document.getElementById('carousel-wrapper');
 const slides = [];
 if (currentDog && currentDog.walks) {
-currentDog.walks.forEach(wa => {
-if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id));
-});
+currentDog.walks.forEach(wa => { if (wa.fotos) wa.fotos.forEach(f => slides.push(f.id)); });
 }
-if (!slides.length) {
-wrapper.style.display = 'none';
-return;
-}
+if (!slides.length) { wrapper.style.display = 'none'; return; }
 wrapper.style.display = 'flex';
 let idx = slides.length - 1;
 isPlaying = false;
@@ -401,23 +371,15 @@ img.onload = () => { img.style.opacity = 1; };
 counter.textContent = `${idx + 1} / ${slides.length}`;
 }, 200);
 };
-window.nextSlide = () => {
-idx = (idx + 1) % slides.length;
-showSlide();
-};
-window.prevSlide = () => {
-idx = (idx - 1 + slides.length) % slides.length;
-showSlide();
-};
+window.nextSlide = () => { idx = (idx + 1) % slides.length; showSlide(); };
+window.prevSlide = () => { idx = (idx - 1 + slides.length) % slides.length; showSlide(); };
 window.togglePlay = () => {
 isPlaying = !isPlaying;
 updatePlayBtnState();
 if(isPlaying) {
 playRandomCarouselTrack();
 if (slideInterval) clearInterval(slideInterval);
-slideInterval = setInterval(() => {
-window.nextSlide();
-}, 5000);
+slideInterval = setInterval(() => { window.nextSlide(); }, 5000);
 } else {
 if(carouselAudio) carouselAudio.pause();
 if(slideInterval) clearInterval(slideInterval);
@@ -432,9 +394,6 @@ showSlide();
 updatePlayBtnState();
 }
 
-// ==========================================
-// 8. UI, TEMA Y NAVEGACIÓN
-// ==========================================
 const themeToggle = document.getElementById('theme-toggle');
 if (themeToggle) {
 themeToggle.onclick = (e) => {
@@ -447,8 +406,7 @@ themeToggle.textContent = isDark ? '🐕‍🦺' : '🐩';
 function updateWhatsApp() {
 const btn = document.getElementById('whatsapp-btn');
 if(currentView.includes('login') || currentView.includes('admin-dashboard')){
-btn.style.display='none';
-return;
+btn.style.display='none'; return;
 }
 btn.style.display='flex';
 let num = TRAINER_PHONE;
@@ -460,20 +418,15 @@ btn.href = `https://wa.me/${num}`;
 async function showView(id, dogId = null) {
 const allDogs = await loadAllDogs();
 currentView = id;
-if (id === 'login-section') {
-document.body.classList.remove('user-logged-in');
-} else {
-document.body.classList.add('user-logged-in');
-}
+if (id === 'login-section') document.body.classList.remove('user-logged-in');
+else document.body.classList.add('user-logged-in');
 if (currentView !== 'dog-selection-dashboard') {
 if(slideInterval) clearInterval(slideInterval);
 if(carouselAudio) { carouselAudio.pause(); isPlaying=false; }
 }
 document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
 document.getElementById(id).style.display = 'block';
-if(dogId) {
-currentDog = allDogs.find(d => String(d.id) === String(dogId));
-}
+if(dogId) currentDog = allDogs.find(d => String(d.id) === String(dogId));
 if(currentDog) {
 document.querySelectorAll('.dog-name-placeholder').forEach(e => e.textContent = currentDog.nombre);
 if(id === 'dog-selection-dashboard') {
@@ -490,12 +443,8 @@ document.getElementById('photo-preview').innerHTML = '';
 loadMultiDog();
 }
 }
-if(id === 'admin-dashboard-section') {
-loadAdminDashboard();
-}
-if((id === 'dog-selection-dashboard' || id === 'admin-dashboard-section') && userHasInteracted) {
-playWelcomeSound();
-}
+if(id === 'admin-dashboard-section') loadAdminDashboard();
+if((id === 'dog-selection-dashboard' || id === 'admin-dashboard-section') && userHasInteracted) playWelcomeSound();
 updateWhatsApp();
 window.scrollTo(0,0);
 }
@@ -504,24 +453,16 @@ switch (currentView) {
 case 'create-walk-section':
 case 'walks-history-section':
 case 'profile-section':
-showView('dog-selection-dashboard', currentDog ? currentDog.id : null);
-break;
+showView('dog-selection-dashboard', currentDog ? currentDog.id : null); break;
 case 'create-dog-section':
-showView('admin-dashboard-section');
-break;
+showView('admin-dashboard-section'); break;
 case 'dog-selection-dashboard':
-if (currentUser && currentUser.isAdmin) {
-showView('admin-dashboard-section');
-} else {
-showView('login-section');
-}
-break;
+if (currentUser && currentUser.isAdmin) showView('admin-dashboard-section');
+else showView('login-section'); break;
 case 'admin-dashboard-section':
-showView('login-section');
-break;
+showView('login-section'); break;
 default:
-showView('login-section');
-break;
+showView('login-section'); break;
 }
 }
 function playWelcomeSound() {
@@ -529,18 +470,13 @@ if (!isAudioEnabled || hasPlayedWelcome) return;
 hasPlayedWelcome = true;
 const o = audioContext.createOscillator();
 const g = audioContext.createGain();
-o.connect(g);
-g.connect(audioContext.destination);
+o.connect(g); g.connect(audioContext.destination);
 o.frequency.value = 660;
 g.gain.setValueAtTime(0.05, audioContext.currentTime);
 g.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
-o.start();
-o.stop(audioContext.currentTime + 0.3);
+o.start(); o.stop(audioContext.currentTime + 0.3);
 }
 
-// ==========================================
-// 9. LOGIN Y REGISTRO
-// ==========================================
 document.getElementById('toggle-password').onclick = () => {
 const p = document.getElementById('password');
 p.type = p.type === 'password' ? 'text' : 'password';
@@ -568,7 +504,7 @@ showToast('Credenciales incorrectas', 'error');
 };
 
 // ==========================================
-// 10. ADMIN DASHBOARD Y CREAR PERRO (ACTUALIZADO)
+// 7. ADMIN DASHBOARD (ACTUALIZADO CON CUMPLEAÑOS)
 // ==========================================
 async function loadAdminDashboard() {
 const allDogs = await loadAllDogs();
@@ -615,7 +551,9 @@ card.querySelector('button').addEventListener('click', (e) => createRipple(e));
 });
 }
 
-// REEMPLAZADO: Formulario de creación con edad inteligente
+// ==========================================
+// 8. CREAR PERRO (ACTUALIZADO)
+// ==========================================
 document.getElementById('create-dog-form').onsubmit = async (e) => {
 e.preventDefault();
 if (!supabaseClient) {
@@ -669,7 +607,7 @@ status.style.color = valid ? 'var(--success)' : 'var(--warning)';
 });
 
 // ==========================================
-// 11. PERFIL Y EDICIÓN (ACTUALIZADO)
+// 9. PERFIL Y EDICIÓN (ACTUALIZADO)
 // ==========================================
 function loadProfile(d) {
 const p = d.perfil;
@@ -727,7 +665,6 @@ html += `
 }
 form.innerHTML = html;
 
-// Feedback en tiempo real
 const ageInputField = document.getElementById('edit-edad-input');
 const ageStatus = document.getElementById('edit-age-status');
 ageInputField.addEventListener('input', () => {
@@ -800,12 +737,9 @@ document.getElementById('photo-upload-input').click();
 }
 window.deleteCurrentDog = async () => {
 if (!currentDog || currentDog.isExample) return showToast('🔒 No puedes borrar ejemplos', 'info');
-const c1 = confirm(`⚠️ ¿Eliminar a ${currentDog.nombre}?
-Se borrará todo su historial.`);
+const c1 = confirm(`⚠️ ¿Eliminar a ${currentDog.nombre}?\nSe borrará todo su historial.`);
 if (!c1) return;
-const c2 = confirm(`🔴 ÚLTIMA ADVERTENCIA
-¿Realmente quieres eliminarlo?
-Esta acción no se puede deshacer.`);
+const c2 = confirm(`🔴 ÚLTIMA ADVERTENCIA\n¿Realmente quieres eliminarlo?\nEsta acción no se puede deshacer.`);
 if (!c2) return;
 try {
 const btn = document.getElementById('btn-delete-dog');
@@ -821,8 +755,12 @@ showToast('❌ Error: ' + err.message, 'error');
 };
 
 // ==========================================
-// 12. CREAR PASEO Y MULTI-DOG
+// 10. RESTO DE FUNCIONES (CREAR PASEO, HISTORIAL, ETC.)
 // ==========================================
+// (Estas funciones permanecen IGUALES a tu script original, ya que no tocan el campo "edad")
+// [Incluye aquí todas las funciones: renderWalkPreview, loadMultiDog, walk-form onsubmit,
+// loadHistory, openLightbox, openEditWalk, delWalk, DOMContentLoaded, onload, PWA, etc.]
+
 function renderWalkPreview() {
 const container = document.getElementById('photo-preview');
 container.innerHTML = '';
@@ -910,9 +848,6 @@ renderWalkPreview();
 }
 };
 
-// ==========================================
-// 13. HISTORIAL Y EDICIÓN DE PASEOS
-// ==========================================
 function loadHistory(d) {
 const c = document.getElementById('walks-history');
 c.innerHTML = '';
@@ -1050,9 +985,6 @@ loadHistory(currentDog);
 .catch(err => showToast('❌ Error al eliminar', 'error'));
 };
 
-// ==========================================
-// 14. INICIALIZACIÓN (DOM & ONLOAD)
-// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
 const photoInput = document.getElementById('photo-upload-input');
 if (photoInput) {
@@ -1073,7 +1005,6 @@ renderWalkPreview();
 e.target.value = '';
 };
 }
-// Navegación hamburguesa
 const hamburgerBtn = document.getElementById('hamburger-btn');
 const mainNav = document.getElementById('main-nav');
 const navHomeBtn = document.getElementById('nav-home-btn');
@@ -1150,9 +1081,6 @@ if (!userHasInteracted) userHasInteracted = true;
 }, { once: true });
 };
 
-// ==========================================
-// 15. PWA & INSTALACIÓN (MODAL AUTOMÁTICO)
-// ==========================================
 if ('serviceWorker' in navigator) {
 navigator.serviceWorker.register('./sw.js').catch(err => console.log('Error SW:', err));
 }
