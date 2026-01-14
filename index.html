@@ -89,50 +89,49 @@
             <div id="dog-list-container"></div>
         </section>
 
-        <!-- CREATE DOG - Reemplazar toda la sección id="create-dog-section" -->
-<section id="create-dog-section" style="display:none;">
-    <h2>🐶 Registrar Nuevo Mimoso</h2>
-    <form id="create-dog-form">
-        <h3>Datos del Perro</h3>
-        
-        <label>Nombre</label>
-        <input type="text" id="new-dog-name" required>
-        
-        <label>Raza</label>
-        <input type="text" id="new-dog-breed" required>
-        
-        <label>Sexo</label>
-        <select id="new-dog-sex">
-            <option>Macho</option>
-            <option>Hembra</option>
-        </select>
-        
-        <label>Edad o Fecha de Nacimiento 🎂</label>
-        <div style="display:flex; align-items:center; gap:8px;">
-    <input type="text" id="new-dog-age" required 
-           placeholder="Ej: 3 años, 5 meses, 20/07/2024">
-    <span id="create-age-status" style="font-size:1.2rem;"></span>
-</div>
-               placeholder="Ej: 3 años, 5 meses, 20/07/2024">
-        <small style="color: var(--text-secondary); display: block; margin-top: -10px; margin-bottom: 16px; font-size: 0.85rem;">
-            💡 Escribe la edad ("3 años", "4 meses") o la fecha exacta ("20/07/2024")
-        </small>
-        
-        <h3>Datos del Dueño</h3>
-        
-        <label>Nombre Dueño</label>
-        <input type="text" id="new-dog-owner" required>
-        
-        <label>Email (Usuario)</label>
-        <input type="email" id="new-dog-email" required>
-        
-        <label>Teléfono (WhatsApp)</label>
-        <input type="tel" id="new-dog-phone" required>
-        
-        <button type="submit" id="save-dog-btn" class="save-btn ripple">💾 Guardar en Base de Datos</button>
-    </form>
-    <button class="nav-button ripple" onclick="goBack()" style="background:var(--text-secondary);">Cancelar</button>
-</section>
+        <!-- CREATE DOG -->
+        <section id="create-dog-section" style="display:none;">
+            <h2>🐶 Registrar Nuevo Mimoso</h2>
+            <form id="create-dog-form">
+                <h3>Datos del Perro</h3>
+                
+                <label>Nombre</label>
+                <input type="text" id="new-dog-name" required>
+                
+                <label>Raza</label>
+                <input type="text" id="new-dog-breed" required>
+                
+                <label>Sexo</label>
+                <select id="new-dog-sex">
+                    <option>Macho</option>
+                    <option>Hembra</option>
+                </select>
+                
+                <label>Edad o Fecha de Nacimiento 🎂</label>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="text" id="new-dog-age" required 
+                           placeholder="Ej: 3 años, 5 meses, 20/07/2024">
+                    <span id="create-age-status" style="font-size:1.2rem;"></span>
+                </div>
+                <small style="color: var(--text-secondary); display: block; margin-top: -10px; margin-bottom: 16px; font-size: 0.85rem;">
+                    💡 Escribe la edad ("3 años", "4 meses") o la fecha exacta ("20/07/2024")
+                </small>
+                
+                <h3>Datos del Dueño</h3>
+                
+                <label>Nombre Dueño</label>
+                <input type="text" id="new-dog-owner" required>
+                
+                <label>Email (Usuario)</label>
+                <input type="email" id="new-dog-email" required>
+                
+                <label>Teléfono (WhatsApp)</label>
+                <input type="tel" id="new-dog-phone" required>
+                
+                <button type="submit" id="save-dog-btn" class="save-btn ripple">💾 Guardar en Base de Datos</button>
+            </form>
+            <button class="nav-button ripple" onclick="goBack()" style="background:var(--text-secondary);">Cancelar</button>
+        </section>
 
         <!-- DOG DASHBOARD -->
         <section id="dog-selection-dashboard" style="display:none;">
