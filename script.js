@@ -1,114 +1,101 @@
+/**
+ * PASEOVIRTUAL - SCRIPT MAESTRO COMPLETO
+ * Versión: Full Logic (Supabase + PWA + Multimedia)
+ */
+
 // ==========================================
-// 1. CONFIGURACIÓN Y SUPABASE (BLINDADO)
+// 1. CONFIGURACIÓN Y SUPABASE (CONEXIÓN)
 // ==========================================
 const SUPABASE_URL = 'https://asejbhohkbcoixiwdhcq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZWpiaG9oa2Jjb2l4aXdkaGNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjk0NzMsImV4cCI6MjA4MDYwNTQ3M30.kbRKO5PEljZ29_kn6GYKoyGfB_t8xalxtMiq1ovPo4w';
+
 let supabaseClient = null;
 try {
     if (window.supabase) {
         const { createClient } = window.supabase;
         supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else {
-        console.warn('⚠️ La librería de Supabase no cargó. Se usará modo offline limitado.');
     }
 } catch (err) {
-    console.error('❌ Error crítico inicializando Supabase:', err);
+    console.error('❌ Error Supabase:', err);
 }
 
 // ==========================================
-// 2. FUNCIONES DE EDAD INTELIGENTE
+// 2. MOTOR DE EDAD Y FECHAS (NATURAL LANGUAGE)
 // ==========================================
 
 function parseAgeInput(input) {
     if (!input) return null;
     const trimmed = input.trim().toLowerCase();
     const monthsMap = {
-        'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3,
-        'mayo': 4, 'junio': 5, 'julio': 6, 'agosto': 7,
-        'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
+        'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3, 'mayo': 4, 'junio': 5,
+        'julio': 6, 'agosto': 7, 'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
     };
+
+    // 1. "20 de octubre 2020"
     const textDateMatch = trimmed.match(/^(\d{1,2})\s+de\s+([a-záéíóúñ]+)\s+de?\s+(\d{4})$/);
     if (textDateMatch) {
-        const [, dStr, mName, yStr] = textDateMatch;
-        const d = parseInt(dStr, 10); const y = parseInt(yStr, 10); const m = monthsMap[mName];
-        if (m !== undefined && d >= 1 && d <= 31) {
-            const date = new Date(y, m, d);
-            return date.toISOString().split('T')[0];
-        }
+        const [, d, m, y] = textDateMatch;
+        return new Date(y, monthsMap[m], d).toISOString().split('T')[0];
     }
-    const datePatterns = [/^(\d{4})-(\d{2})-(\d{2})$/, /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/];
-    for (let pattern of datePatterns) {
-        const match = trimmed.match(pattern);
-        if (match) {
-            let day, month, year;
-            if (pattern.source.startsWith('^(')) { [, day, month, year] = match.map(Number); }
-            else { [, year, month, day] = match.map(Number); }
-            const date = new Date(year, month - 1, day);
-            return date.toISOString().split('T')[0];
-        }
+
+    // 2. "DD/MM/YYYY"
+    const dateMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (dateMatch) {
+        const [, d, m, y] = dateMatch;
+        return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
     }
+
+    // 3. "3 años", "5 meses"
     let totalMonths = 0;
-    const yearsMatch = trimmed.match(/(\d+)\s*(año|anos|years?|a)/i);
+    const yearsMatch = trimmed.match(/(\d+)\s*(año|ano|a)/i);
     if (yearsMatch) totalMonths += parseInt(yearsMatch[1]) * 12;
-    const monthsMatch = trimmed.match(/(\d+)\s*(mes|meses|months?|m)(?!i)/i);
+    const monthsMatch = trimmed.match(/(\d+)\s*(mes|m)(?!i)/i);
     if (monthsMatch) totalMonths += parseInt(monthsMatch[1]);
+
     if (totalMonths > 0) {
-        const birthDate = new Date();
-        birthDate.setMonth(birthDate.getMonth() - totalMonths);
-        return birthDate.toISOString().split('T')[0];
+        const bD = new Date();
+        bD.setMonth(bD.getMonth() - totalMonths);
+        return bD.toISOString().split('T')[0];
     }
     return null;
 }
 
-function calculateExactAge(birthDateString) {
-    if (!birthDateString) return '?';
-    const birthDate = new Date(birthDateString);
-    if (isNaN(birthDate.getTime())) return '?';
+function calculateExactAge(birthStr) {
+    if (!birthStr) return '?';
+    const birth = new Date(birthStr);
     const today = new Date();
-    let years = today.getFullYear() - birthDate.getFullYear();
-    let months = today.getMonth() - birthDate.getMonth();
-    if (months < 0) { years--; months += 12; }
-    if (today.getDate() < birthDate.getDate()) {
-        months--; if (months < 0) { years--; months += 12; }
+    let years = today.getFullYear() - birth.getFullYear();
+    let months = today.getMonth() - birth.getMonth();
+    if (months < 0 || (months === 0 && today.getDate() < birth.getDate())) {
+        years--; months += 12;
     }
-    if (years === 0) return months === 1 ? '1 mes' : `${months} meses`;
-    if (months === 0) return years === 1 ? '1 año' : `${years} años`;
-    return `${years} ${years === 1 ? 'año' : 'años'} ${months} ${months === 1 ? 'mes' : 'meses'}`;
+    if (years === 0) return `${months} ${months === 1 ? 'mes' : 'meses'}`;
+    const yText = years === 1 ? '1 año' : `${years} años`;
+    const mText = months === 0 ? '' : (months === 1 ? ' 1 mes' : ` ${months} meses`);
+    return yText + mText;
 }
 
-function isBirthdayToday(birthDateString) {
-    if (!birthDateString) return false;
-    const birth = new Date(birthDateString);
-    const today = new Date();
-    return birth.getDate() === today.getDate() && birth.getMonth() === today.getMonth();
-}
-
-function isBirthdaySoon(birthDateString) {
-    if (!birthDateString) return false;
-    const birth = new Date(birthDateString);
-    const today = new Date();
-    const thisYearBday = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
-    const nextWeek = new Date(today);
-    nextWeek.setDate(today.getDate() + 7);
-    return thisYearBday >= today && thisYearBday <= nextWeek;
+function isBirthdayToday(birthStr) {
+    if (!birthStr) return false;
+    const b = new Date(birthStr);
+    const t = new Date();
+    return b.getDate() === t.getDate() && b.getMonth() === t.getMonth();
 }
 
 // ==========================================
-// 3. VARIABLES GLOBALES
+// 3. VARIABLES DE ESTADO Y DATOS
 // ==========================================
-const DB_URL = 'paseoDogDB.json';
 let TRAINER_PHONE = "59896921960";
 let ADMIN_USER = { email: 'admin@paseos.com', password: 'admin123' };
 let REAL_DOGS = [];
 let currentUser = null, currentDog = null, currentView = 'login-section';
-let currentWalkFiles = [], isEditing = false;
-let editWalkIdx = null, editWalkPhotos = [];
+let currentWalkFiles = [], isEditing = false, editWalkIdx = null, editWalkPhotos = [];
 let slideInterval = null, isPlaying = false, carouselAudio = null;
+let isAudioEnabled = localStorage.getItem('paseoDogAudio') !== 'off';
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-let isAudioEnabled = true, userHasInteracted = false;
 
 // ==========================================
-// 4. UTILIDADES
+// 4. UTILIDADES DE INTERFAZ (UI)
 // ==========================================
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
@@ -119,111 +106,88 @@ function showToast(message, type = 'info') {
     setTimeout(() => toast.remove(), 3000);
 }
 
-function createRipple(event, element) {
-    const button = element || event.currentTarget;
+function createRipple(event) {
+    const btn = event.currentTarget;
     const circle = document.createElement('span');
-    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    const diameter = Math.max(btn.clientWidth, btn.clientHeight);
     circle.style.width = circle.style.height = `${diameter}px`;
-    circle.style.left = `${event.clientX - button.getBoundingClientRect().left - diameter/2}px`;
-    circle.style.top = `${event.clientY - button.getBoundingClientRect().top - diameter/2}px`;
+    circle.style.left = `${event.clientX - btn.getBoundingClientRect().left - diameter / 2}px`;
+    circle.style.top = `${event.clientY - btn.getBoundingClientRect().top - diameter / 2}px`;
     circle.classList.add('ripple-effect');
-    button.appendChild(circle);
+    btn.appendChild(circle);
     setTimeout(() => circle.remove(), 600);
 }
 
 function getPhotoUrl(id) {
-    if(!id) return 'https://via.placeholder.com/150?text=🐶';
-    if(id.toString().startsWith('http')) return id;
+    if (!id) return 'https://via.placeholder.com/150?text=🐶';
+    if (String(id).startsWith('http')) return id;
     return `${SUPABASE_URL}/storage/v1/object/public/paseodog-photos/${id}`;
 }
 
 // ==========================================
-// 5. CARGA Y MIGRACIÓN
+// 5. COMUNICACIÓN CON SUPABASE (CRUD)
 // ==========================================
-async function loadRealDogs() {
+async function loadAllDogs() {
     if (!supabaseClient) return [];
     const { data, error } = await supabaseClient.from('dogs_real').select('*').order('nombre');
-    if (error) return [];
+    if (error) { console.error(error); return []; }
+    REAL_DOGS = data;
     return data;
 }
 
-async function migrateLegacyAgeFields(dogs) {
-    for (const dog of dogs) {
-        if (dog.perfil.fecha_nacimiento) continue;
-        const possibleDate = parseAgeInput(dog.perfil.edad);
-        if (possibleDate) {
-            dog.perfil.fecha_nacimiento = possibleDate;
-            await updateRealDogProfile(dog.id, dog.perfil);
-        }
-    }
+async function updateRealDogProfile(id, perfil) {
+    return await supabaseClient.from('dogs_real').update({ perfil }).eq('id', id);
 }
 
-async function loadAllDogs() {
-    const reals = await loadRealDogs();
-    await migrateLegacyAgeFields(reals);
-    REAL_DOGS = reals;
-    return reals;
-}
-
-async function saveRealDog(dogData) {
-    return await supabaseClient.from('dogs_real').insert([dogData]);
-}
-
-async function updateRealDogWalks(dogId, walks) {
-    return await supabaseClient.from('dogs_real').update({ walks }).eq('id', dogId);
-}
-
-async function updateRealDogProfile(dogId, newPerfil) {
-    return await supabaseClient.from('dogs_real').update({ perfil: newPerfil }).eq('id', dogId);
+async function updateRealDogWalks(id, walks) {
+    return await supabaseClient.from('dogs_real').update({ walks }).eq('id', id);
 }
 
 // ==========================================
-// 6. DASHBOARD ADMIN (MEJORADO CON ALERTAS)
+// 6. DASHBOARD ADMIN (CUMPLES Y BUSCADOR)
 // ==========================================
 async function loadAdminDashboard() {
     const dogs = await loadAllDogs();
-    const list = document.getElementById('dog-list-container');
     const alerts = document.getElementById('birthday-alerts-container');
+    const list = document.getElementById('dog-list-container');
     
-    list.innerHTML = '';
     alerts.innerHTML = '';
+    list.innerHTML = '';
 
-    // Buscador Dinámico (Parche 1)
-    if (!document.getElementById('admin-search')) {
-        const search = document.createElement('input');
-        search.id = 'admin-search';
-        search.placeholder = '🔍 Buscar mimoso...';
-        search.className = 'search-bar';
-        search.style.marginBottom = '20px';
-        search.oninput = (e) => filterAdminList(e.target.value);
-        list.parentElement.insertBefore(search, list);
+    // Buscador Dinámico
+    if (!document.getElementById('admin-search-bar')) {
+        const sb = document.createElement('input');
+        sb.id = 'admin-search-bar';
+        sb.placeholder = '🔍 Buscar perro por nombre...';
+        sb.className = 'search-bar';
+        sb.oninput = (e) => {
+            const query = e.target.value.toLowerCase();
+            renderDogList(REAL_DOGS.filter(d => d.nombre.toLowerCase().includes(query)));
+        };
+        list.parentElement.insertBefore(sb, list);
     }
 
-    // Tarjetas de Alerta de Cumpleaños (Parche 2)
-    const todayBirthdays = dogs.filter(d => d.perfil.fecha_nacimiento && isBirthdayToday(d.perfil.fecha_nacimiento));
-    todayBirthdays.forEach(dog => {
-        const alertCard = document.createElement('div');
-        alertCard.className = 'birthday-alert-card';
-        alertCard.innerHTML = `
+    // Alertas de Cumpleaños
+    dogs.filter(d => d.perfil.fecha_nacimiento && isBirthdayToday(d.perfil.fecha_nacimiento)).forEach(dog => {
+        const age = calculateExactAge(dog.perfil.fecha_nacimiento);
+        const card = document.createElement('div');
+        card.className = 'birthday-alert-card';
+        card.innerHTML = `
             <div class="birthday-cake-icon">🎂</div>
             <div class="birthday-alert-content">
                 <div class="birthday-alert-title">¡Hoy cumple ${dog.nombre}!</div>
-                <div class="birthday-alert-message">El mimoso está cumpliendo <strong>${calculateExactAge(dog.perfil.fecha_nacimiento)}</strong>.</div>
-            </div>
-        `;
-        alerts.appendChild(alertCard);
+                <div class="birthday-alert-message">El mimoso está cumpliendo <strong>${age}</strong>.</div>
+            </div>`;
+        alerts.appendChild(card);
     });
 
-    renderAdminList(dogs);
+    renderDogList(dogs);
 }
 
-function renderAdminList(dogs) {
+function renderDogList(dogs) {
     const list = document.getElementById('dog-list-container');
     list.innerHTML = '';
     dogs.forEach((d, i) => {
-        const age = d.perfil.fecha_nacimiento ? calculateExactAge(d.perfil.fecha_nacimiento) : d.perfil.edad;
-        let bDayBadge = isBirthdayToday(d.perfil.fecha_nacimiento) ? '<span class="birthday-badge">🎂 HOY</span>' : '';
-        
         const card = document.createElement('div');
         card.className = 'dog-card';
         card.style.setProperty('--i', i);
@@ -231,29 +195,22 @@ function renderAdminList(dogs) {
             <div style="display:flex; align-items:center;">
                 <img src="${getPhotoUrl(d.perfil.foto_id)}" class="dog-list-thumb">
                 <div>
-                    <strong>${d.nombre} ${bDayBadge}</strong>
-                    <small style="display:block; color:var(--text-secondary)">${d.perfil.raza} • ${age}</small>
+                    <strong>${d.nombre}</strong>
+                    <small style="display:block; color:var(--text-secondary)">${d.perfil.raza}</small>
                 </div>
             </div>
-            <button class="ripple" onclick="showView('dog-selection-dashboard', '${d.id}')">Gestionar</button>
-        `;
+            <button class="ripple" onclick="showView('dog-selection-dashboard', '${d.id}')">Gestionar</button>`;
         list.appendChild(card);
     });
 }
 
-function filterAdminList(query) {
-    const filtered = REAL_DOGS.filter(d => d.nombre.toLowerCase().includes(query.toLowerCase()));
-    renderAdminList(filtered);
-}
-
 // ==========================================
-// 7. CARRUSEL Y MULTIMEDIA
+// 7. DASHBOARD DEL PERRO Y CARRUSEL
 // ==========================================
 function initCarousel() {
     const wrapper = document.getElementById('carousel-wrapper');
     const slides = [];
     currentDog.walks?.forEach(w => w.fotos?.forEach(f => slides.push(f.id)));
-    
     if (!slides.length) { wrapper.style.display = 'none'; return; }
     wrapper.style.display = 'flex';
 
@@ -261,16 +218,15 @@ function initCarousel() {
     const img = document.getElementById('carousel-img');
     const counter = document.getElementById('carousel-counter');
 
-    const showSlide = () => {
+    const update = () => {
         const url = getPhotoUrl(slides[idx]);
         img.src = url;
         wrapper.style.backgroundImage = `url(${url})`;
         counter.textContent = `${idx + 1} / ${slides.length}`;
     };
 
-    window.nextSlide = () => { idx = (idx + 1) % slides.length; showSlide(); };
-    window.prevSlide = () => { idx = (idx - 1 + slides.length) % slides.length; showSlide(); };
-    
+    window.nextSlide = () => { idx = (idx + 1) % slides.length; update(); };
+    window.prevSlide = () => { idx = (idx - 1 + slides.length) % slides.length; update(); };
     window.togglePlay = () => {
         isPlaying = !isPlaying;
         document.getElementById('play-pause-btn').textContent = isPlaying ? '⏸' : '▶';
@@ -286,11 +242,92 @@ function initCarousel() {
             if (carouselAudio) carouselAudio.pause();
         }
     };
-    showSlide();
+    update();
 }
 
 // ==========================================
-// 8. LOGÍN Y NAVEGACIÓN
+// 8. PERFIL Y EDICIÓN
+// ==========================================
+function loadProfile(dog) {
+    const p = dog.perfil;
+    const v = document.getElementById('profile-details-view');
+    document.getElementById('profile-photo').src = getPhotoUrl(p.foto_id);
+    document.getElementById('profile-dog-name-display').textContent = dog.nombre;
+
+    if (isEditing) {
+        v.innerHTML = `
+            <label>Raza</label><input type="text" id="edit-raza" value="${p.raza || ''}">
+            <label>Sexo</label><select id="edit-sexo"><option ${p.sexo=='Macho'?'selected':''}>Macho</option><option ${p.sexo=='Hembra'?'selected':''}>Hembra</option></select>
+            <label>Dueño</label><input type="text" id="edit-dueno" value="${p.dueno || ''}">
+            <label>WhatsApp</label><input type="text" id="edit-tel" value="${p.telefono || ''}">
+            <label>Peso</label><input type="text" id="edit-peso" value="${p.peso || ''}">
+            <label>Energía</label><input type="text" id="edit-energia" value="${p.energia || ''}">
+            <button class="save-btn" onclick="saveProfileChanges()">💾 Guardar Todo</button>`;
+    } else {
+        v.innerHTML = `
+            <div class="detail-row"><span class="detail-label">Raza:</span> ${p.raza}</div>
+            <div class="detail-row"><span class="detail-label">Edad:</span> ${p.fecha_nacimiento ? calculateExactAge(p.fecha_nacimiento) : p.edad_input}</div>
+            <div class="detail-row"><span class="detail-label">Sexo:</span> ${p.sexo}</div>
+            <div class="detail-row"><span class="detail-label">Peso:</span> ${p.peso || '?' }</div>
+            <div class="detail-row"><span class="detail-label">Dueño:</span> ${p.dueno}</div>`;
+    }
+}
+
+async function saveProfileChanges() {
+    const newP = {
+        ...currentDog.perfil,
+        raza: document.getElementById('edit-raza').value,
+        sexo: document.getElementById('edit-sexo').value,
+        dueno: document.getElementById('edit-dueno').value,
+        telefono: document.getElementById('edit-tel').value,
+        peso: document.getElementById('edit-peso').value,
+        energia: document.getElementById('edit-energia').value
+    };
+    await updateRealDogProfile(currentDog.id, newP);
+    currentDog.perfil = newP;
+    isEditing = false;
+    showToast('Perfil actualizado', 'success');
+    loadProfile(currentDog);
+}
+
+// ==========================================
+// 9. HISTORIAL Y PASEOS
+// ==========================================
+function loadHistory(dog) {
+    const c = document.getElementById('walks-history');
+    c.innerHTML = '';
+    if (!dog.walks?.length) { c.innerHTML = '<p class="info-text">No hay paseos registrados.</p>'; return; }
+    
+    dog.walks.forEach((w, i) => {
+        const div = document.createElement('div');
+        div.className = 'walk-session';
+        div.style.setProperty('--i', i);
+        div.innerHTML = `
+            <h3>📅 ${w.fecha}</h3>
+            <div class="walk-details">
+                <div class="walk-metrics">
+                    <span>⏱️ ${w.duracion_minutos} min</span>
+                    <span>📏 ${w.distancia_km} km</span>
+                </div>
+                <p>${w.resumen_diario}</p>
+                <div class="gallery">
+                    ${(w.fotos || []).map(f => `<img src="${getPhotoUrl(f.id)}" class="photo-card" onclick="openLightbox('${f.id}')">`).join('')}
+                </div>
+            </div>`;
+        c.appendChild(div);
+    });
+}
+
+function loadMultiDog() {
+    const c = document.getElementById('multi-dog-container');
+    c.innerHTML = '';
+    REAL_DOGS.filter(d => String(d.id) !== String(currentDog.id)).forEach(d => {
+        c.innerHTML += `<div class="dog-select-item"><input type="checkbox" value="${d.id}" id="md${d.id}"><label for="md${d.id}">${d.nombre}</label></div>`;
+    });
+}
+
+// ==========================================
+// 10. NAVEGACIÓN Y LOGIN
 // ==========================================
 async function showView(id, dogId = null) {
     currentView = id;
@@ -310,12 +347,16 @@ async function showView(id, dogId = null) {
 
     if (id === 'admin-dashboard-section') loadAdminDashboard();
     if (id === 'dog-selection-dashboard') initCarousel();
-    if (id === 'profile-section') loadProfile(currentDog);
+    if (id === 'profile-section') { isEditing = false; loadProfile(currentDog); }
     if (id === 'walks-history-section') loadHistory(currentDog);
-    if (id === 'create-walk-section') loadMultiDog();
+    if (id === 'create-walk-section') {
+        document.getElementById('walk-form').reset();
+        document.getElementById('walk-date').valueAsDate = new Date();
+        currentWalkFiles = [];
+        loadMultiDog();
+    }
 
     updateWhatsApp();
-    window.scrollTo(0,0);
 }
 
 function goBack() {
@@ -328,111 +369,6 @@ function goBack() {
     }
 }
 
-// ==========================================
-// 9. EVENTOS DE FORMULARIO (SUBIDAS)
-// ==========================================
-document.getElementById('login-form').onsubmit = async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value.toLowerCase();
-    const pass = document.getElementById('password').value;
-    const dogs = await loadAllDogs();
-
-    if (email === ADMIN_USER.email && pass === ADMIN_USER.password) {
-        currentUser = { isAdmin: true };
-        showView('admin-dashboard-section');
-    } else {
-        const dog = dogs.find(d => d.dueno_email === email && pass === '123456');
-        if (dog) {
-            currentUser = { isAdmin: false };
-            showView('dog-selection-dashboard', dog.id);
-        } else {
-            showToast('Credenciales incorrectas', 'error');
-        }
-    }
-};
-
-document.getElementById('walk-form').onsubmit = async (e) => {
-    e.preventDefault();
-    const btn = e.target.querySelector('button[type="submit"]');
-    btn.disabled = true;
-    showToast('Guardando paseo...', 'info');
-
-    try {
-        const fotos = [];
-        for (let i = 0; i < currentWalkFiles.length; i++) {
-            const file = currentWalkFiles[i];
-            const name = `walk_${currentDog.id}_${Date.now()}_${i}.jpg`;
-            await supabaseClient.storage.from('paseodog-photos').upload(name, file);
-            fotos.push({ id: name });
-        }
-
-        const walk = {
-            fecha: document.getElementById('walk-date').value,
-            duracion_minutos: document.getElementById('walk-duration').value,
-            distancia_km: document.getElementById('walk-distance').value,
-            resumen_diario: document.getElementById('walk-summary').value,
-            comportamiento_problemas: document.getElementById('comportamiento-problemas').checked,
-            incidentes_salud: document.getElementById('incidentes-salud').value,
-            fotos
-        };
-
-        const updatedWalks = [walk, ...(currentDog.walks || [])];
-        await updateRealDogWalks(currentDog.id, updatedWalks);
-
-        // Actualizar a los compañeros de paseo
-        const others = document.querySelectorAll('#multi-dog-container input:checked');
-        for (const chk of others) {
-            const oDog = REAL_DOGS.find(d => String(d.id) === String(chk.value));
-            if (oDog) {
-                const oWalks = [walk, ...(oDog.walks || [])];
-                await updateRealDogWalks(oDog.id, oWalks);
-            }
-        }
-
-        showToast('✅ Paseo registrado con éxito', 'success');
-        showView('dog-selection-dashboard');
-    } catch (err) {
-        showToast('❌ Error al subir', 'error');
-    } finally {
-        btn.disabled = false;
-    }
-};
-
-// ==========================================
-// 10. CARGA INICIAL
-// ==========================================
-window.onload = () => {
-    document.getElementById('loading-overlay').style.display = 'none';
-    
-    // Toggle Audio
-    const audioBtn = document.getElementById('audio-toggle');
-    audioBtn.onclick = () => {
-        isAudioEnabled = !isAudioEnabled;
-        audioBtn.textContent = isAudioEnabled ? '🔊' : '🔇';
-        if (!isAudioEnabled && carouselAudio) carouselAudio.pause();
-    };
-
-    // Subida de Fotos
-    document.getElementById('add-walk-photo-btn').onclick = () => document.getElementById('walk-photo-input').click();
-    document.getElementById('walk-photo-input').onchange = (e) => {
-        currentWalkFiles = Array.from(e.target.files);
-        const prev = document.getElementById('photo-preview');
-        prev.innerHTML = '';
-        currentWalkFiles.forEach(f => {
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(f);
-            img.style.width = '60px'; img.style.height = '60px'; img.style.objectFit = 'cover';
-            prev.appendChild(img);
-        });
-    };
-
-    // Navegación
-    document.getElementById('hamburger-btn').onclick = () => document.getElementById('main-nav').classList.toggle('show');
-    document.getElementById('nav-logout-btn').onclick = () => location.reload();
-
-    showView('login-section');
-};
-
 function updateWhatsApp() {
     const btn = document.getElementById('whatsapp-btn');
     if (['login-section', 'admin-dashboard-section'].includes(currentView)) {
@@ -443,25 +379,56 @@ function updateWhatsApp() {
     }
 }
 
-// Historial y Perfil (Simplificados para este bloque, usa tus funciones de carga)
-function loadHistory(d) {
-    const c = document.getElementById('walks-history');
-    c.innerHTML = '';
-    d.walks?.forEach(w => {
-        c.innerHTML += `<div class="walk-session"><h3>📅 ${w.fecha}</h3><p>${w.resumen_diario}</p></div>`;
-    });
-}
+// ==========================================
+// 11. INICIALIZACIÓN (ONLOAD)
+// ==========================================
+window.onload = () => {
+    document.getElementById('loading-overlay').style.display = 'none';
 
-function loadProfile(d) {
-    const v = document.getElementById('profile-details-view');
-    document.getElementById('profile-photo').src = getPhotoUrl(d.perfil.foto_id);
-    v.innerHTML = `<div class="detail-row"><strong>Raza:</strong> ${d.perfil.raza}</div>`;
-}
+    document.getElementById('login-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const em = document.getElementById('email').value.toLowerCase();
+        const pw = document.getElementById('password').value;
+        const dogs = await loadAllDogs();
 
-function loadMultiDog() {
-    const c = document.getElementById('multi-dog-container');
-    c.innerHTML = '';
-    REAL_DOGS.filter(d => d.id !== currentDog.id).forEach(d => {
-        c.innerHTML += `<div><input type="checkbox" value="${d.id}"> ${d.nombre}</div>`;
-    });
+        if (em === ADMIN_USER.email && pw === ADMIN_USER.password) {
+            currentUser = { isAdmin: true };
+            showView('admin-dashboard-section');
+        } else {
+            const dog = dogs.find(d => d.dueno_email === em && pw === '123456');
+            if (dog) {
+                currentUser = { isAdmin: false };
+                showView('dog-selection-dashboard', dog.id);
+            } else {
+                showToast('Credenciales incorrectas', 'error');
+            }
+        }
+    };
+
+    // Listeners Multimedia
+    const audioBtn = document.getElementById('audio-toggle');
+    audioBtn.onclick = () => {
+        isAudioEnabled = !isAudioEnabled;
+        audioBtn.textContent = isAudioEnabled ? '🔊' : '🔇';
+        localStorage.setItem('paseoDogAudio', isAudioEnabled ? 'on' : 'off');
+        if (!isAudioEnabled && carouselAudio) carouselAudio.pause();
+    };
+
+    document.getElementById('hamburger-btn').onclick = () => document.getElementById('main-nav').classList.toggle('show');
+    document.getElementById('nav-logout-btn').onclick = () => location.reload();
+    document.getElementById('toggle-edit-btn').onclick = () => { isEditing = !isEditing; loadProfile(currentDog); };
+
+    showView('login-section');
+};
+
+// LIGHTBOX
+window.openLightbox = (id) => {
+    document.getElementById('lightbox-img').src = getPhotoUrl(id);
+    document.getElementById('lightbox').style.display = 'flex';
+};
+document.getElementById('close-lightbox').onclick = () => document.getElementById('lightbox').style.display = 'none';
+
+// SERVICE WORKER
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
 }
