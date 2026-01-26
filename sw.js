@@ -4,6 +4,7 @@ const ASSETS = [
   './index.html',
   './style.css',
   './script.js',
+  './manifest.json', // <--- Añade esto
   './paseovirtualapp.png'
 ];
 
